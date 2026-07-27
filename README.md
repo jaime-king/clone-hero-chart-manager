@@ -382,6 +382,13 @@ left sidebar, not the title bar.
 > **System tray:** when the window is hidden it stays in the system tray.
 > Click the tray icon to bring it back, or right‑click it for Show / Quit.
 
+## Related projects
+
+**[Clone Hero Chart Studio](https://github.com/xlzipx/clone-hero-chart-studio)** —
+a sister project: a chart editor for Clone Hero with its own engine (drums and
+5‑fret guitar/bass, in 2D, 3D and split views). If Chart Manager is how you find
+and organise charts, Chart Studio is how you make them. Free and open source.
+
 ## License
 
 The app's own code (`app/`) is licensed under the **MIT** license — see
