@@ -389,6 +389,12 @@ is a chart editor for Clone Hero with its own engine (drums and 5‑fret
 guitar/bass, in 2D, 3D and split views). If Chart Manager is how you find and
 organise charts, Chart Studio is how you make them. Free and open source.
 
+<p align="center">
+  <a href="https://github.com/xlzipx/clone-hero-chart-studio" title="Open Clone Hero Chart Studio on GitHub">
+    <img alt="Chart Studio — the drum editor, 3D highway and synced lyrics side by side" width="880" src="docs/img/chart-studio.png" />
+  </a>
+</p>
+
 ## License
 
 The app's own code (`app/`) is licensed under the **MIT** license — see
