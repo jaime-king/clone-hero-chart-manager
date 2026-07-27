@@ -384,10 +384,10 @@ left sidebar, not the title bar.
 
 ## Related projects
 
-**[Clone Hero Chart Studio](https://github.com/xlzipx/clone-hero-chart-studio)** —
-a sister project: a chart editor for Clone Hero with its own engine (drums and
-5‑fret guitar/bass, in 2D, 3D and split views). If Chart Manager is how you find
-and organise charts, Chart Studio is how you make them. Free and open source.
+**[Clone Hero Chart Studio](https://github.com/xlzipx/clone-hero-chart-studio)**
+is a chart editor for Clone Hero with its own engine (drums and 5‑fret
+guitar/bass, in 2D, 3D and split views). If Chart Manager is how you find and
+organise charts, Chart Studio is how you make them. Free and open source.
 
 ## License
 
