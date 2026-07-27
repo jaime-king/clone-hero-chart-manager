@@ -8,8 +8,21 @@ import { IS_MAC } from '../platform'
 import { Icon } from './Icon'
 
 const REPO_URL = 'https://github.com/xlzipx/clone-hero-chart-manager'
+const STUDIO_URL = 'https://github.com/xlzipx/clone-hero-chart-studio'
 const X_URL = 'https://x.com/xlZiPx'
 const REDDIT_URL = 'https://www.reddit.com/user/xlZiPx/'
+
+// GitHub logo přes CSS masku (ne <img>): jednobarevné SVG by přes <img> NEzdědilo
+// currentColor a vyšlo by natvrdo skoro černé = na tmavém neviditelné. Maskou barvu
+// řídí CSS (`background: currentColor`). URL v uvozovkách je NUTNOST, ne kosmetika:
+// github.svg je pod 4 kB, takže ho Vite v produkci inlinuje jako data URI — a ten
+// obsahuje apostrofy (viewBox='0 0 16 16'). Neuvozovkovaný url() je pak podle CSS
+// specifikace nevalidní → maska se nenačte a zbyde prázdný čtverec. V devu to
+// nevyjde najevo (tam se servíruje jako cesta k souboru).
+const GH_MASK = {
+  WebkitMaskImage: `url("${githubLogo}")`,
+  maskImage: `url("${githubLogo}")`
+}
 
 // Hodnoty projektu jedním pohledem. Krátká slova schválně — je to signál, ne text.
 const VALUES = ['Free', 'Open source', 'No ads', 'No accounts']
@@ -101,26 +114,42 @@ export function AboutModal(): JSX.Element | null {
             ))}
           </ul>
 
-          <button className="about__gh" onClick={open(REPO_URL)}>
-            {/* Maska, ne <img>: GitHub logo je jednobarevné a `<img>` NEDĚDÍ
-                currentColor (SVG se v něm renderuje ve vlastním kontextu) →
-                vyšlo by černé na tmavém. Stejný postup jako u Spotify loga. */}
-            <span
-              className="about__ghicon"
-              // URL v uvozovkách je NUTNOST, ne kosmetika: github.svg je pod 4 kB,
-              // takže ho Vite v produkci inlinuje jako data URI — a ten obsahuje
-              // APOSTROFY (viewBox='0 0 16 16'). Neuvozovkovaný url() je podle CSS
-              // specifikace mít nesmí → maska se nenačte a zbyde bílý čtverec.
-              // V devu to nevyjde najevo, tam se servíruje jako cesta k souboru.
-              style={{
-                WebkitMaskImage: `url("${githubLogo}")`,
-                maskImage: `url("${githubLogo}")`
-              }}
-              aria-hidden="true"
-            />
-            View the source on GitHub
-            <Icon name="external" size={13} className="about__ghgo" />
-          </button>
+          {/* Dva zdrojáky: tahle appka + sesterský editor Chart Studio. Každé
+              tlačítko nese GitHub značku, ať je jasné, že vede na repo. */}
+          <div className="about__ghrow">
+            <button
+              className="about__gh"
+              onClick={open(STUDIO_URL)}
+              title="View Chart Studio on GitHub"
+            >
+              <span className="about__ghicon" style={GH_MASK} aria-hidden="true" />
+              Chart Studio
+              <Icon name="external" size={13} className="about__ghgo" />
+            </button>
+            <span className="about__ghdiv" aria-hidden="true" />
+            <button
+              className="about__gh"
+              onClick={open(REPO_URL)}
+              title="View Chart Manager on GitHub"
+            >
+              <span className="about__ghicon" style={GH_MASK} aria-hidden="true" />
+              Chart Manager
+              <Icon name="external" size={13} className="about__ghgo" />
+            </button>
+          </div>
+          {/* Krátké představení Chart Studia pod repo tlačítky. Popisné, ne
+              klikací — odkaz obstarává tlačítko „Chart Studio" nad tím. */}
+          <div className="about__studio">
+            <div className="about__studiohead">
+              <span className="about__studiotitle">Chart Studio</span>
+              <span className="about__studiotag">Chart editor</span>
+            </div>
+            <p className="about__studiodesc">
+              Build and edit your own charts with a built‑in engine: drums and 5‑fret
+              guitar/bass, in 2D, 3D and split views. Pull audio from a link, sync
+              lyrics, and playtest without ever leaving the editor.
+            </p>
+          </div>
 
           {/* Kontaktní karta — vizitka na jednom řádku (avatar+jméno vlevo,
               odkazy vpravo). Krátký lead nahoře říká, proč jsou tam odkazy. */}
