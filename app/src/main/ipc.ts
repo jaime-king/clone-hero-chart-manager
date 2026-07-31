@@ -53,6 +53,7 @@ import { asError } from '../shared/errors'
 import type { SongMeta } from '../shared/types'
 import { invalidateLibraryIndex } from './core/playlists'
 import { getPreview } from './core/preview'
+import { getSongAudio } from './core/localaudio'
 import { fetchFilterOptions, search as searchRhythmverse } from './core/rhythmverse'
 import { resolveSpotifyPlaylist } from './core/spotify'
 import { getReleaseNotes, getReleaseNotesSince } from './core/update'
@@ -139,6 +140,8 @@ export function registerIpc(): void {
 
   // 30s zvuková ukázka (poslech před stažením) — spáruje se v main procesu.
   ipcMain.handle('preview:get', (_e, artist: string, title: string) => getPreview(artist, title))
+  // Cestu si `getSongAudio` sám ověří proti složce knihovny (renderer jí nesmí věřit).
+  ipcMain.handle('preview:songAudio', (_e, rel: string) => getSongAudio(rel))
 
   ipcMain.handle('jobs:enqueue', (_e, song: SongResult, targetSubfolder?: string) =>
     jobManager.enqueue(song, targetSubfolder)

@@ -134,6 +134,12 @@ interface AppState {
   previewLabel: string | null
   /** Přehraje / zastaví 30s ukázku dané písně (lazy — stáhne se až na klik). */
   togglePreview: (song: SongResult) => Promise<void>
+  /**
+   * Ukázka písně, kterou už máme v knihovně — hraje SKUTEČNÝ zvuk chartu
+   * (u stopově dělených se všechny stopy pustí naráz). `key` odlišuje tlačítka
+   * mezi sebou, `folderAbs` je složka písně.
+   */
+  toggleLocalPreview: (key: string, rel: string) => Promise<void>
   stopPreview: () => void
 
   setQuery: (q: string) => void
@@ -343,12 +349,96 @@ const PREVIEW_BLOB_MAX = 40
 /** Ukázky (hlavně iTunes) jsou hlasitě normalizované — přehráváme tišeji. */
 const PREVIEW_VOLUME = 0.5
 
+// --- Ukázka písně, kterou UŽ MÁME v knihovně (Library manager, duplikáty) ---
+// Hraje se skutečný zvuk chartu přes `chm-audio://`. Charty bývají rozdělené na
+// stopy, takže elementů je víc a musí běžet SOUČASNĚ — samotné `song.ogg` je
+// u takového chartu jen doprovod bez nástrojů.
+let localEls: HTMLAudioElement[] = []
+/** Časovač, který ukázku utne po 30 s (lokální soubor je celá píseň). */
+let localTimer: number | null = null
+/** Okno přehrávané ukázky v sekundách — kroužek se počítá z něj, ne z délky písně. */
+let localWindow: { start: number; len: number } | null = null
+/** Element, ze kterého se čte postup (lokálně první stopa, jinak online ukázka). */
+let progressEl: HTMLAudioElement | null = null
+/** Délka ukázky — stejná jako u online (iTunes/Deezer posílají 30s klip). */
+const LOCAL_PREVIEW_SEC = 30
+
 /** Přístup k sdílenému audio elementu (pro progress ring v aktivním řádku). */
 export function getPreviewAudioEl(): HTMLAudioElement | null {
-  return previewAudio
+  return progressEl
+}
+
+/**
+ * Postup ukázky 0..1. U lokálních stop se počítá z 30s okna — `duration` je tam
+ * délka celé písně, takže by kroužek sotva popolezl.
+ */
+export function getPreviewProgress(): number {
+  const el = progressEl
+  if (!el) return 0
+  if (localWindow) {
+    return Math.max(0, Math.min(1, (el.currentTime - localWindow.start) / localWindow.len))
+  }
+  const d = el.duration || LOCAL_PREVIEW_SEC
+  return d > 0 ? Math.min(1, el.currentTime / d) : 0
+}
+
+/**
+ * Připraví stopu k synchronnímu startu: počká na metadata, přetočí na `start`
+ * a počká, až je co přehrávat. Teprve když jsou takhle nachystané všechny,
+ * spustí se naráz — jinak by každá naskočila jindy a mix by se rozešel.
+ *
+ * Timeout je pojistka proti zaseknutí (poškozený soubor, kodek navíc), ať
+ * jedna vadná stopa nezablokuje celou ukázku.
+ */
+function seekReady(el: HTMLAudioElement, start: number): Promise<void> {
+  return new Promise((resolve) => {
+    let timer = 0
+    let done = false
+    const finish = (): void => {
+      if (done) return
+      done = true
+      clearTimeout(timer)
+      resolve()
+    }
+    timer = window.setTimeout(finish, 6000)
+    el.addEventListener('error', finish, { once: true })
+
+    const afterSeek = (): void => {
+      // HAVE_FUTURE_DATA = je co hrát; jinak počkej na canplay.
+      if (el.readyState >= 3) finish()
+      else el.addEventListener('canplay', finish, { once: true })
+    }
+    const onMeta = (): void => {
+      if (start > 0 && el.duration && start < el.duration) {
+        el.addEventListener('seeked', afterSeek, { once: true })
+        el.currentTime = start
+      } else {
+        afterSeek()
+      }
+    }
+    // readyState >= 1 (HAVE_METADATA) → délka je známá, dá se přetáčet.
+    if (el.readyState >= 1) onMeta()
+    else el.addEventListener('loadedmetadata', onMeta, { once: true })
+  })
+}
+
+/** Zastaví a zahodí lokální stopy (uvolní i spojení na `chm-audio://`). */
+function stopLocalAudio(): void {
+  if (localTimer !== null) {
+    clearTimeout(localTimer)
+    localTimer = null
+  }
+  for (const el of localEls) {
+    el.pause()
+    el.removeAttribute('src')
+    el.load() // ukončí probíhající Range požadavky
+  }
+  localEls = []
+  localWindow = null
 }
 
 function stopPreviewAudio(): void {
+  stopLocalAudio()
   if (previewAudio) {
     previewAudio.pause()
     try {
@@ -357,6 +447,7 @@ function stopPreviewAudio(): void {
       /* některé stavy to nedovolí — nevadí */
     }
   }
+  progressEl = null
 }
 
 export const useStore = create<AppState>((set, get) => {
@@ -596,6 +687,65 @@ export const useStore = create<AppState>((set, get) => {
     set({ previewKey: null, previewState: 'idle', previewLabel: null })
   },
 
+  toggleLocalPreview: async (key, rel) => {
+    const { previewKey, previewState } = get()
+
+    // Klik na tutéž (hrající/načítající) ukázku = zastavit.
+    if (previewKey === key && (previewState === 'playing' || previewState === 'loading')) {
+      get().stopPreview()
+      return
+    }
+
+    stopPreviewAudio()
+    set({ previewKey: key, previewState: 'loading', previewLabel: null })
+
+    try {
+      const audio = await window.api.songAudio(rel)
+      if (get().previewKey !== key) return // uživatel mezitím přepnul
+      if (audio.tracks.length === 0) {
+        set({ previewState: 'unavailable' })
+        return
+      }
+
+      const els = audio.tracks.map((t) => {
+        const el = new Audio()
+        el.preload = 'auto'
+        // Každou stopu na stejnou hlasitost: stopy dohromady tvoří původní mix,
+        // takže rovnoměrné ztlumení zachová poměry a jen ztiší celek.
+        el.volume = PREVIEW_VOLUME
+        el.src = t.url
+        return el
+      })
+      localEls = els
+
+      const start = (audio.previewStartMs ?? 0) / 1000
+      // Počkej, až je každá stopa připravená a najetá na start. Bez toho by se
+      // spustily nestejně a mix by se rozjel.
+      await Promise.all(els.map((el) => seekReady(el, start)))
+      if (get().previewKey !== key) {
+        stopLocalAudio()
+        return
+      }
+
+      progressEl = els[0]
+      localWindow = { start: els[0].currentTime, len: LOCAL_PREVIEW_SEC }
+      // Spustit v jednom kroku, ať stopy nezačnou posunuté.
+      await Promise.all(els.map((el) => el.play().catch(() => undefined)))
+      if (get().previewKey !== key) {
+        stopLocalAudio()
+        return
+      }
+      set({ previewState: 'playing' })
+
+      // Lokální soubor je celá píseň → ukázku sami utneme po 30 s.
+      localTimer = window.setTimeout(() => {
+        if (get().previewKey === key) get().stopPreview()
+      }, LOCAL_PREVIEW_SEC * 1000)
+    } catch {
+      if (get().previewKey === key) set({ previewState: 'error' })
+    }
+  },
+
   togglePreview: async (song) => {
     const key = song.key
     const { previewKey, previewState } = get()
@@ -630,6 +780,7 @@ export const useStore = create<AppState>((set, get) => {
       if (get().previewKey !== key) return // uživatel mezitím přepnul
       const a = ensureAudio()
       a.src = blobUrl
+      progressEl = a // kroužek čte postup odsud
       set({ previewState: 'playing', previewLabel: label })
       void a.play().catch(() => {
         if (get().previewKey === key) set({ previewState: 'error' })

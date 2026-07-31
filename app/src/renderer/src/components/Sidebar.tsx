@@ -42,6 +42,7 @@ export function Sidebar(): JSX.Element {
   const doSearch = useStore((s) => s.doSearch)
   const surpriseMe = useStore((s) => s.surpriseMe)
   const setShowPlaylistImport = useStore((s) => s.setShowPlaylistImport)
+  const openWhatsNew = useStore((s) => s.openWhatsNew)
 
   // Launch / focus her — přesunuto z TitleBaru, logika beze změny.
   const [runningGame, setRunningGame] = useState<Game>(null)
@@ -345,7 +346,16 @@ export function Sidebar(): JSX.Element {
         ) : (
           // Klidový stav → verze + ruční kontrola.
           <>
-            <span className="side-version">version {version || '…'}</span>
+            {/* Verze je klikací → otevře „What's new" (bez `since` = poslední
+                vydání). Jediná cesta, jak se k poznámkám dostat i bez updatu. */}
+            <button
+              type="button"
+              className="side-version"
+              title="See what's new in this version"
+              onClick={() => openWhatsNew()}
+            >
+              version {version || '…'}
+            </button>
             <button
               type="button"
               className="side-update"

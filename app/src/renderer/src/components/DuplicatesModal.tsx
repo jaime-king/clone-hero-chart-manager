@@ -5,6 +5,7 @@ import { useStore } from '../store'
 import { formatLength, stripTags } from '../utils'
 import { Icon } from './Icon'
 import { InstrumentDifficulty } from './InstrumentDifficulty'
+import { LocalPreview } from './LocalPreview'
 import { RichText } from './RichText'
 
 // Odznaky „co má složka navíc" — pomáhá rozhodnout, kterou kopii si nechat.
@@ -94,13 +95,18 @@ function CopyDetail({ rel }: { rel: string }): JSX.Element {
     .join(' · ')
   return (
     <div className="dup__detail">
-      {detail.albumArt ? (
-        <img className="dup__detailart" src={detail.albumArt} alt="" />
-      ) : (
-        <div className="dup__detailart dup__detailart--none">
-          <Icon name="note" size={20} />
-        </div>
-      )}
+      {/* Obal je zároveň přehrávání — u duplicit pomáhá poslechem rozhodnout,
+          která kopie je ta lepší (jiný mix, chybějící stopa…). */}
+      <div className="dup__detailartwrap">
+        {detail.albumArt ? (
+          <img className="dup__detailart" src={detail.albumArt} alt="" />
+        ) : (
+          <div className="dup__detailart dup__detailart--none">
+            <Icon name="note" size={20} />
+          </div>
+        )}
+        <LocalPreview previewKey={`dup:${rel}`} rel={rel} size={16} />
+      </div>
       <div className="dup__detailmeta">
         {line1 ? <div className="dup__detailsub">{line1}</div> : null}
         {line2 ? <div className="dup__detailsub">{line2}</div> : null}

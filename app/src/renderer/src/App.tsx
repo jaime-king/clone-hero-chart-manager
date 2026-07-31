@@ -7,7 +7,7 @@ import { LocalDropModal } from './components/LocalDropModal'
 import { MarketplaceModal } from './components/MarketplaceModal'
 import { AboutModal } from './components/AboutModal'
 import { PlaylistImportModal } from './components/PlaylistImportModal'
-import { Pager } from './components/Pager'
+import { Pager, ReportBug } from './components/Pager'
 import { SearchBar } from './components/SearchBar'
 import { Sidebar } from './components/Sidebar'
 import { Settings } from './components/Settings'
@@ -660,8 +660,14 @@ export function App(): JSX.Element {
       {source.length > 0 && !surprise ? (
         <Pager visibleCount={visible.length} matchTotal={deep ? filteredAll.length : undefined} />
       ) : loading && !surprise ? (
-        // Prázdný pager — drží jen spodní odsazení, ať shimmer zůstane v okně výsledků.
-        <div className="pager pager--skeleton" aria-hidden="true" />
+        // Pager bez obsahu — drží jen spodní odsazení, ať shimmer zůstane v okně
+        // výsledků. Ikona hlášení chyby zůstává i tady, ať při přepínání databáze
+        // neproblikává pryč.
+        <div className="pager pager--skeleton">
+          <div className="pager__right">
+            <ReportBug />
+          </div>
+        </div>
       ) : null}
         </main>
       </div>

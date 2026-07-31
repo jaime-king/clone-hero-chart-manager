@@ -55,6 +55,18 @@ export function TargetFolderModal(): JSX.Element | null {
     else void confirmDownload(target)
   }
 
+  // Popisek potvrzovacího tlačítka rozdělený na dvě části: `goLabel` se drží
+  // vždy celý, `goName` (název složky) se v UI usekne. `goFull` jde do tooltipu.
+  const goLabel = isBatch
+    ? `Download ${batchCount} →`
+    : newFolder.trim()
+      ? 'Create & download →'
+      : target
+        ? 'Download →'
+        : 'Download to root'
+  const goName = isBatch ? target || 'root' : newFolder.trim() || target || ''
+  const goFull = goName ? `${goLabel} ${goName}` : goLabel
+
   return (
     <div
       className="modal-overlay"
@@ -160,14 +172,13 @@ export function TargetFolderModal(): JSX.Element | null {
           <button className="btn-secondary" onClick={cancel}>
             Cancel
           </button>
-          <button className="btn-primary" onClick={confirm}>
-            {isBatch
-              ? `Download ${batchCount} → ${target || 'root'}`
-              : newFolder.trim()
-                ? `Create & download → ${newFolder.trim()}`
-                : target
-                  ? `Download → ${target}`
-                  : 'Download to root'}
+          {/* Cíl na tlačítku je poslední potvrzení, kam se bude ukládat, takže ho
+              nechceme zahodit. Dlouhý název složky by ale okno roztáhl → jméno
+              stojí ve vlastním elementu a useče se třemi tečkami (celé je
+              v tooltipu). Popisek před šipkou se nikdy nezkracuje. */}
+          <button className="btn-primary tfm__go" onClick={confirm} title={goFull}>
+            <span className="tfm__golabel">{goLabel}</span>
+            {goName ? <span className="tfm__goname">{goName}</span> : null}
           </button>
         </div>
       </div>

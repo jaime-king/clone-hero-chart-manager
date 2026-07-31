@@ -89,9 +89,13 @@ export function WhatsNew(): JSX.Element | null {
     setReleases([])
     let cancelled = false
     // Po updatu (since != null): vše novější než minulá verze, max 8.
-    // Ruční otevření (since == null): poslední 3 vydání.
-    void window.api
-      .getReleaseNotesSince(since ?? undefined, since ? 8 : 3)
+    // Ruční otevření (since == null): patch notes NAINSTALOVANÉ verze — ne
+    // nejnovější z GitHubu. Kdo zůstal na starší verzi, musí vidět poznámky
+    // ke své, ne k té, kterou nemá.
+    const load = since
+      ? window.api.getReleaseNotesSince(since, 8)
+      : window.api.getReleaseNotes().then((n) => (n ? [n] : []))
+    void load
       .then((list) => {
         if (!cancelled) setReleases(list)
       })
@@ -108,9 +112,16 @@ export function WhatsNew(): JSX.Element | null {
 
   if (!show) return null
 
-  // Nadpis: po updatu z konkrétní verze to řekni; při ručním otevření obecně.
+  // Nadpis: po updatu z konkrétní verze to řekni, při ručním otevření pojmenuj
+  // verzi, kterou uživatel opravdu má (ne tu nejnovější na GitHubu).
   const multi = releases.length > 1
-  const title = since && multi ? `What's new since v${since}` : "What's new"
+  const title = since
+    ? multi
+      ? `What's new since v${since}`
+      : "What's new"
+    : releases[0]
+      ? `What's new in v${releases[0].version}`
+      : "What's new"
   const newestUrl = releases[0]?.url || RELEASES_PAGE
 
   return (

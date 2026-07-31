@@ -499,6 +499,8 @@ export interface RendererApi {
   getReleaseNotesSince(since?: string, max?: number): Promise<ReleaseNotes[]>
   /** 30s zvuková ukázka spárovaná podle interpreta + názvu (iTunes → Deezer). */
   preview(artist: string, title: string): Promise<PreviewResult>
+  /** Zvuk už stažené písně (stopy + odkud pouštět ukázku). `rel` je cesta v knihovně. */
+  songAudio(rel: string): Promise<SongAudio>
 }
 
 /** Výsledek hledání zvukové ukázky (30s klip oficiální nahrávky). */
@@ -515,4 +517,22 @@ export interface PreviewResult {
   source?: 'itunes' | 'deezer'
   /** Důvod při ok=false: 'notfound' = nespárováno, 'error' = síť/stažení selhalo. */
   reason?: 'notfound' | 'error'
+}
+
+/** Jedna zvuková stopa písně v knihovně (URL na vlastním schématu `chm-audio://`). */
+export interface SongAudioTrack {
+  /** Název souboru (guitar.ogg, song.ogg…) — jen pro ladění a popisky. */
+  name: string
+  url: string
+}
+
+/**
+ * Zvuk písně, kterou už máme staženou. Když má chart rozdělené stopy, je jich
+ * `tracks` víc a musí se přehrát SOUČASNĚ — samotné `song.ogg` je u takového
+ * chartu jen doprovod bez nástrojů.
+ */
+export interface SongAudio {
+  tracks: SongAudioTrack[]
+  /** `preview_start_time` ze song.ini v ms — odkud ukázku pouštět (null = od začátku). */
+  previewStartMs: number | null
 }

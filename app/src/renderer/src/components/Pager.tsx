@@ -1,6 +1,33 @@
+import bugIcon from '../assets/bug.webp'
 import { useStore } from '../store'
 import { INSTRUMENTS, rvReachablePages } from '../utils'
 import { Icon } from './Icon'
+
+const ISSUES_URL = 'https://github.com/xlzipx/clone-hero-chart-manager/issues'
+
+/**
+ * Ikona „nahlásit chybu" v pravém rohu spodní lišty. Samostatná komponenta,
+ * protože ji kromě pageru vykresluje i skeleton — jinak by ikona při každém
+ * přepnutí databáze na dobu načítání zmizela.
+ */
+export function ReportBug(): JSX.Element {
+  return (
+    // Popis nese `title` (tooltip), stejně jako u dlaždic her v sidebaru.
+    <button
+      className="pager__bug"
+      title="Report a bug"
+      onClick={() => window.api.openExternal(ISSUES_URL)}
+    >
+      {/* Maska, ne <img>: předloha je ČERNÁ kresba na průhledném pozadí, na
+          tmavém UI by zanikla. Přes masku barvu určuje CSS (viz AboutModal). */}
+      <span
+        className="pager__bugicon"
+        style={{ WebkitMaskImage: `url("${bugIcon}")`, maskImage: `url("${bugIcon}")` }}
+        aria-hidden="true"
+      />
+    </button>
+  )
+}
 
 /** Vytvoří seznam stránek s výpustkami: [1,2,3,'…',9]. */
 function pageList(current: number, total: number): (number | '…')[] {
@@ -112,21 +139,24 @@ export function Pager({
       </div>
 
       <div className="pager__right">
-        {deep ? (
-          <>
-            Page {page} / {totalPages} · {matchTotal} matches
-            {deepLoading
-              ? ` · scanning ${deepScannedPages}/${deepTotalPages}…`
-              : deepCapHit
-                ? ` · first ${deepTotalPages * 100} scanned` /* 100 = DEEP_FETCH ve store */
-                : ''}
-          </>
-        ) : (
-          <>
-            Page {page} / {totalPages} · {resultCount || totalFiltered} results
-            {instrumentFilters.length > 0 ? ` · ${visibleCount} shown` : ''}
-          </>
-        )}
+        <span>
+          {deep ? (
+            <>
+              Page {page} / {totalPages} · {matchTotal} matches
+              {deepLoading
+                ? ` · scanning ${deepScannedPages}/${deepTotalPages}…`
+                : deepCapHit
+                  ? ` · first ${deepTotalPages * 100} scanned` /* 100 = DEEP_FETCH ve store */
+                  : ''}
+            </>
+          ) : (
+            <>
+              Page {page} / {totalPages} · {resultCount || totalFiltered} results
+              {instrumentFilters.length > 0 ? ` · ${visibleCount} shown` : ''}
+            </>
+          )}
+        </span>
+        <ReportBug />
       </div>
     </div>
   )

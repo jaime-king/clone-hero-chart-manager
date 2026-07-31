@@ -5,6 +5,7 @@ import { IS_MAC } from '../platform'
 import { useStore } from '../store'
 import { formatLength, stripTags } from '../utils'
 import { RichText } from './RichText'
+import { LocalPreview } from './LocalPreview'
 import { DuplicatesModal } from './DuplicatesModal'
 import { Icon } from './Icon'
 import { InstrumentDifficulty } from './InstrumentDifficulty'
@@ -430,13 +431,24 @@ export function LibraryManager(): JSX.Element | null {
 
         {detail?.info ? (
           <div className="songdetail">
-            {detail.albumArt ? (
-              <img className="songdetail__art" src={detail.albumArt} alt="" />
-            ) : (
-              <div className="songdetail__art songdetail__art--none">
-                <Icon name="note" size={26} />
-              </div>
-            )}
+            {/* Obal je zároveň tlačítko přehrávání — stejně jako ve výsledcích
+                hledání, jen tady hraje skutečný zvuk chartu z disku. */}
+            <div className="songdetail__artwrap">
+              {detail.albumArt ? (
+                <img className="songdetail__art" src={detail.albumArt} alt="" />
+              ) : (
+                <div className="songdetail__art songdetail__art--none">
+                  <Icon name="note" size={26} />
+                </div>
+              )}
+              {detail.info.rel ? (
+                <LocalPreview
+                  previewKey={`lib:${detail.info.rel}`}
+                  rel={detail.info.rel}
+                  size={18}
+                />
+              ) : null}
+            </div>
             <div className="songdetail__meta">
               <div className="songdetail__title">
                 {detail.info.title ? (

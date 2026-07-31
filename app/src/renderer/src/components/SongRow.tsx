@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react'
 import type { DownloadJob, SongResult } from '../../../shared/types'
-import { getPreviewAudioEl, useStore } from '../store'
+import { getPreviewAudioEl, getPreviewProgress, useStore } from '../store'
 import {
   detectManualHost,
   formatDownloads,
@@ -151,10 +151,7 @@ function SongRowBase({
     }
     const el = getPreviewAudioEl()
     if (!el) return
-    const update = (): void => {
-      const d = el.duration || 30
-      setPvProgress(d > 0 ? Math.min(1, el.currentTime / d) : 0)
-    }
+    const update = (): void => setPvProgress(getPreviewProgress())
     update()
     el.addEventListener('timeupdate', update)
     return () => el.removeEventListener('timeupdate', update)

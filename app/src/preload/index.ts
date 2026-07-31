@@ -14,6 +14,7 @@ import type {
   PlaylistResolveResult,
   PlaylistSong,
   PreviewResult,
+  SongAudio,
   ReleaseNotes,
   RhythmVerseSystem,
   SearchFilters,
@@ -157,6 +158,8 @@ const api = {
   /** 30s zvuková ukázka spárovaná podle interpreta + názvu. */
   preview: (artist: string, title: string) =>
     ipcRenderer.invoke('preview:get', artist, title) as Promise<PreviewResult>,
+  songAudio: (rel: string) =>
+    ipcRenderer.invoke('preview:songAudio', rel) as Promise<SongAudio>,
 
   runningGame: () =>
     ipcRenderer.invoke('game:running') as Promise<'clone-hero' | 'yarg' | null>,

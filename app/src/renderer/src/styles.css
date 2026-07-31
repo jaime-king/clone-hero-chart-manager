@@ -2416,10 +2416,49 @@ body {
   padding: 0 2px;
 }
 .pager__right {
+  /* Natvrdo 3. sloupec: skeleton vykresluje jen tenhle blok (bez levé části a
+     stránek), a bez toho by spadl do prvního sloupce = ikona vlevo. */
+  grid-column: 3;
   justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-align: right;
   color: var(--text-faint);
   white-space: nowrap;
+}
+/* Nahlásit chybu: holá ikona vedle počtu výsledků, rozměrem stejná jako
+   tlačítka stránek. Popis nese `title`, na hover se podloží. */
+.pager__bug {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  padding: 0;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.14s ease, background 0.14s ease;
+}
+.pager__bug:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.07);
+}
+/* Bílá (barva textu), ne původní černá kresba — jinak by na tmavém zanikla. */
+.pager__bugicon {
+  width: 19px;
+  height: 19px;
+  background: var(--text);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 /* ---------- Download queue ---------- */
@@ -3018,6 +3057,22 @@ body {
   gap: 10px;
   padding: 15px 22px;
   border-top: 1px solid var(--border);
+}
+/* Potvrzení výběru cílové složky: název složky se usekne, ať dlouhé jméno
+   neroztáhne okno. Popisek („Download →“) zůstává vždy celý. */
+.tfm__go {
+  min-width: 0;
+  max-width: 340px;
+  gap: 6px;
+}
+.tfm__golabel {
+  flex: none;
+}
+.tfm__goname {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .btn-primary {
   background: var(--accent-grad);
@@ -3676,6 +3731,15 @@ body {
   color: var(--text-faint);
   font-size: 12px;
 }
+/* Stejný princip jako `.songdetail__artwrap` — nosič pro přehrávací tlačítko. */
+.dup__detailartwrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+}
 .dup__detailart {
   width: 64px;
   height: 64px;
@@ -3888,17 +3952,17 @@ body {
   gap: 8px;
   padding: 11px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: #ffffff;
-  color: #17181c;
+  border: 1px solid rgba(148, 170, 220, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
 }
 .about__gh:hover {
-  background: #edeff3;
-  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(148, 170, 220, 0.5);
   transform: translateY(-1px);
 }
 /* GitHub logo přes masku (viz komentář v AboutModal.tsx) — barvu tak řídí CSS,
@@ -3907,8 +3971,7 @@ body {
   width: 20px;
   height: 20px;
   flex: none;
-  /* currentColor = tmavý text tlačítka → GitHub značka je na bílém vidět. */
-  background: currentColor;
+  background: var(--text);
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
@@ -3917,8 +3980,7 @@ body {
   mask-size: contain;
 }
 .about__ghgo {
-  color: currentColor;
-  opacity: 0.5;
+  color: var(--text-faint);
 }
 /* Malá „produktová" karta pod repo tlačítky — krátce představí Chart Studio.
    Barevný proužek vlevo ji odliší od kontaktní karty, ať to není jednolité. */
@@ -4184,7 +4246,9 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 22px 0;
+  /* Odsazení shora i zdola: tlačítko dřív lepilo na hlavičku a rovnou pod ním
+     začínal odscrollovaný obsah, takže působilo vraženě do kraje. */
+  padding: 15px 22px 13px;
   flex: none;
 }
 .dup__scopebtn {
@@ -4620,6 +4684,16 @@ body {
   border: 1px solid var(--border-strong);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
+}
+/* Obal alba nese přehrávací tlačítko (`.song__preview` je position:absolute,
+   takže potřebuje relativní rodiče o přesné velikosti obrázku). */
+.songdetail__artwrap {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  overflow: hidden;
 }
 .songdetail__art {
   width: 84px;
@@ -5368,6 +5442,11 @@ body {
   min-height: 52px; /* = výška reálného pageru (padding 10px + tlačítka 32px) */
   pointer-events: none;
 }
+/* Hlášení chyby je i ve skeletonu jediný živý prvek — vrátit mu klikatelnost,
+   kterou `pointer-events: none` na skeletonu jinak vypne. */
+.pager--skeleton .pager__bug {
+  pointer-events: auto;
+}
 @media (prefers-reduced-motion: reduce) {
   .sk::after {
     animation: none;
@@ -5829,10 +5908,28 @@ body {
   flex-direction: column;
   gap: 8px;
 }
+/* Klikací (otevře „What's new"), ale vzhledem pořád jen popisek — proto se
+   nativní styl tlačítka shazuje a zvýraznění přichází až na hover. */
 .side-version {
+  display: block;
+  /* Sidebar je flex sloupec → tlačítko by se roztáhlo přes celou šířku a hover
+     podbarvení s ním. `flex-start` ho nechá obepnout jen text. */
+  align-self: flex-start;
+  font: inherit;
   font-size: 12px;
+  text-align: left;
   color: var(--text-faint);
-  padding-left: 2px;
+  padding: 2px 4px;
+  margin-left: -2px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  transition: color 0.14s ease, background 0.14s ease;
+}
+.side-version:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
 }
 .side-update {
   display: block;
@@ -6396,8 +6493,12 @@ body {
 .song__preview--idle > svg {
   transform: translateX(1px);
 }
-/* Odkrytí: hover řádku, klávesový fokus, nebo aktivní ukázka. */
+/* Odkrytí: hover řádku, klávesový fokus, nebo aktivní ukázka. Kromě výsledků
+   hledání sedí totéž tlačítko i na obalu v Library manageru a u duplicit —
+   tam je nosičem `*__artwrap` (řádek `.song` tam není). */
 .song:hover .song__preview,
+.songdetail__artwrap:hover .song__preview,
+.dup__detailartwrap:hover .song__preview,
 .song__preview:focus-visible,
 .song__preview--active,
 .song__preview--loading,
@@ -7229,7 +7330,8 @@ button.badge--owned:hover {
   white-space: nowrap;
   flex: none;
 }
-.modal--playlist .modal__head h2 {
+.modal--playlist .modal__head h2,
+.modal--about .modal__head h2 {
   display: inline-flex;
   align-items: center;
   gap: 9px;
