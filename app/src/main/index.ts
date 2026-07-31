@@ -10,7 +10,24 @@ import { createOverlay, getOverlay, revealOverlay } from './overlay'
 import { destroyReminder } from './reminder'
 import { createTray, destroyTray } from './tray'
 import { initAutoUpdate } from './core/autoupdate'
-import { isMac } from './core/platform'
+import { isMac, isWin } from './core/platform'
+import { handleAudioProtocol, registerAudioScheme } from './core/localaudio'
+
+/**
+ * Windows: při tažení za okraj se rám okna zvětší okamžitě, ale obsah dobíhá a
+ * do nově odkryté plochy se roztáhne/zopakuje poslední snímek (duchové na pravé
+ * a spodní hraně). Dělá to prezentace přes DirectComposition — swap chain se
+ * škáluje, dokud renderer nedodá nový snímek. Bez ní Chromium prezentuje starší
+ * cestou, která překresluje rovnou do okna.
+ *
+ * NENÍ to totéž co `disableHardwareAcceleration()` (to jsme zkoušeli a bylo to
+ * horší) — GPU rasterizace i kompozice zůstávají, mění se jen způsob prezentace.
+ */
+if (isWin) app.commandLine.appendSwitch('disable-direct-composition')
+
+// Vlastní schéma pro zvuk písní z knihovny. MUSÍ se zaregistrovat dřív, než je
+// app ready — potom už Chromium seznam schémat nepřebírá.
+registerAudioScheme()
 
 /**
  * macOS: v DEV režimu (spuštěno přes `electron`) nemá běžící proces .app bundle,
@@ -34,6 +51,7 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(() => {
     setMacDockIcon()
+    handleAudioProtocol()
     setupAppMenu()
     registerIpc()
     createOverlay()

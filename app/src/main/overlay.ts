@@ -164,22 +164,25 @@ export function createOverlay(): BrowserWindow {
  * při skrytí, pokud Clone Hero běží, ho aktivně přepneme do popředí.
  */
 /**
- * INSTANTNÍ skrytí — bez DWM fade-out animace. Neprůhledné okno Windows při
- * `hide()` animuje (zavírací prolnutí), což je u velkého okna trhané. Nastavením
- * opacity na 0 okno zmizí OKAMŽITĚ (setOpacity není animovaný), takže i kdyby DWM
- * animaci spustil, není co prolínat. `revealOverlay` pak opacity vrátí na 1 (což
- * zároveň sundá WS_EX_LAYERED → Aero Snap dál funguje). */
-function hideInstant(win: BrowserWindow): void {
-  win.setOpacity(0)
+ * Skrytí okna.
+ *
+ * NEPOUŽÍVAT `setOpacity()` — ani pro „instantní" skrytí. Na Windows Electron
+ * při prvním volání nastaví oknu `WS_EX_LAYERED` a ten příznak už NIKDY nesundá
+ * (ani při opacity zpátky na 1; dřívější komentář tady tvrdil opak, což byl omyl).
+ * Layered okno je vyloučené z rychlé cesty DWM při změně velikosti: obsah se
+ * místo přeskládání překresluje a blituje, takže tažení za okraj „duchuje" a
+ * výplň dobíhá se zpožděním. Původní důvod pro ten trik (trhaná fade-out
+ * animace) navíc padl, když okno přestalo být `transparent`.
+ */
+function hideWindow(win: BrowserWindow): void {
   win.hide()
 }
 
-/** Ukáže hlavní okno (opacity zpět na 1 po případném instantním skrytí) + focus. */
+/** Ukáže hlavní okno + focus. */
 export function revealOverlay(): void {
   const win = mainWindow
   if (!win) return
   hideReminder() // hlavní okno bude vidět → reminder pill je zbytečný
-  win.setOpacity(1)
   win.show()
   win.focus()
 }
@@ -188,7 +191,7 @@ export async function toggleOverlay(): Promise<void> {
   const win = mainWindow
   if (!win) return
   if (win.isVisible() && win.isFocused()) {
-    hideInstant(win)
+    hideWindow(win)
     // Vrátí focus zpět na hru (pokud běží) — bez tohohle by uživatel musel
     // ručně kliknout na CH/YARG okno. + ukázat reminder pill.
     try {
@@ -209,7 +212,7 @@ export async function toggleOverlay(): Promise<void> {
 export async function hideOverlay(): Promise<void> {
   const win = mainWindow
   if (!win) return
-  hideInstant(win)
+  hideWindow(win)
   try {
     const game = await runningGame()
     if (game) {
