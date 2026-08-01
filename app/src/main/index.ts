@@ -3,11 +3,10 @@
 import { app, BrowserWindow } from 'electron'
 import { existsSync } from 'fs'
 import { join } from 'path'
-import { registerIpc, stopGamePoll } from './ipc'
+import { registerIpc } from './ipc'
 import { registerHotkeys, unregisterHotkeys } from './hotkeys'
 import { setupAppMenu } from './menu'
 import { createOverlay, getOverlay, revealOverlay } from './overlay'
-import { destroyReminder } from './reminder'
 import { createTray, destroyTray } from './tray'
 import { initAutoUpdate } from './core/autoupdate'
 import { isMac, isWin } from './core/platform'
@@ -66,9 +65,7 @@ if (!app.requestSingleInstanceLock()) {
 
   app.on('will-quit', () => {
     unregisterHotkeys()
-    stopGamePoll()
     destroyTray()
-    destroyReminder()
   })
 
   // Nechceme zavřít appku při zavření okna (běží jako overlay na pozadí).

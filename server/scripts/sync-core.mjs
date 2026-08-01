@@ -22,10 +22,12 @@ const repoRoot = dirname(serverRoot)
 const appSrc = join(repoRoot, 'app', 'src')
 const gen = join(serverRoot, 'src', 'gen')
 
-// Modules NOT mirrored: autoupdate.ts, gamedetect.ts (classified `delete` in
-// docs/port/api-inventory.md — desktop-only features with no server meaning)
-// and config.ts (replaced by the shim below).
-const EXCLUDED = new Set(['autoupdate.ts', 'gamedetect.ts', 'config.ts'])
+// Modules NOT mirrored: autoupdate.ts (classified `delete` in
+// docs/port/api-inventory.md — desktop-only feature with no server meaning;
+// gamedetect.ts was the other `delete` module but has since been removed
+// from the app entirely, so it no longer needs excluding) and config.ts
+// (replaced by the shim below).
+const EXCLUDED = new Set(['autoupdate.ts', 'config.ts'])
 
 rmSync(gen, { recursive: true, force: true })
 mkdirSync(join(gen, 'main', 'core'), { recursive: true })

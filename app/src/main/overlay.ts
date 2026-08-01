@@ -6,8 +6,6 @@ import type { MenuItemConstructorOptions } from 'electron'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { getConfig } from './core/config'
-import { bringGameToFront, runningGame } from './core/gamedetect'
-import { hideReminder, showReminder } from './reminder'
 
 /** Základní zoom UI (nad Windows DPI scalingem). Násobí se uživatelským uiScale.
  *  REDESIGN v2: 1.0 — CSS je autorované 1:1 v pixelech mockupu (okno 1500×1044),
@@ -182,7 +180,6 @@ function hideWindow(win: BrowserWindow): void {
 export function revealOverlay(): void {
   const win = mainWindow
   if (!win) return
-  hideReminder() // hlavní okno bude vidět → reminder pill je zbytečný
   win.show()
   win.focus()
 }
@@ -192,34 +189,14 @@ export async function toggleOverlay(): Promise<void> {
   if (!win) return
   if (win.isVisible() && win.isFocused()) {
     hideWindow(win)
-    // Vrátí focus zpět na hru (pokud běží) — bez tohohle by uživatel musel
-    // ručně kliknout na CH/YARG okno. + ukázat reminder pill.
-    try {
-      const game = await runningGame()
-      if (game) {
-        await bringGameToFront(game)
-        showReminder()
-      }
-    } catch {
-      /* nevadí — jen UX bonus */
-    }
   } else {
     revealOverlay()
   }
 }
 
-/** Skryje okno (Hide tlačítko / IPC) — taky vrátí focus na hru. */
+/** Skryje okno (Hide tlačítko / IPC). */
 export async function hideOverlay(): Promise<void> {
   const win = mainWindow
   if (!win) return
   hideWindow(win)
-  try {
-    const game = await runningGame()
-    if (game) {
-      await bringGameToFront(game)
-      showReminder()
-    }
-  } catch {
-    /* ignore */
-  }
 }
