@@ -3,17 +3,44 @@
 import { existsSync, rmSync } from 'fs'
 import { basename, extname, join } from 'path'
 import { getConfig } from './config'
-import { ensureExecutable, sevenZipBinaryName } from './platform'
+import { ensureExecutable, isWin, sevenZipBinaryName } from './platform'
 import { run } from './proc'
 
+/**
+ * Resolves the 7-Zip binary to invoke.
+ *
+ * Electron packages 7-Zip next to the app (`c3BinDir`, auto-detected in
+ * `config.ts`'s `detect7zDir()`) — that lookup is unchanged below and stays
+ * the primary path for the desktop app, which never sets `CHM_SEVENZIP_PATH`.
+ *
+ * The server has no bundled binary directory; it expects a system package
+ * (Linux container: `p7zip-full`'s `7z`) and two ways to point at it:
+ *   1. `CHM_SEVENZIP_PATH` — full path (or bare command) to the binary,
+ *      checked first, wins outright.
+ *   2. No `c3BinDir` configured (server's default) → fall back to the bare
+ *      command name and let `child_process.spawn`'s PATH search find it —
+ *      `7z` on Linux/PATH rather than the macOS-specific static `7zz` name
+ *      `sevenZipBinaryName()` returns, since that name is meaningless outside
+ *      a bundled macOS build.
+ */
 function sevenZipPath(): string {
+  const envPath = process.env.CHM_SEVENZIP_PATH
+  if (envPath) return envPath
+
+  const dir = getConfig().c3BinDir
   const bin = sevenZipBinaryName() // 7z.exe (Windows) / 7zz (macOS, Linux)
-  const exe = join(getConfig().c3BinDir, bin)
-  if (!existsSync(exe)) {
-    throw new Error(`${bin} not found in ${getConfig().c3BinDir} (check the 7-Zip path in Settings)`)
+  if (dir) {
+    const exe = join(dir, bin)
+    if (!existsSync(exe)) {
+      throw new Error(`${bin} not found in ${dir} (check the 7-Zip path in Settings)`)
+    }
+    ensureExecutable(exe)
+    return exe
   }
-  ensureExecutable(exe)
-  return exe
+  // No configured directory — rely on PATH. Not `existsSync`-checked here:
+  // there is no single file to check for a bare command name, so a missing
+  // binary surfaces as the spawn's own ENOENT, caught by `run()`'s caller.
+  return isWin ? bin : '7z'
 }
 
 const ARCHIVE_EXT = new Set(['.zip', '.rar', '.7z', '.tar', '.gz', '.001'])
