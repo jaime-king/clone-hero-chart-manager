@@ -222,29 +222,6 @@ export const webApi: RendererApi = {
   },
   songAudio: (rel: string) => callHttp<SongAudio>('preview:songAudio', [rel]),
 
-  // ---- Desktop game-detection / launch — no server-side meaning, deleted ----
-  runningGame: () =>
-    Promise.reject(new Error('runningGame: removed in web port')) as Promise<
-      'clone-hero' | 'yarg' | null
-    >,
-  bringGameToFront: (_prefer?: 'clone-hero' | 'yarg') =>
-    Promise.reject(new Error('bringGameToFront: removed in web port')) as Promise<
-      { ok: true; game?: 'clone-hero' | 'yarg' } | { ok: false; error: string }
-    >,
-  chExeStatus: () =>
-    Promise.reject(new Error('chExeStatus: removed in web port')) as Promise<{
-      path: string | null
-      autoDetected: boolean
-    }>,
-  yargExeStatus: () =>
-    Promise.reject(new Error('yargExeStatus: removed in web port')) as Promise<{
-      path: string | null
-      autoDetected: boolean
-    }>,
-  chooseExeFile: () =>
-    Promise.reject(new Error('chooseExeFile: removed in web port')) as Promise<string | null>,
-  onGameStatus: (_cb: (game: 'clone-hero' | 'yarg' | null) => void) => () => {},
-
   // ---- Window-chrome (frameless titlebar) — no BrowserWindow in a tab ----
   hideOverlay: () => removed('hideOverlay'),
   toggleMaximize: () => removed('toggleMaximize'),

@@ -1,20 +1,16 @@
 import { useEffect, useState } from 'react'
 import type { Database, RhythmVerseSystem, UpdateAvailable } from '../../../shared/types'
 import { errMsg } from '../../../shared/errors'
-import chLogo from '../assets/CloneHero_Logo.png'
 import spotifyMark from '../assets/Spotify_Primary_Logo.webp'
-import yargLogo from '../assets/YARG_Logo.png'
 import { useStore } from '../store'
 import { Icon } from './Icon'
 
 // Verzi, kterou uživatel „zavřel", si pamatujeme, ať ho stejné upozornění neotravuje.
 const DISMISS_KEY = 'chm.updateDismissed'
 
-// Levý panel (redesign v2 dle mockupu): nahoře launchery her S IKONAMI,
-// pod nimi svislé seznamy DATABASE a SYSTEM. Stejné chování jako dřívější
-// Segmented přepínače v SearchBaru — jen jiné rozložení.
-
-type Game = 'clone-hero' | 'yarg' | null
+// Levý panel (redesign v2 dle mockupu): svislé seznamy DATABASE a SYSTEM.
+// Stejné chování jako dřívější Segmented přepínače v SearchBaru — jen jiné
+// rozložení.
 
 const DATABASES: { id: Database; label: string; hint: string }[] = [
   { id: 'rhythmverse', label: 'RhythmVerse', hint: 'Largest catalogue — CH, Phase Shift and Rock Band CON' },
@@ -29,10 +25,6 @@ const SYSTEMS: { id: RhythmVerseSystem; label: string; hint: string }[] = [
   { id: 'all', label: 'All', hint: 'All formats' }
 ]
 
-function gameName(g: Exclude<Game, null>): string {
-  return g === 'yarg' ? 'YARG' : 'Clone Hero'
-}
-
 export function Sidebar(): JSX.Element {
   const database = useStore((s) => s.database)
   const setDatabase = useStore((s) => s.setDatabase)
@@ -44,21 +36,6 @@ export function Sidebar(): JSX.Element {
   const setShowPlaylistImport = useStore((s) => s.setShowPlaylistImport)
   const openWhatsNew = useStore((s) => s.openWhatsNew)
 
-  // Launch / focus her — přesunuto z TitleBaru, logika beze změny.
-  const [runningGame, setRunningGame] = useState<Game>(null)
-  const [busy, setBusy] = useState(false)
-
-  // Lze hru spustit? (exe z config override nebo auto-detekce). path === null →
-  // exe nenalezené → launcher označíme jako „nelze spustit" a klik pošle do Nastavení.
-  const config = useStore((s) => s.config)
-  const setShowSettings = useStore((s) => s.setShowSettings)
-  const [chOk, setChOk] = useState(true)
-  const [yargOk, setYargOk] = useState(true)
-  useEffect(() => {
-    void window.api.chExeStatus().then((s) => setChOk(s.path !== null))
-    void window.api.yargExeStatus().then((s) => setYargOk(s.path !== null))
-  }, [config?.chExePath, config?.yargExePath, config?.songsDir])
-
   // Verze + celý životní cyklus aktualizace (přesunuto sem z horního pruhu):
   // ruční kontrola → dostupné → stahování → připraveno k restartu.
   const [version, setVersion] = useState('')
@@ -69,9 +46,7 @@ export function Sidebar(): JSX.Element {
   const [downloaded, setDownloaded] = useState(false)
 
   useEffect(() => {
-    void window.api.runningGame().then(setRunningGame)
     void window.api.appVersion().then(setVersion)
-    const offGame = window.api.onGameStatus(setRunningGame)
     const offAvail = window.api.onUpdateAvailable((i) => {
       if (localStorage.getItem(DISMISS_KEY) === i.version) return // tuhle verzi už zavřel
       setAvailable(i)
@@ -82,7 +57,6 @@ export function Sidebar(): JSX.Element {
       setDownloading(false)
     })
     return () => {
-      offGame()
       offAvail()
       offProg()
       offDone()
@@ -138,64 +112,10 @@ export function Sidebar(): JSX.Element {
     }
   }
 
-  const launchGame = async (game: Exclude<Game, null>): Promise<void> => {
-    if (busy) return
-    setBusy(true)
-    try {
-      const res = await window.api.bringGameToFront(game)
-      if (!res.ok) {
-        window.alert(res.error)
-      } else if (!runningGame && res.game) {
-        setRunningGame(res.game)
-      }
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  const launcher = (game: Exclude<Game, null>, logo: string): JSX.Element => {
-    const isRunning = runningGame === game
-    const launchable = game === 'clone-hero' ? chOk : yargOk
-    // „Nelze spustit" jen když hra NEběží (běžící se dá přepnout i bez exe cesty).
-    const missing = !isRunning && !launchable
-    // V tlačítku je jen logo (bez textu) — název hry je z loga čitelný. Stav (běží /
-    // chybí exe) nese styl čtverce, plný popis akce je v `title` (tooltip).
-    const title = missing
-      ? `${gameName(game)} executable not found — click to set its path in Settings`
-      : isRunning
-        ? `${gameName(game)} is running — click to bring it to the front`
-        : `Launch ${gameName(game)}`
-    return (
-      <button
-        key={game}
-        className={`side-launch side-launch--${game} ${isRunning ? 'side-launch--running' : ''} ${
-          missing ? 'side-launch--missing' : ''
-        }`}
-        title={title}
-        onClick={() => (missing ? setShowSettings(true) : void launchGame(game))}
-        disabled={busy}
-      >
-        <img className="side-launch__logo" src={logo} alt="" draggable={false} />
-        {missing ? (
-          <span className="side-launch__warn" aria-label="Executable not found">
-            <Icon name="info" size={13} />
-          </span>
-        ) : null}
-      </button>
-    )
-  }
-
   const showSystems = database !== 'enchor'
 
   return (
     <aside className="sidebar">
-      <div className="side-launchers">
-        {launcher('clone-hero', chLogo)}
-        {launcher('yarg', yargLogo)}
-      </div>
-
-      <div className="side-sep" aria-hidden="true" />
-
       <div className="side-group">
         <div className="side-label">Database</div>
         <div className="side-list">
