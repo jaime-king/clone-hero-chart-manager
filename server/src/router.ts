@@ -35,6 +35,7 @@ import { search as searchEnchor } from './gen/main/core/enchor'
 import { fetchFilterOptions, search as searchRhythmverse } from './gen/main/core/rhythmverse'
 import { getPreview } from './gen/main/core/preview'
 import { getSongAudio } from './gen/main/core/localaudio'
+import { toHttpAudioUrl } from './audio'
 import { jobManager } from './gen/main/core/jobs'
 import { listSongFolders, ownedFolders, ownedSongKeys } from './gen/main/core/library'
 import {
@@ -166,9 +167,17 @@ const handlers: Record<string, Handler> = {
 
   // ── Preview ─────────────────────────────────────────────────────────
   'preview:get': (artist: string, title: string) => getPreview(artist, title),
-  // Metadata only; the returned chm-audio:// track URLs are replaced by the
-  // Phase 5 HTTP Range audio endpoint.
-  'preview:songAudio': (rel: string) => getSongAudio(rel),
+  // getSongAudio (core/localaudio.ts) returns track URLs shaped for Electron's
+  // chm-audio:// protocol; rewrite them to the Phase 5 HTTP Range endpoint
+  // (server/src/audio.ts) here at the route layer, not in core or the
+  // renderer, so the core module stays byte-identical for Electron.
+  'preview:songAudio': async (rel: string) => {
+    const audio = await getSongAudio(rel)
+    return {
+      ...audio,
+      tracks: audio.tracks.map((t) => ({ ...t, url: toHttpAudioUrl(t.url) }))
+    }
+  },
 
   // ── Jobs ────────────────────────────────────────────────────────────
   'jobs:enqueue': (song: SongResult, targetSubfolder?: string) =>

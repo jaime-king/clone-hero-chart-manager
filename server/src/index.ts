@@ -10,6 +10,7 @@ import fastifyStatic from '@fastify/static'
 import { existsSync } from 'fs'
 import { resolve } from 'path'
 import { dataDir, initConfig, libraryRoot, quarantineDir } from './config'
+import { registerAudioRoute } from './audio'
 import { registerRoutes } from './router'
 import { registerSse } from './sse'
 import { serverRoot, serverVersion } from './version'
@@ -21,6 +22,7 @@ async function main(): Promise<void> {
 
   registerRoutes(app)
   registerSse(app)
+  registerAudioRoute(app)
 
   app.get('/healthz', () => ({ ok: true, version: serverVersion() }))
 
