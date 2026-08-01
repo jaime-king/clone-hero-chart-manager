@@ -128,38 +128,52 @@ export function FilterBar(): JSX.Element {
         </div>
       </div>
 
-      <button
-        type="button"
-        className={`dropzone ${dragOver ? 'dropzone--hover' : ''}`}
-        onClick={async () => {
-          const picked = await window.api.chooseSongFile()
-          if (picked) void openLocalDrop(picked.path, picked.name)
-        }}
-        onDragOver={(e) => {
-          e.preventDefault()
-          e.dataTransfer.dropEffect = 'copy'
-          setDragOver(true)
-        }}
-        onDragEnter={(e) => {
-          e.preventDefault()
-          setDragOver(true)
-        }}
-        onDragLeave={(e) => {
-          e.preventDefault()
-          setDragOver(false)
-        }}
-        onDrop={handleDrop}
-      >
-        <span className="dropzone__main">
-          <Icon name="download" size={20} />
-          <strong>
-            Drop files or a folder,
-            <br />
-            or click to browse
-          </strong>
-        </span>
-        <span className="dropzone__ext">.zip · .rar · .7z · .sng · .CON · .DTX</span>
-      </button>
+      {/* Manual install (drag/drop + native file picker) is out of scope for
+          the web port (docs/port/plan.md guardrail 4: getDroppedFilePath and
+          dialog:chooseSongFile are `delete`, not rewritten as an upload flow —
+          see docs/port/api-inventory.md rows #41/#42/#6/#7). web-api.ts's
+          window.api.platform reports 'web' only in the web build (never a
+          real NodeJS.Platform value an Electron preload would return), so
+          this is a clean, build-target-scoped condition: the Electron app
+          keeps the panel unconditionally, the web build never renders it. */}
+      {/* Cast: web-api.ts's `platform` is typed as NodeJS.Platform to match the
+          preload contract exactly, but returns the literal 'web' at runtime
+          (see its comment) — a value TypeScript doesn't consider part of
+          that type, hence the cast rather than a direct comparison. */}
+      {(window.api.platform as unknown as string) !== 'web' && (
+        <button
+          type="button"
+          className={`dropzone ${dragOver ? 'dropzone--hover' : ''}`}
+          onClick={async () => {
+            const picked = await window.api.chooseSongFile()
+            if (picked) void openLocalDrop(picked.path, picked.name)
+          }}
+          onDragOver={(e) => {
+            e.preventDefault()
+            e.dataTransfer.dropEffect = 'copy'
+            setDragOver(true)
+          }}
+          onDragEnter={(e) => {
+            e.preventDefault()
+            setDragOver(true)
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault()
+            setDragOver(false)
+          }}
+          onDrop={handleDrop}
+        >
+          <span className="dropzone__main">
+            <Icon name="download" size={20} />
+            <strong>
+              Drop files or a folder,
+              <br />
+              or click to browse
+            </strong>
+          </span>
+          <span className="dropzone__ext">.zip · .rar · .7z · .sng · .CON · .DTX</span>
+        </button>
+      )}
     </div>
   )
 }
