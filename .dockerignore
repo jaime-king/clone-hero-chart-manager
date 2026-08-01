@@ -1,0 +1,19 @@
+# Build context hygiene — Phase 6. Everything the Docker build regenerates
+# itself (deps, build output, generated mirrors) or plainly doesn't need.
+.git
+**/node_modules
+app/out
+app/dist
+app/*.tsbuildinfo
+server/dist
+server/src/gen
+server/data
+server/.env
+worker
+docs
+release-assets
+scripts
+*.log
+.DS_Store
+Dockerfile
+.dockerignore
