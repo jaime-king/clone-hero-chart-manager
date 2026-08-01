@@ -1,0 +1,8 @@
+{
+  "name": "electron",
+  "version": "0.0.0-chm-server-shim",
+  "private": true,
+  "description": "Server-side replacement for the 'electron' module. Installed into server/node_modules via a file: dependency so the unmodified app/src/main/core modules (librarymgr, playlists, update, localaudio) resolve their Electron imports to this shim.",
+  "main": "index.js",
+  "types": "index.d.ts"
+}
