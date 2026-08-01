@@ -208,8 +208,18 @@ export const webApi: RendererApi = {
 
   resolveUrl: (url: string) => callHttp<string>('url:resolve', [url]),
 
-  preview: (artist: string, title: string) =>
-    callHttp<PreviewResult>('preview:get', [artist, title]),
+  preview: async (artist: string, title: string) => {
+    // The server sends the 30s clip base64-encoded (`dataB64`) because
+    // ArrayBuffer doesn't survive JSON; restore the PreviewResult contract.
+    const res = await callHttp<PreviewResult & { dataB64?: string }>('preview:get', [
+      artist,
+      title
+    ])
+    if (!res.dataB64) return res
+    const { dataB64, ...rest } = res
+    const bytes = Uint8Array.from(atob(dataB64), (c) => c.charCodeAt(0))
+    return { ...rest, data: bytes.buffer }
+  },
   songAudio: (rel: string) => callHttp<SongAudio>('preview:songAudio', [rel]),
 
   // ---- Desktop game-detection / launch — no server-side meaning, deleted ----

@@ -166,7 +166,16 @@ const handlers: Record<string, Handler> = {
   },
 
   // ── Preview ─────────────────────────────────────────────────────────
-  'preview:get': (artist: string, title: string) => getPreview(artist, title),
+  // getPreview returns the 30s clip as an ArrayBuffer, which Electron IPC
+  // structured-clones but JSON.stringify collapses to {}. Ship it base64
+  // (`dataB64`); the web shim decodes it back into `data` so the renderer
+  // sees the exact PreviewResult contract.
+  'preview:get': async (artist: string, title: string) => {
+    const res = await getPreview(artist, title)
+    if (!res.ok || !res.data) return res
+    const { data, ...rest } = res
+    return { ...rest, dataB64: Buffer.from(data).toString('base64') }
+  },
   // getSongAudio (core/localaudio.ts) returns track URLs shaped for Electron's
   // chm-audio:// protocol; rewrite them to the Phase 5 HTTP Range endpoint
   // (server/src/audio.ts) here at the route layer, not in core or the
