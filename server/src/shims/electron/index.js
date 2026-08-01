@@ -5,8 +5,8 @@
 // plain node_modules package, outside the TypeScript program.
 'use strict'
 
-const { cpSync, mkdirSync, renameSync, rmSync } = require('node:fs')
-const { basename, dirname, isAbsolute, join, relative, resolve, sep } = require('node:path')
+const { rmSync } = require('node:fs')
+const { isAbsolute, join, relative, resolve, sep } = require('node:path')
 
 function dataDir() {
   return resolve(process.env.CHM_DATA_DIR || './data')
@@ -34,29 +34,18 @@ const app = {
 }
 
 const shell = {
-  // shell.trashItem replacement: move to <CHM_DATA_DIR>/trash/<timestamp>/<relpath>.
-  // Nothing is ever hard-deleted. <relpath> = path relative to the library root
-  // when inside it, otherwise just the basename.
+  // shell.trashItem replacement: permanent delete (owner's decision, 2026-08-01
+  // — no server-side trash). Only paths inside the library root may be deleted;
+  // there is no auth in front of this server, so the containment check is the
+  // entire safety boundary.
   async trashItem(absPath) {
     const abs = resolve(absPath)
     const lib = libraryRoot()
-    const rel = abs === lib || abs.startsWith(lib + sep) ? relative(lib, abs) : basename(abs)
+    const rel = abs !== lib && abs.startsWith(lib + sep) ? relative(lib, abs) : ''
     if (!rel || isAbsolute(rel) || rel.split(sep)[0] === '..') {
-      throw new Error('trash shim: refusing to trash an unsafe path')
+      throw new Error('delete shim: refusing to delete a path outside the library')
     }
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-')
-    const dest = join(dataDir(), 'trash', stamp, rel)
-    mkdirSync(dirname(dest), { recursive: true })
-    try {
-      renameSync(abs, dest)
-    } catch (err) {
-      if (err && err.code === 'EXDEV') {
-        cpSync(abs, dest, { recursive: true })
-        rmSync(abs, { recursive: true, force: true })
-      } else {
-        throw err
-      }
-    }
+    rmSync(abs, { recursive: true, force: true })
   },
   // These back the `delete`-classified channels lib:open / lib:reveal — no
   // HTTP route exists for them, so a plain throw is fine.

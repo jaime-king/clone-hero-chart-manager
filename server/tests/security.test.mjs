@@ -81,7 +81,9 @@ before(async () => {
         CHM_PORT: String(PORT),
         CHM_HOST: '127.0.0.1'
       },
-      stdio: ['ignore', 'pipe', 'pipe']
+      stdio: ['ignore', 'pipe', 'pipe'],
+      // Own process group so teardown can kill tsx AND its node child.
+      detached: true
     }
   )
   let out = ''
@@ -104,7 +106,13 @@ before(async () => {
 })
 
 after(async () => {
-  if (serverProc) serverProc.kill('SIGKILL')
+  if (serverProc) {
+    try {
+      process.kill(-serverProc.pid, 'SIGKILL') // whole group: tsx wrapper + node child
+    } catch {
+      serverProc.kill('SIGKILL')
+    }
+  }
   try {
     rmSync(join(libRoot, '..', '..'), { recursive: true, force: true })
   } catch {
