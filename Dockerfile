@@ -50,13 +50,16 @@ RUN curl -fL -o onyx.AppImage \
 
 # ---- Stage 3: runtime -------------------------------------------------------
 FROM node:26-slim
-# p7zip-full provides /usr/bin/7z (the default CHM_SEVENZIP_PATH). 7zip
-# provides /usr/bin/7zz (upstream 7-Zip) and unrar-free a standalone
-# unrar — both best-effort candidates for .rar archives; actual rar support
-# is verified post-build and CHM_SEVENZIP_PATH switched if needed.
+# p7zip-full provides /usr/bin/7z (the default CHM_SEVENZIP_PATH) — on Debian
+# trixie it is a transitional package for upstream 7-Zip 25.01, which lists
+# Rar/Rar5 among its formats. unrar-free is a best-effort standalone fallback
+# (the app itself only ever calls 7z). The lib* packages are the shared
+# libraries the extracted Onyx AppImage needs at runtime (verified
+# empirically: without them AppRun fails on libGL.so.1 / libfontconfig.so.1).
 RUN apt-get update \
- && apt-get install -y --no-install-recommends p7zip-full \
- && (apt-get install -y --no-install-recommends 7zip || true) \
+ && apt-get install -y --no-install-recommends \
+      p7zip-full \
+      libgl1 libfontconfig1 libxkbcommon0 libdbus-1-3 \
  && (apt-get install -y --no-install-recommends unrar-free || true) \
  && rm -rf /var/lib/apt/lists/*
 
