@@ -65,14 +65,14 @@ deleted not rewritten. **`?`** suffix = genuinely ambiguous, see the note.
 | 50 | `yargExeStatus` | `game:yargExeStatus` | invoke | — | `Promise<{path,autoDetected}>` | main/ipc.ts:258 | delete — same — **removed 2026-08-02** |
 | 51 | `chooseExeFile` | `dialog:chooseExe` | invoke | — | `Promise<string\|null>` | main/ipc.ts:260-278 | delete — picks the CH/YARG executable for the deleted game-launch feature — **removed 2026-08-02** |
 | 52 | `onGameStatus` | `game:status` | on-stream | `cb: (game) => void` | unsubscribe fn | emitted main/ipc.ts:338 (`pollGameInner`) | delete — feeds the deleted game-detection feature, not a portable stream — **removed 2026-08-02** |
-| 53 | `hideOverlay` | `overlay:hide` | send | — | `void` | main/ipc.ts:296 | delete — window control |
+| 53 | `hideOverlay` | `overlay:hide` | send | — | `void` | main/ipc.ts:296 | delete — window control — **removed 2026-08-02** |
 | 54 | `toggleMaximize` | `overlay:toggleMaximize` | send | — | `void` | main/ipc.ts:297 | delete — window control |
 | 55 | `isMaximized` | `overlay:isMaximized` | invoke | — | `Promise<boolean>` | main/ipc.ts:298 | delete — window control |
 | 56 | `onMaximizeChange` | `overlay:maximized` | on-stream | `cb: (max) => void` | unsubscribe fn | emitted main/overlay.ts:145-149 (`sendMax`) | delete — window-control stream |
 | 57 | `quitApp` | `app:quit` | send | — | `void` | main/ipc.ts:299 | delete — desktop app lifecycle |
-| 58 | `pauseHotkeys` | `hotkeys:pause` | send | — | `void` | main/ipc.ts:300 | delete — global hotkeys |
-| 59 | `resumeHotkeys` | `hotkeys:resume` | send | — | `void` | main/ipc.ts:301 | delete — global hotkeys |
-| 60 | `onHotkey` | `hotkey` | on-stream | `cb: (action) => void` | unsubscribe fn | emitter `sendHotkey()` main/hotkeys.ts:37-39 | delete — global-hotkey stream; also dead code today, see Strays §3.3 |
+| 58 | `pauseHotkeys` | `hotkeys:pause` | send | — | `void` | main/ipc.ts:300 | delete — global hotkeys — **removed 2026-08-02** |
+| 59 | `resumeHotkeys` | `hotkeys:resume` | send | — | `void` | main/ipc.ts:301 | delete — global hotkeys — **removed 2026-08-02** |
+| 60 | `onHotkey` | `hotkey` | on-stream | `cb: (action) => void` | unsubscribe fn | emitter `sendHotkey()` main/hotkeys.ts:37-39 | delete — global-hotkey stream; also dead code today, see Strays §3.3 — **removed 2026-08-02** (`main/hotkeys.ts` deleted entirely, along with `main/tray.ts` — its only purpose was toggling this same hide/show behavior) |
 | 61 | `openExternal` | `shell:openExternal` | send | `url` | `void` | main/ipc.ts:302-304 (`shell.openExternal`) | delete — becomes a plain `<a target="_blank">` in the browser, no server round-trip needed |
 | 62 | `downloadUpdate` | `update:download` | invoke | — | `Promise<{ok,...}>` | core/autoupdate.ts:71-78 (win) / 127-130 (mac) | delete — electron-updater |
 | 63 | `installUpdate` | `update:install` | invoke | — | `Promise<void>` | core/autoupdate.ts:79-81 / 131-133 | delete — electron-updater |
