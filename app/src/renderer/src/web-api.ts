@@ -11,7 +11,7 @@
 //   { result } / throw on { error }.
 // - `onJobUpdate`   → shared EventSource('/api/events'), subscribes to the
 //   `jobs:update` event, fans out to registered callbacks.
-// - other `on*` streams (game/update/hotkey/maximize — all `delete`) → no-op
+// - other `on*` streams (game/update/maximize — all `delete`) → no-op
 //   subscribe so mounting components don't crash; returns a matching
 //   unsubscribe function.
 // - `delete`-classified invoke/send methods → throw `<name>: removed in web
@@ -223,14 +223,10 @@ export const webApi: RendererApi = {
   songAudio: (rel: string) => callHttp<SongAudio>('preview:songAudio', [rel]),
 
   // ---- Window-chrome (frameless titlebar) — no BrowserWindow in a tab ----
-  hideOverlay: () => removed('hideOverlay'),
   toggleMaximize: () => removed('toggleMaximize'),
   isMaximized: () => Promise.reject(new Error('isMaximized: removed in web port')),
   onMaximizeChange: (_cb: (max: boolean) => void) => () => {},
   quitApp: () => removed('quitApp'),
-  pauseHotkeys: () => removed('pauseHotkeys'),
-  resumeHotkeys: () => removed('resumeHotkeys'),
-  onHotkey: (_cb: (action: string) => void) => () => {},
 
   // `openExternal` is classified `delete` in the inventory, but only because
   // its Electron implementation (`shell.openExternal`) has no server-side

@@ -8,7 +8,6 @@ import {
 import type { AppConfig } from '../../../shared/types'
 import { useStore } from '../store'
 import { IS_MAC } from '../platform'
-import { HotkeyInput } from './HotkeyInput'
 import { Icon } from './Icon'
 
 // Ukázková píseň pro náhled šablony. Má VYPLNĚNÉ všechny tagy, ať je hned vidět,
@@ -297,38 +296,6 @@ export function Settings(): JSX.Element | null {
             </div>
             <p className="field__hint">
               Stacks on top of Windows display scaling. Preview updates live; click Save to keep it.
-            </p>
-          </fieldset>
-              </section>
-
-              <section className="settings-group">
-                <h3 className="settings-group__title">Overlay</h3>
-          <fieldset className="field">
-            <span>Quick toggle hotkey (optional)</span>
-            <div className="field__row">
-              <label className="hk">
-                <span className="hk__label">
-                  Show / hide window
-                  <span
-                    className="info"
-                    title={`Global hotkey – works even when the game window has focus. Most users don't need it (just ${IS_MAC ? 'Cmd+Tab' : 'Alt+Tab'} to bring the app forward).`}
-                  >
-                    <Icon name="info" size={13} />
-                  </span>
-                </span>
-                <HotkeyInput
-                  value={draft.hotkeys.toggleOverlay}
-                  onChange={(v) =>
-                    setDraft({ ...draft, hotkeys: { ...draft.hotkeys, toggleOverlay: v } })
-                  }
-                />
-              </label>
-            </div>
-            <p className="field__hint">
-              Optional global shortcut to bring the app forward from anywhere. Most users just use{' '}
-              {IS_MAC ? 'Cmd+Tab' : 'Alt+Tab'} — leave it blank to disable. Click the field and press
-              a key or combo (e.g. <code>F10</code> or{' '}
-              <code>{IS_MAC ? '⌘⇧H' : 'Control+Shift+H'}</code>); Backspace clears it.
             </p>
           </fieldset>
               </section>

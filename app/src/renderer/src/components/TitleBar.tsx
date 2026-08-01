@@ -66,13 +66,6 @@ export function TitleBar(): JSX.Element {
         </button>
         <button
           className="titlebar__btn"
-          title="Hide window"
-          onClick={() => window.api.hideOverlay()}
-        >
-          <Icon name="minimize" size={16} />
-        </button>
-        <button
-          className="titlebar__btn"
           title={maximized ? 'Restore window' : 'Maximize window'}
           onClick={() => window.api.toggleMaximize()}
         >
