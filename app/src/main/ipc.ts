@@ -13,16 +13,8 @@ import type {
   SortKey
 } from '../shared/types'
 import { getConfig, setConfig } from './core/config'
-import { isMac } from './core/platform'
 import { search as searchEnchor } from './core/enchor'
 import { peekFileMeta } from './core/filemeta'
-import {
-  bringGameToFront,
-  chExeStatus,
-  runningGame,
-  yargExeStatus
-} from './core/gamedetect'
-import { hideReminder, showReminder } from './reminder'
 import { jobManager } from './core/jobs'
 import { invalidateOwnedIndex, listSongFolders, ownedFolders, ownedSongKeys } from './core/library'
 import {
@@ -57,11 +49,9 @@ import { getSongAudio } from './core/localaudio'
 import { fetchFilterOptions, search as searchRhythmverse } from './core/rhythmverse'
 import { resolveSpotifyPlaylist } from './core/spotify'
 import { getReleaseNotes, getReleaseNotesSince } from './core/update'
-import { registerHotkeys, unregisterHotkeys } from './hotkeys'
-import { applyUiScale, getOverlay, hideOverlay, isMaximized, toggleMaximize } from './overlay'
+import { applyUiScale, getOverlay, isMaximized, toggleMaximize } from './overlay'
 
 let ipcRegistered = false
-let gamePollHandle: NodeJS.Timeout | null = null
 
 export function registerIpc(): void {
   if (ipcRegistered) return
@@ -208,7 +198,6 @@ export function registerIpc(): void {
   ipcMain.handle('config:set', (_e, patch) => {
     const prevSongsDir = getConfig().songsDir
     const next = setConfig(patch)
-    registerHotkeys() // hotkeys se mohly změnit
     applyUiScale(next.uiScale) // sjednoť zoom s uloženou hodnotou
     if (next.songsDir !== prevSongsDir) {
       // Jiná knihovna → starý index i „už mám" cache neplatí (jinak by se
@@ -250,33 +239,6 @@ export function registerIpc(): void {
     return { path, name }
   })
 
-  ipcMain.handle('game:running', () => runningGame())
-  ipcMain.handle('game:bringToFront', (_e, prefer?: 'clone-hero' | 'yarg') =>
-    bringGameToFront(prefer)
-  )
-  ipcMain.handle('game:chExeStatus', () => chExeStatus())
-  ipcMain.handle('game:yargExeStatus', () => yargExeStatus())
-
-  ipcMain.handle('dialog:chooseExe', async () => {
-    const win = getOverlay() ?? undefined
-    const res = await dialog.showOpenDialog(win as BrowserWindow, {
-      title: isMac ? 'Select Clone Hero.app' : 'Select Clone Hero.exe',
-      // macOS: .app je „package" (bundle) → openFile ho vybrat umí; nabídneme
-      // i openDirectory pro jistotu. Windows zůstává na výběru .exe.
-      properties: isMac ? ['openFile', 'openDirectory'] : ['openFile'],
-      filters: isMac
-        ? [
-            { name: 'Application', extensions: ['app'] },
-            { name: 'All files', extensions: ['*'] }
-          ]
-        : [
-            { name: 'Executable', extensions: ['exe'] },
-            { name: 'All files', extensions: ['*'] }
-          ]
-    })
-    return res.canceled || res.filePaths.length === 0 ? null : res.filePaths[0]
-  })
-
   ipcMain.handle('file:peekMeta', (_e, path: string) => peekFileMeta(path))
 
   // Rozbalí bit.ly/tinyurl/… shortlink na finální URL — slouží jen pro UI label
@@ -293,12 +255,9 @@ export function registerIpc(): void {
   // Import playlistu (v1: veřejný Spotify přes embed, bez API klíče).
   ipcMain.handle('playlist:resolve', (_e, url: string) => resolveSpotifyPlaylist(url))
 
-  ipcMain.on('overlay:hide', () => hideOverlay())
   ipcMain.on('overlay:toggleMaximize', () => toggleMaximize())
   ipcMain.handle('overlay:isMaximized', () => isMaximized())
   ipcMain.on('app:quit', () => app.quit())
-  ipcMain.on('hotkeys:pause', () => unregisterHotkeys())
-  ipcMain.on('hotkeys:resume', () => registerHotkeys())
   ipcMain.on('shell:openExternal', (_e, url: string) => {
     if (typeof url === 'string' && /^https?:\/\//.test(url)) shell.openExternal(url)
   })
@@ -312,55 +271,4 @@ export function registerIpc(): void {
   jobManager.on('update', (job) => {
     getOverlay()?.webContents.send('jobs:update', job)
   })
-
-  // Polling stavu her — vysílá změny rendereru + řídí reminder pill.
-  // Status je teď 'clone-hero' | 'yarg' | null — pill se zobrazí pro JAKOUKOLI hru.
-  let lastRunning: string | null | 'init' = 'init'
-  // Zábrana překryvu: `runningGame()` spouští až dvě `tasklist` volání (timeout
-  // 2,5 s každé). Když je systém zatížený a jeden poll trvá déle než 3 s interval,
-  // bez tohohle by se `tasklist` procesy stohovaly. Necháme běžet jen jeden poll.
-  let pollInFlight = false
-  const pollGame = async (): Promise<void> => {
-    if (pollInFlight) return
-    pollInFlight = true
-    try {
-      await pollGameInner()
-    } finally {
-      pollInFlight = false
-    }
-  }
-  const pollGameInner = async (): Promise<void> => {
-    const running = await runningGame()
-    if (running !== lastRunning) {
-      const wasNone = lastRunning === null || lastRunning === 'init'
-      const isNow = running !== null
-      lastRunning = running
-      getOverlay()?.webContents.send('game:status', running)
-
-      if (isNow && wasNone) {
-        // Hra se právě spustila → reminder pill (pokud opt-in a okno neni v popředí).
-        const main = getOverlay()
-        if (!main || !main.isVisible() || !main.isFocused()) {
-          showReminder()
-        }
-      } else if (!isNow && !wasNone) {
-        // Žádná hra už neběží → skrýt pill.
-        hideReminder()
-      }
-    }
-  }
-  // První poll ODLOŽ o ~1,2 s — spouští `tasklist` procesy, které by hned na
-  // startu konkurovaly CPU při náběhu okna. Herní stav se tak zjistí o chvíli
-  // později (zanedbatelné), ale launch je plynulejší.
-  setTimeout(() => void pollGame(), 1200)
-  if (gamePollHandle) clearInterval(gamePollHandle)
-  gamePollHandle = setInterval(pollGame, 3000)
-}
-
-/** Zastaví periodické dotazování na běžící hru (volá se při quitu). */
-export function stopGamePoll(): void {
-  if (gamePollHandle) {
-    clearInterval(gamePollHandle)
-    gamePollHandle = null
-  }
 }

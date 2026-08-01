@@ -295,11 +295,6 @@ export function App(): JSX.Element {
       .getJobs()
       .then((js) => js.forEach(applyJobUpdate))
       .catch(() => {})
-    const offHotkey = window.api.onHotkey((action) => {
-      if (action === 'focus-search') {
-        ;(document.querySelector('.searchbar input') as HTMLInputElement)?.focus()
-      }
-    })
     // Default v Electron rendereru je otevřít drop file ve výchozím prohlížeči — zabit.
     const stopDrag = (e: DragEvent): void => e.preventDefault()
     window.addEventListener('dragover', stopDrag)
@@ -312,7 +307,6 @@ export function App(): JSX.Element {
     document.addEventListener('visibilitychange', onVis)
     return () => {
       offJob()
-      offHotkey()
       window.removeEventListener('dragover', stopDrag)
       window.removeEventListener('drop', stopDrag)
       document.removeEventListener('visibilitychange', onVis)
@@ -373,7 +367,7 @@ export function App(): JSX.Element {
           // škála zůstala aplikovaná až do restartu).
           void window.api.setUiScale(st.config?.uiScale ?? 1)
           st.setShowSettings(false)
-        } else window.api.hideOverlay()
+        }
         return
       }
       // Otevřené Nastavení/Správce/What's new/Import/About: nech projít jen Escape (výše), nenaviguj.

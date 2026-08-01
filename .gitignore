@@ -36,3 +36,10 @@ how it works video/
 
 # Náhodné screenshoty
 pages/Screenshot*.png
+
+# Web server workspace (Phase 2)
+server/node_modules/
+server/dist/
+server/src/gen/
+server/data/
+server/.env

@@ -148,8 +148,6 @@ function defaults(): AppConfig {
     songsDir: detectSongsDir(),
     c3BinDir: detect7zDir(),
     onyxPath: detectOnyxPath(),
-    chExePath: '', // auto-detekce z songsDir
-    yargExePath: '', // auto-detekce v běžných YARG instalech
     recordsPerPage: 25,
     // Default 1.0 (= 100 %). Historicky bylo 1.2 kvůli 4K @ 125 %, ale na malých
     // obrazovkách (notebook 1366×768 / 1920×1080 s vyšším Windows scaling) se
@@ -160,14 +158,7 @@ function defaults(): AppConfig {
     // působí o kus větší. Default 0.9 UI na Macu srovná pocitovou velikost.
     // (Uložená hodnota uživatele má přednost přes `{...def, ...parsed}` níž.)
     uiScale: isMac ? 0.9 : 1.0,
-    hotkeys: {
-      // Show / hide window — rychlý toggle. Na macu Command+I (nativní modifikátor),
-      // na Windows Control+I. Nepřekrývá běžné herní bindings v CH.
-      toggleOverlay: isMac ? 'Command+I' : 'Control+I'
-    },
     showTips: true, // rotující tipy v liště (uživatel může vypnout)
-    showReminder: false, // opt-in
-    reminderPosition: 'bottom-right',
     dupMoveDir: '', // poslední karanténní složka pro duplicity
     // Šablona složky chartu — výchozí hodnota je PŘESNĚ ten formát, který byl do
     // 0.9.6 natvrdo v `install()`, a auto je vypnuté → kdo si nic nenastaví, má
@@ -185,7 +176,7 @@ export function getConfig(): AppConfig {
   try {
     const raw = readFileSync(configPath(), 'utf-8')
     const parsed = JSON.parse(raw)
-    result = { ...def, ...parsed, hotkeys: { ...def.hotkeys, ...parsed.hotkeys } }
+    result = { ...def, ...parsed }
     // Nástroje (onyx, 7z) jsou přibalené → přibalená/detekovaná cesta má VŽDY
     // přednost před uloženou (jinak by stará cesta na 7-Zip 9.20 přebíjela
     // moderní 7-Zip). Uloženou cestu použijeme jen když detekce selže.
@@ -202,8 +193,7 @@ export function setConfig(patch: Partial<AppConfig>): AppConfig {
   const current = getConfig()
   const next: AppConfig = {
     ...current,
-    ...patch,
-    hotkeys: { ...current.hotkeys, ...(patch.hotkeys ?? {}) }
+    ...patch
   }
   cached = next
   const dir = app.getPath('userData')

@@ -2,9 +2,18 @@
 // (do koše), přesun a kopírování. Vše je bezpečně omezené na songsDir.
 
 import { shell } from 'electron'
-import { cpSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'fs'
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  statSync
+} from 'fs'
 import { readdir } from 'fs/promises'
-import { basename, extname, join, resolve, sep } from 'path'
+import { basename, dirname, extname, join, resolve, sep } from 'path'
 import { getConfig } from './config'
 import { readAlbumArt, readSongInfo, readSongMeta, writeSongMeta } from './songmeta'
 import {
@@ -40,11 +49,46 @@ function rootDir(): string {
   return resolve(getConfig().songsDir)
 }
 
-/** Bezpečně převede relativní cestu na absolutní uvnitř songsDir. */
+/**
+ * Real (symlink-resolved) path of the deepest existing ancestor of `p`. For a
+ * path that exists this is just its realpath; for one that doesn't (e.g. a
+ * new folder about to be created) it walks up until it finds an ancestor
+ * that does, so creation flows keep working.
+ */
+function realExistingAncestor(p: string): string {
+  let cur = p
+  for (;;) {
+    try {
+      return realpathSync(cur)
+    } catch {
+      const parent = dirname(cur)
+      if (parent === cur) return cur
+      cur = parent
+    }
+  }
+}
+
+/**
+ * Bezpečně převede relativní cestu na absolutní uvnitř songsDir.
+ *
+ * Two checks, not one: the lexical `resolve()`/`startsWith` check below
+ * blocks `../` and absolute-path escapes, but it never touches the
+ * filesystem — a symlink physically sitting inside songsDir that points
+ * outside of it (e.g. `Songs/evil -> /etc`) would pass that check while
+ * every real fs call (readdir/stat/read/write) still follows the symlink out.
+ * The second check resolves symlinks (`realpathSync`) on the deepest existing
+ * ancestor and re-validates containment against the library root's own real
+ * path, so a symlink escape is rejected exactly like a `../` escape is.
+ */
 function safeAbs(rel: string): string {
   const base = rootDir()
   const abs = resolve(base, rel || '.')
   if (abs !== base && !abs.startsWith(base + sep)) {
+    throw new Error('Path is outside the Songs library')
+  }
+  const realBase = realExistingAncestor(base)
+  const realAbs = realExistingAncestor(abs)
+  if (realAbs !== realBase && !realAbs.startsWith(realBase + sep)) {
     throw new Error('Path is outside the Songs library')
   }
   return abs

@@ -161,30 +161,6 @@ const api = {
   songAudio: (rel: string) =>
     ipcRenderer.invoke('preview:songAudio', rel) as Promise<SongAudio>,
 
-  runningGame: () =>
-    ipcRenderer.invoke('game:running') as Promise<'clone-hero' | 'yarg' | null>,
-  bringGameToFront: (prefer?: 'clone-hero' | 'yarg') =>
-    ipcRenderer.invoke('game:bringToFront', prefer) as Promise<
-      { ok: true; game?: 'clone-hero' | 'yarg' } | { ok: false; error: string }
-    >,
-  chExeStatus: () =>
-    ipcRenderer.invoke('game:chExeStatus') as Promise<{
-      path: string | null
-      autoDetected: boolean
-    }>,
-  yargExeStatus: () =>
-    ipcRenderer.invoke('game:yargExeStatus') as Promise<{
-      path: string | null
-      autoDetected: boolean
-    }>,
-  chooseExeFile: () => ipcRenderer.invoke('dialog:chooseExe') as Promise<string | null>,
-  onGameStatus: (cb: (game: 'clone-hero' | 'yarg' | null) => void) => {
-    const handler = (_e: unknown, game: 'clone-hero' | 'yarg' | null): void => cb(game)
-    ipcRenderer.on('game:status', handler)
-    return () => ipcRenderer.removeListener('game:status', handler)
-  },
-
-  hideOverlay: () => ipcRenderer.send('overlay:hide'),
   toggleMaximize: () => ipcRenderer.send('overlay:toggleMaximize'),
   isMaximized: () => ipcRenderer.invoke('overlay:isMaximized') as Promise<boolean>,
   onMaximizeChange: (cb: (max: boolean) => void) => {
@@ -193,14 +169,6 @@ const api = {
     return () => ipcRenderer.removeListener('overlay:maximized', handler)
   },
   quitApp: () => ipcRenderer.send('app:quit'),
-  pauseHotkeys: () => ipcRenderer.send('hotkeys:pause'),
-  resumeHotkeys: () => ipcRenderer.send('hotkeys:resume'),
-
-  onHotkey: (cb: (action: string) => void) => {
-    const handler = (_e: unknown, action: string) => cb(action)
-    ipcRenderer.on('hotkey', handler)
-    return () => ipcRenderer.removeListener('hotkey', handler)
-  },
 
   openExternal: (url: string) => ipcRenderer.send('shell:openExternal', url),
 

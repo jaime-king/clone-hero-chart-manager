@@ -131,72 +131,6 @@ body {
   justify-self: end;
 }
 
-/* Tlačítko Launch / Switch to Clone Hero */
-.gamebtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  background: var(--panel);
-  border: 1px solid var(--border-strong);
-  color: var(--text-dim);
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-family: var(--font-display);
-  font-size: 12.5px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.16s, border-color 0.16s, color 0.16s, transform 0.05s,
-    box-shadow 0.18s;
-}
-.gamebtn:hover:not(:disabled) {
-  background: var(--panel-hover);
-  border-color: var(--accent);
-  color: var(--text);
-}
-.gamebtn:active:not(:disabled) {
-  transform: translateY(1px);
-}
-.gamebtn--running {
-  background: linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(45, 212, 191, 0.1));
-  border-color: rgba(45, 212, 191, 0.65);
-  color: #d6fff7;
-  box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.25), 0 8px 22px rgba(45, 212, 191, 0.18);
-}
-.gamebtn--running:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(45, 212, 191, 0.3), rgba(45, 212, 191, 0.16));
-  border-color: rgba(45, 212, 191, 0.85);
-  color: #fff;
-}
-.gamebtn--busy {
-  opacity: 0.7;
-}
-.gamebtn__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
-  flex-shrink: 0;
-}
-.gamebtn__dot--on {
-  background: #2dd4bf;
-  box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.22);
-  animation: gamePulse 1.6s ease-in-out infinite;
-}
-.gamebtn__label {
-  white-space: nowrap;
-  letter-spacing: 0.2px;
-}
-@keyframes gamePulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.55);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(45, 212, 191, 0);
-  }
-}
 .titlebar__brand {
   position: relative;
   display: flex;
@@ -2951,25 +2885,6 @@ body {
   text-transform: uppercase;
   color: var(--text-faint);
 }
-.hk {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  flex: 1;
-  font-size: 11.5px;
-}
-.hk__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.hotkey-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
 /* ---------- Checkbox row v Settings ---------- */
 .check {
   display: inline-flex;
@@ -3035,21 +2950,6 @@ body {
 /* Dropdown pozice — širší než default 50px, ať se vejde "Bottom-right" */
 .dd--pos .dd__btn {
   min-width: 150px;
-}
-.hotkey-input {
-  cursor: pointer;
-  caret-color: transparent;
-}
-.hotkey-input--invalid {
-  border-color: var(--warn) !important;
-  background: rgba(255, 107, 107, 0.08) !important;
-  color: var(--warn) !important;
-}
-.hotkey-warn {
-  margin: 0;
-  font-size: 11px;
-  color: var(--warn);
-  line-height: 1.35;
 }
 .modal__foot {
   display: flex;
@@ -4780,50 +4680,6 @@ body {
 .sidebar button {
   -webkit-app-region: no-drag;
 }
-.side-launchers {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.side-launch {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 44px;
-  padding: 0 12px;
-  border-radius: 11px;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.025);
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-  text-align: left;
-  transition: background 0.15s, border-color 0.15s;
-}
-.side-launch:hover:not(:disabled) {
-  background: rgba(var(--accent-rgb), 0.12);
-  border-color: rgba(var(--accent-rgb), 0.45);
-}
-.side-launch:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-.side-launch--running {
-  border-color: rgba(45, 214, 192, 0.45);
-}
-.side-launch__logo {
-  height: 22px;
-  width: 30px;
-  object-fit: contain;
-  flex-shrink: 0;
-  -webkit-user-drag: none;
-}
-.side-launch span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 .side-group {
   display: flex;
@@ -5599,15 +5455,6 @@ body {
 .sidebar {
   padding: 18px 14px;
 }
-.side-launch {
-  height: 48px;
-  font-size: 13.5px;
-  border-radius: 12px;
-}
-.side-launch__logo {
-  height: 24px;
-  width: 34px;
-}
 .side-label {
   font-size: 11px;
 }
@@ -5822,15 +5669,6 @@ body {
   padding: 16px 16px;
 }
 
-/* Launch tlačítka: BEZ ohraničení, jen lehký gradient (zapadají mezi ploché tlačítka). */
-.side-launch {
-  background: linear-gradient(180deg, rgba(90, 131, 255, 0.14) 0%, rgba(90, 131, 255, 0.035) 100%);
-  border: none;
-}
-.side-launch:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(90, 131, 255, 0.24) 0%, rgba(90, 131, 255, 0.08) 100%);
-}
-
 /* Label nad zapuštěným seznamem (jako „Style"/„Size" v náhledu) — jen text,
    bez čáry; skupinu vizuálně drží samotný „důlek" pod ním. */
 .side-label {
@@ -5853,10 +5691,8 @@ body {
   gap: 8px;
 }
 
-/* Obsah sidebaru odsazený od horního okraje tak, aby horní hrana tlačítka
-   „Launch Clone Hero" lícovala s horní hranou textu „Chart Manager". */
 .sidebar {
-  padding-top: 22px; /* launchery mírně od horního okraje */
+  padding-top: 22px;
 }
 
 /* Spodní lišta (pager) bez horní oddělovací čáry. */
@@ -5995,24 +5831,6 @@ body {
   border-radius: var(--r-md);
 }
 
-/* Launch tlačítka — každé svůj gradient (dle náhledu):
-   Clone Hero = sytě modrý diagonální, YARG = tlumený šedomodrý. Bez borderu. */
-.side-launch--clone-hero {
-  background: linear-gradient(135deg, #3d5ed6 0%, #16255a 100%);
-  color: #fff;
-}
-.side-launch--clone-hero:hover:not(:disabled) {
-  background: linear-gradient(135deg, #4869e4 0%, #1b2e6c 100%);
-}
-.side-launch--yarg {
-  background: linear-gradient(135deg, #3a4258 0%, #1d2334 100%);
-  color: var(--text-dim);
-}
-.side-launch--yarg:hover:not(:disabled) {
-  background: linear-gradient(135deg, #454e68 0%, #232a40 100%);
-  color: var(--text);
-}
-
 /* Tenčí search bar (byl zbytečně vysoký). */
 .content .searchbar__row--input {
   padding: 7px;
@@ -6126,62 +5944,15 @@ body {
   background: rgba(var(--accent-rgb), 0.14);
 }
 
-/* ── Běžící hra: zelený gradient + obíhající zelený okraj ──
-   Aktivní launch tlačítko (side-launch--running) dostane zelený podklad
-   a po obvodu obíhá světle zelený „paprsek" (rotující conic-gradient
-   maskovaný jen na 2px okraj). Přebíjí modrý/šedý gradient tlačítek. */
+/* Obíhající úhel pro conic-gradient border (viz .side-update-card--live níže). */
 @property --runangle {
   syntax: '<angle>';
   inherits: false;
   initial-value: 0deg;
 }
-.side-launch--running {
-  position: relative;
-  background: linear-gradient(135deg, #1f9a5f 0%, #0b3f28 100%);
-  color: #fff;
-  box-shadow: 0 0 16px rgba(52, 211, 130, 0.22);
-}
-.side-launch--running:hover:not(:disabled) {
-  background: linear-gradient(135deg, #24a869 0%, #0e4a30 100%);
-}
-/* Obsah (logo + text) nad obíhajícím okrajem. */
-.side-launch--running > * {
-  position: relative;
-  z-index: 1;
-}
-.side-launch--running::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 2px; /* tloušťka obíhajícího okraje */
-  background: conic-gradient(
-    from var(--runangle),
-    rgba(52, 211, 130, 0) 0deg,
-    rgba(52, 211, 130, 0) 230deg,
-    #34d382 290deg,
-    #b6ffdb 320deg,
-    #34d382 350deg,
-    rgba(52, 211, 130, 0) 360deg
-  );
-  /* Ukázat jen okraj (padding-box XOR content-box). */
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  animation: runBorder 2.6s linear infinite;
-  pointer-events: none;
-}
 @keyframes runBorder {
   to {
     --runangle: 360deg;
-  }
-}
-/* Omezený pohyb: statický zelený okraj, žádné obíhání. */
-@media (prefers-reduced-motion: reduce) {
-  .side-launch--running::before {
-    animation: none;
-    background: linear-gradient(90deg, #34d382, #b6ffdb);
   }
 }
 
@@ -6446,7 +6217,6 @@ body {
    Custom tlačítka/položky měly jen slabý defaultní ring na tmavém pozadí.
    :focus-visible se ukáže jen při ovládání klávesnicí, ne po kliknutí myší. */
 .side-item:focus-visible,
-.side-launch:focus-visible,
 .side-update:focus-visible,
 .side-update-card__btn:focus-visible,
 .suggest__item:focus-visible,
@@ -6635,24 +6405,6 @@ body {
 }
 [data-theme='graphite'] .suggest {
   background: linear-gradient(180deg, #1b1c20 0%, #141517 100%);
-}
-
-/* Launch tlačítka → grafitové vyvýšené pilulky. */
-[data-theme='graphite'] .side-launch--clone-hero {
-  background: linear-gradient(180deg, #26272c 0%, #1a1b1e 100%);
-  color: var(--text);
-}
-[data-theme='graphite'] .side-launch--clone-hero:hover:not(:disabled) {
-  background: linear-gradient(180deg, #2d2e33 0%, #202126 100%);
-}
-[data-theme='graphite'] .side-launch--yarg {
-  /* Sjednoceno s Clone Hero — dřív byl YARG o odstín tmavší. */
-  background: linear-gradient(180deg, #26272c 0%, #1a1b1e 100%);
-  color: var(--text);
-}
-[data-theme='graphite'] .side-launch--yarg:hover:not(:disabled) {
-  background: linear-gradient(180deg, #2d2e33 0%, #202126 100%);
-  color: var(--text);
 }
 
 /* Primární tlačítka → světlá pilulka s tmavým textem (typický „graphite" tah). */
@@ -6891,13 +6643,6 @@ body {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
-/* Launch tlačítka — výraznější vyvýšení. */
-[data-theme='graphite'] .side-launch {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.5),
-    0 8px 20px rgba(0, 0, 0, 0.35) !important;
-  border: 1px solid rgba(0, 0, 0, 0.35);
-}
-
 /* Vybraná položka v sidebaru + klouzavý indikátor — jemně vyvýšené. */
 [data-theme='graphite'] .side-indicator {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 6px rgba(0, 0, 0, 0.4);
@@ -6952,16 +6697,6 @@ body {
 [data-theme='graphite'] .filterbar__label,
 [data-theme='graphite'] .modal__head h2 {
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
-}
-
-/* Běžící hra: zelené pozadí + zelený obíhající okraj i v grafitu (grafitový
-   override .side-launch--clone-hero/yarg by jinak zelené pozadí přebil). */
-[data-theme='graphite'] .side-launch--running {
-  background: linear-gradient(135deg, #1f9a5f 0%, #0b3f28 100%);
-  color: #fff;
-}
-[data-theme='graphite'] .side-launch--running:hover:not(:disabled) {
-  background: linear-gradient(135deg, #24a869 0%, #0e4a30 100%);
 }
 
 /* ── „In library" badge = klikací (odhal složku) + popover pro duplikáty ── */
@@ -7021,23 +6756,6 @@ button.badge--owned:hover {
 }
 .libpop__item:hover {
   background: var(--panel-hover);
-}
-
-/* ── Launcher bez cesty k exe (nelze spustit) ──
-   Ztlumené + varovná ikona vpravo. Opacity funguje přes jakýkoli gradient/motiv,
-   takže netřeba přebíjet pozadí. Klik otevře Nastavení (nastavit cestu). */
-.side-launch--missing {
-  opacity: 0.5;
-}
-.side-launch--missing:hover:not(:disabled) {
-  opacity: 0.72;
-}
-.side-launch__warn {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  color: var(--warn);
-  flex-shrink: 0;
 }
 
 /* ── Library Manager: banner „N kopií" (duplikáty z „In library") ── */
@@ -7692,48 +7410,6 @@ button.plrow__na:hover {
   font-size: 12.5px;
   font-weight: 700;
   color: var(--text);
-}
-
-/* ════════════════════════════════════════════════════════════════════════
-   Launchery her — dva ČTVERCOVÉ logo-buttony vedle sebe (v tlačítku jen logo),
-   krátký popisek POD čtvercem. Přepisuje starší sloupcové launchery výše.
-   ════════════════════════════════════════════════════════════════════════ */
-.side-launchers {
-  flex-direction: row; /* base bylo column */
-  gap: 10px;
-}
-.side-launch {
-  flex: 1;
-  min-width: 0;
-  position: relative;
-  height: 66px; /* čtvercovější, jen logo */
-  padding: 0;
-  justify-content: center;
-  gap: 0;
-  border: none; /* gradientové launchery jsou bez rámečku (base .side-launch ho má) */
-}
-.side-launch__logo {
-  height: 30px;
-  width: auto;
-  /* Jemný „pop" při hoveru — lehké přestřelení (bounce) přes cubic-bezier. */
-  transition: transform 0.2s cubic-bezier(0.34, 1.7, 0.5, 1);
-}
-.side-launch:hover:not(:disabled) .side-launch__logo {
-  transform: scale(1.1);
-}
-.side-launch:active:not(:disabled) .side-launch__logo {
-  transform: scale(1.04); /* při stisku se lehce zmáčkne zpátky */
-}
-/* Logo Clone Hero je opticky menší (kompaktnější tvar) → o kousek zvětšit. */
-.side-launch--clone-hero .side-launch__logo {
-  height: 38px;
-}
-/* Varovná ikona (chybí exe) do rohu čtverce místo doprava od textu. */
-.side-launch--missing .side-launch__warn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  margin: 0;
 }
 
 /* Jemná dělící čára mezi sekcemi sidebaru (launchery | DATABASE, SYSTEM | akce).
