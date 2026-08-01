@@ -13,9 +13,9 @@
 // pouští VÝHRADNĚ audio soubory zevnitř složky s knihovnou (viz `isAllowed`).
 
 import { protocol } from 'electron'
-import { createReadStream } from 'fs'
+import { createReadStream, realpathSync } from 'fs'
 import { readdir, readFile, stat } from 'fs/promises'
-import { extname, join, resolve, sep } from 'path'
+import { dirname, extname, join, resolve, sep } from 'path'
 import { Readable } from 'stream'
 import type { SongAudio } from '../../shared/types'
 import { getConfig } from './config'
@@ -59,6 +59,32 @@ export function audioUrl(absPath: string): string {
 }
 
 /**
+ * Real (symlink-resolved) path of the deepest existing ancestor of `p`. See
+ * the identical helper + rationale in `librarymgr.ts`'s `safeAbs`: a lexical
+ * `startsWith` check alone doesn't catch a symlink that sits inside the
+ * library but points outside it.
+ */
+function realExistingAncestor(p: string): string {
+  let cur = p
+  for (;;) {
+    try {
+      return realpathSync(cur)
+    } catch {
+      const parent = dirname(cur)
+      if (parent === cur) return cur
+      cur = parent
+    }
+  }
+}
+
+function insideLibrary(base: string, target: string): boolean {
+  if (target !== base && !target.startsWith(base.endsWith(sep) ? base : base + sep)) return false
+  const realBase = realExistingAncestor(base)
+  const realTarget = realExistingAncestor(target)
+  return realTarget === realBase || realTarget.startsWith(realBase + sep)
+}
+
+/**
  * Pustí ven jen audio soubory ležící UVNITŘ složky s knihovnou. Bez téhle
  * kontroly by stránka mohla přes vlastní schéma číst libovolný soubor na disku.
  */
@@ -68,20 +94,20 @@ function isAllowed(absPath: string): boolean {
   if (!root) return false
   const base = resolve(root)
   const target = resolve(absPath)
-  // `sep` na konci: jinak by „…/Songs2" prošlo jako podsložka „…/Songs".
-  return target === base || target.startsWith(base.endsWith(sep) ? base : base + sep)
+  return insideLibrary(base, target)
 }
 
 /**
  * Relativní cesta ke složce písně → absolutní, s kontrolou, že nevede ven
- * z knihovny (stejná ochrana jako `safeAbs` v `librarymgr`).
+ * z knihovny (stejná ochrana jako `safeAbs` v `librarymgr`, včetně
+ * symlink-realpath kontroly).
  */
 function songFolderAbs(rel: string): string {
   const root = getConfig().songsDir
   if (!root) throw new Error('Songs library is not set')
   const base = resolve(root)
   const abs = resolve(base, rel || '.')
-  if (abs !== base && !abs.startsWith(base + sep)) {
+  if (!insideLibrary(base, abs)) {
     throw new Error('Path is outside the Songs library')
   }
   return abs
