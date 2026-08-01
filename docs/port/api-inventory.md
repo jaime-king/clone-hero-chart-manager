@@ -59,12 +59,12 @@ deleted not rewritten. **`?`** suffix = genuinely ambiguous, see the note.
 | 44 | `resolveUrl` | `url:resolve` | invoke | `url` | `Promise<string>` | main/ipc.ts:284-291 | http |
 | 45 | `preview` | `preview:get` | invoke | `artist, title` | `Promise<PreviewResult>` | main/ipc.ts:142 | http |
 | 46 | `songAudio` | `preview:songAudio` | invoke | `rel` | `Promise<SongAudio>` | main/ipc.ts:144 | http (metadata call; actual audio bytes move to the Phase 5 `GET /api/audio` range endpoint) |
-| 47 | `runningGame` | `game:running` | invoke | — | `Promise<'clone-hero'\|'yarg'\|null>` | main/ipc.ts:253 → core/gamedetect.ts | delete — desktop process detection, no server-side meaning |
-| 48 | `bringGameToFront` | `game:bringToFront` | invoke | `prefer?` | `Promise<{ok,...}>` | main/ipc.ts:254-256 | delete — focuses a local desktop window |
-| 49 | `chExeStatus` | `game:chExeStatus` | invoke | — | `Promise<{path,autoDetected}>` | main/ipc.ts:257 | delete — desktop exe-path detection |
-| 50 | `yargExeStatus` | `game:yargExeStatus` | invoke | — | `Promise<{path,autoDetected}>` | main/ipc.ts:258 | delete — same |
-| 51 | `chooseExeFile` | `dialog:chooseExe` | invoke | — | `Promise<string\|null>` | main/ipc.ts:260-278 | delete — picks the CH/YARG executable for the deleted game-launch feature |
-| 52 | `onGameStatus` | `game:status` | on-stream | `cb: (game) => void` | unsubscribe fn | emitted main/ipc.ts:338 (`pollGameInner`) | delete — feeds the deleted game-detection feature, not a portable stream |
+| 47 | `runningGame` | `game:running` | invoke | — | `Promise<'clone-hero'\|'yarg'\|null>` | main/ipc.ts:253 → core/gamedetect.ts | delete — desktop process detection, no server-side meaning — **removed 2026-08-02** |
+| 48 | `bringGameToFront` | `game:bringToFront` | invoke | `prefer?` | `Promise<{ok,...}>` | main/ipc.ts:254-256 | delete — focuses a local desktop window — **removed 2026-08-02** |
+| 49 | `chExeStatus` | `game:chExeStatus` | invoke | — | `Promise<{path,autoDetected}>` | main/ipc.ts:257 | delete — desktop exe-path detection — **removed 2026-08-02** |
+| 50 | `yargExeStatus` | `game:yargExeStatus` | invoke | — | `Promise<{path,autoDetected}>` | main/ipc.ts:258 | delete — same — **removed 2026-08-02** |
+| 51 | `chooseExeFile` | `dialog:chooseExe` | invoke | — | `Promise<string\|null>` | main/ipc.ts:260-278 | delete — picks the CH/YARG executable for the deleted game-launch feature — **removed 2026-08-02** |
+| 52 | `onGameStatus` | `game:status` | on-stream | `cb: (game) => void` | unsubscribe fn | emitted main/ipc.ts:338 (`pollGameInner`) | delete — feeds the deleted game-detection feature, not a portable stream — **removed 2026-08-02** |
 | 53 | `hideOverlay` | `overlay:hide` | send | — | `void` | main/ipc.ts:296 | delete — window control |
 | 54 | `toggleMaximize` | `overlay:toggleMaximize` | send | — | `void` | main/ipc.ts:297 | delete — window control |
 | 55 | `isMaximized` | `overlay:isMaximized` | invoke | — | `Promise<boolean>` | main/ipc.ts:298 | delete — window control |
@@ -98,7 +98,7 @@ deleted not rewritten. **`?`** suffix = genuinely ambiguous, see the note.
 | `extractor.ts` | keep | No electron import. Uses `config.ts` (shimmed) + `proc.ts` to invoke the 7z binary. |
 | `filemeta.ts` | keep | No electron import. |
 | `filetype.ts` | keep | No electron import. |
-| `gamedetect.ts` | delete | No electron import at all, but implements OS process detection (Clone Hero/YARG running-process probing) and window-focus bring-to-front for a local game — a desktop-only feature with no server-side meaning. Every `game:*` channel it backs is `delete` in Table 1. |
+| `gamedetect.ts` | delete | No electron import at all, but implements OS process detection (Clone Hero/YARG running-process probing) and window-focus bring-to-front for a local game — a desktop-only feature with no server-side meaning. Every `game:*` channel it backs is `delete` in Table 1. **File removed 2026-08-02**, along with its two callers in `main/overlay.ts` (`toggleOverlay`/`hideOverlay`'s game-focus-restore branches) and the `game:*`/`dialog:chooseExe` registrations + poll loop in `main/ipc.ts`. The `chExePath`/`yargExePath` `AppConfig` fields it read were dropped from `shared/types.ts`, `main/core/config.ts` and `server/src/config.ts`. The now-unreachable "reminder pill" feature (`main/reminder.ts`, `showReminder`/`reminderPosition` config, and its Settings UI section) was removed in the same pass — its only trigger points were inside the deleted game-detection poll/focus-restore code. |
 | `gameformats.ts` | keep | No electron import. |
 | `jobs.ts` | keep | No electron import. This is the core, portable download→extract→convert→install queue — the feature the whole port exists for. It emits a plain Node `EventEmitter` `'update'` event, bridged to `webContents.send('jobs:update', ...)` in `main/ipc.ts:312-314`; only that one bridging line moves (to the Phase 4 SSE bus), `jobs.ts` itself is untouched. |
 | `library.ts` | keep | No electron import. |
