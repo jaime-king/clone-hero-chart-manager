@@ -49,8 +49,7 @@ import { getSongAudio } from './core/localaudio'
 import { fetchFilterOptions, search as searchRhythmverse } from './core/rhythmverse'
 import { resolveSpotifyPlaylist } from './core/spotify'
 import { getReleaseNotes, getReleaseNotesSince } from './core/update'
-import { registerHotkeys, unregisterHotkeys } from './hotkeys'
-import { applyUiScale, getOverlay, hideOverlay, isMaximized, toggleMaximize } from './overlay'
+import { applyUiScale, getOverlay, isMaximized, toggleMaximize } from './overlay'
 
 let ipcRegistered = false
 
@@ -199,7 +198,6 @@ export function registerIpc(): void {
   ipcMain.handle('config:set', (_e, patch) => {
     const prevSongsDir = getConfig().songsDir
     const next = setConfig(patch)
-    registerHotkeys() // hotkeys se mohly změnit
     applyUiScale(next.uiScale) // sjednoť zoom s uloženou hodnotou
     if (next.songsDir !== prevSongsDir) {
       // Jiná knihovna → starý index i „už mám" cache neplatí (jinak by se
@@ -257,12 +255,9 @@ export function registerIpc(): void {
   // Import playlistu (v1: veřejný Spotify přes embed, bez API klíče).
   ipcMain.handle('playlist:resolve', (_e, url: string) => resolveSpotifyPlaylist(url))
 
-  ipcMain.on('overlay:hide', () => hideOverlay())
   ipcMain.on('overlay:toggleMaximize', () => toggleMaximize())
   ipcMain.handle('overlay:isMaximized', () => isMaximized())
   ipcMain.on('app:quit', () => app.quit())
-  ipcMain.on('hotkeys:pause', () => unregisterHotkeys())
-  ipcMain.on('hotkeys:resume', () => registerHotkeys())
   ipcMain.on('shell:openExternal', (_e, url: string) => {
     if (typeof url === 'string' && /^https?:\/\//.test(url)) shell.openExternal(url)
   })

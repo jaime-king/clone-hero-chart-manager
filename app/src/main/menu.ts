@@ -9,7 +9,7 @@
 import { app, Menu } from 'electron'
 import type { MenuItemConstructorOptions } from 'electron'
 import { isMac } from './core/platform'
-import { getOverlay, revealOverlay, toggleMaximize } from './overlay'
+import { revealOverlay, toggleMaximize } from './overlay'
 
 export function setupAppMenu(): void {
   if (!isMac) return // Windows: ponecháme bez menu (frameless overlay)
@@ -60,16 +60,7 @@ export function setupAppMenu(): void {
     },
     {
       label: 'Window',
-      submenu: [
-        { role: 'minimize' },
-        {
-          label: 'Close',
-          accelerator: 'Cmd+W',
-          // Náš „Close" = schovat okno (appka žije dál jako overlay v tray/docku),
-          // ne zavřít proces. Konzistentní s křížkem v UI.
-          click: () => getOverlay()?.hide()
-        }
-      ]
+      submenu: [{ role: 'minimize' }, { role: 'close' }]
     }
   ]
 

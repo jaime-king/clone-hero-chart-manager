@@ -4,10 +4,8 @@ import { app, BrowserWindow } from 'electron'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { registerIpc } from './ipc'
-import { registerHotkeys, unregisterHotkeys } from './hotkeys'
 import { setupAppMenu } from './menu'
 import { createOverlay, getOverlay, revealOverlay } from './overlay'
-import { createTray, destroyTray } from './tray'
 import { initAutoUpdate } from './core/autoupdate'
 import { isMac, isWin } from './core/platform'
 import { handleAudioProtocol, registerAudioScheme } from './core/localaudio'
@@ -54,8 +52,6 @@ if (!app.requestSingleInstanceLock()) {
     setupAppMenu()
     registerIpc()
     createOverlay()
-    createTray()
-    registerHotkeys()
     initAutoUpdate(getOverlay)
 
     app.on('activate', () => {
@@ -63,12 +59,8 @@ if (!app.requestSingleInstanceLock()) {
     })
   })
 
-  app.on('will-quit', () => {
-    unregisterHotkeys()
-    destroyTray()
-  })
-
-  // Nechceme zavřít appku při zavření okna (běží jako overlay na pozadí).
+  // macOS: appka po zavření okna dál běží (dock ikona zůstává), dokud ji
+  // uživatel nevypne přes Cmd+Q — standardní mac chování.
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
   })

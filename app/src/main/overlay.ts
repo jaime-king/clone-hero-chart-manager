@@ -154,49 +154,10 @@ export function createOverlay(): BrowserWindow {
   return win
 }
 
-/**
- * Zobrazí / skryje okno (globální zkratka nebo tray).
- *
- * **Focus restore**: na Windows `win.hide()` jen schová naše okno, ale OS
- * sám neaktivuje předchozí okno (hru). Uživatel by musel kliknout. Proto
- * při skrytí, pokud Clone Hero běží, ho aktivně přepneme do popředí.
- */
-/**
- * Skrytí okna.
- *
- * NEPOUŽÍVAT `setOpacity()` — ani pro „instantní" skrytí. Na Windows Electron
- * při prvním volání nastaví oknu `WS_EX_LAYERED` a ten příznak už NIKDY nesundá
- * (ani při opacity zpátky na 1; dřívější komentář tady tvrdil opak, což byl omyl).
- * Layered okno je vyloučené z rychlé cesty DWM při změně velikosti: obsah se
- * místo přeskládání překresluje a blituje, takže tažení za okraj „duchuje" a
- * výplň dobíhá se zpožděním. Původní důvod pro ten trik (trhaná fade-out
- * animace) navíc padl, když okno přestalo být `transparent`.
- */
-function hideWindow(win: BrowserWindow): void {
-  win.hide()
-}
-
-/** Ukáže hlavní okno + focus. */
+/** Ukáže hlavní okno + focus (např. při druhé instanci appky nebo z menu). */
 export function revealOverlay(): void {
   const win = mainWindow
   if (!win) return
   win.show()
   win.focus()
-}
-
-export async function toggleOverlay(): Promise<void> {
-  const win = mainWindow
-  if (!win) return
-  if (win.isVisible() && win.isFocused()) {
-    hideWindow(win)
-  } else {
-    revealOverlay()
-  }
-}
-
-/** Skryje okno (Hide tlačítko / IPC). */
-export async function hideOverlay(): Promise<void> {
-  const win = mainWindow
-  if (!win) return
-  hideWindow(win)
 }

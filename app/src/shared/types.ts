@@ -183,10 +183,6 @@ export interface DownloadJob {
   installPath?: string
 }
 
-export interface HotkeyConfig {
-  toggleOverlay: string
-}
-
 export interface AppConfig {
   songsDir: string
   c3BinDir: string
@@ -195,7 +191,6 @@ export interface AppConfig {
   recordsPerPage: number
   /** Ruční škála UI (multiplikátor nad základem). 1 = výchozí. Násobí se s Windows DPI scalingem. */
   uiScale: number
-  hotkeys: HotkeyConfig
   /** Rotující tipy v horní liště (discoverability snadno přehlédnutelných funkcí). */
   showTips: boolean
   /** Poslední složka, kam se přesouvaly duplicity („Move to folder" místo koše). */
@@ -436,7 +431,6 @@ export interface RendererApi {
   peekFileMeta(path: string): Promise<{ artist: string; title: string } | null>
   /** Rozbalí shortlink (bit.ly aj.) na finální URL. */
   resolveUrl(url: string): Promise<string>
-  hideOverlay(): void
   /** Přepne maximalizaci hlavního okna. */
   toggleMaximize(): void
   /** Aktuální stav maximalizace (počáteční ikona tlačítka). */
@@ -444,10 +438,6 @@ export interface RendererApi {
   /** Odběr změn stavu maximalizace (přepnutí ikony). Vrací unsubscribe. */
   onMaximizeChange(cb: (max: boolean) => void): () => void
   quitApp(): void
-  /** Dočasně pozastaví globální zkratky (při zachytávání nové zkratky). */
-  pauseHotkeys(): void
-  resumeHotkeys(): void
-  onHotkey(cb: (action: string) => void): () => void
   openExternal(url: string): void
   // ---- Auto-update ----
   /** Spustí stažení aktualizace (jen instalační verze). */

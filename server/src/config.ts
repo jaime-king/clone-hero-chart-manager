@@ -38,7 +38,6 @@ function defaults(): AppConfig {
     onyxPath: process.env.CHM_ONYX_PATH || '',
     recordsPerPage: 25,
     uiScale: 1.0,
-    hotkeys: { toggleOverlay: '' },
     showTips: true,
     dupMoveDir: quarantineDir(),
     folderTemplate: DEFAULT_FOLDER_TEMPLATE,
@@ -64,7 +63,7 @@ export function getConfig(): AppConfig {
   try {
     const raw = readFileSync(configPath(), 'utf-8')
     const parsed = JSON.parse(raw)
-    result = { ...def, ...parsed, hotkeys: { ...def.hotkeys, ...parsed.hotkeys } }
+    result = { ...def, ...parsed }
   } catch {
     result = def
   }
@@ -76,8 +75,7 @@ export function setConfig(patch: Partial<AppConfig>): AppConfig {
   const current = getConfig()
   const next: AppConfig = pinEnvFields({
     ...current,
-    ...patch,
-    hotkeys: { ...current.hotkeys, ...(patch.hotkeys ?? {}) }
+    ...patch
   })
   cached = next
   mkdirSync(dataDir(), { recursive: true })
