@@ -3,7 +3,7 @@
 # Linux AppImage, (3) slim runtime with 7-Zip. Built ON the amd64 server
 # (the Onyx AppImage is linux-x64 only; do not build on an arm64 Mac).
 #
-# Run contract (see server/.env.example and /stacks/chart-manager/docker-compose.yml):
+# Run contract (see server/.env.example and the compose example in README.md):
 #   /library  — the Songs library mount (read-only in Phase 6)
 #   /data     — named volume: config.json, trash/, documents/, hash-index.json
 #   port 8300

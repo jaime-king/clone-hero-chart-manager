@@ -6,7 +6,7 @@
 > publishing) are in the git history and README.
 
 **Source:** [xlzipx/clone-hero-chart-manager](https://github.com/xlzipx/clone-hero-chart-manager) — Electron + React + TypeScript, MIT, npm + electron-vite.
-**Target:** Node HTTP server + browser SPA, in Docker on the apps container, behind Traefik, managing `/mnt/media/clone-hero`.
+**Target:** Node HTTP server + browser SPA, in Docker on the apps container, behind Traefik, managing `<nas>/clone-hero`.
 **Security model (Jaime's decision, 2026-08-01):** no app auth, no user management. The trust boundary is the local network; Traefik and the server's network position are the whole access control. The app must therefore never be exposed on a router reachable from outside the LAN.
 **Scope (Jaime's decision, 2026-08-01):** catalog search + download from sources, and management of the existing library. **No manual install / upload flow** — the two unportable Electron methods (`getDroppedFilePath`, `dialog:chooseSongFile`) are deleted, not rewritten.
 **Basis:** the analysis in the vault note `60-Systems/Clone Hero Library.md` (§ "Considered, not decided"). Do not re-derive it.
@@ -17,7 +17,7 @@ Each phase below is written as a self-contained brief for one subagent. Phases m
 
 ## Standing guardrails (paste into every subagent prompt)
 
-1. Never delete, move, or modify anything under `/mnt/media/clone-hero` — until Phase 8, all development runs against a local fixture library on the Mac.
+1. Never delete, move, or modify anything under `<nas>/clone-hero` — until Phase 8, all development runs against a local fixture library on the Mac.
 2. No secrets in the repo, ever: no API keys, no `.env` with real values. `.env.example` only.
 3. The whole point is the preload contract: `app/src/preload/index.ts` defines 69 typed methods as one `api` object and the renderer touches nothing else. Preserve those method names and TypeScript types exactly. A renderer diff beyond un-routing deleted features means the approach is wrong.
 4. Manual install is out of scope: `getDroppedFilePath` and `dialog:chooseSongFile` (and the drag-drop / file-picker UI that calls them) are classified `delete`. Do not rewrite them as an upload flow.
@@ -139,7 +139,7 @@ Done when: audio preview plays and seeks in the browser; deletion lands in `.tra
 ## Phase 6 — Container + deploy  *(Sonnet; HUMAN approves go-live)*
 
 1. Multi-stage Dockerfile: build renderer + server, runtime `node:26-slim` + `p7zip-full` (+ unrar if needed), non-root user, library mounted at `/library`, data volume at `/data`.
-2. Compose stack in the apps container's stack layout (see vault `Apps Server` note for conventions): service `chart-manager`, `/mnt/media/clone-hero:/library`, named volume for `/data`. **First deploy mounts the library `:ro`** — flip to `rw` only after Phase 7 read-only checks pass.
+2. Compose stack in the apps container's stack layout (see vault `Apps Server` note for conventions): service `chart-manager`, `<nas>/clone-hero:/library`, named volume for `/data`. **First deploy mounts the library `:ro`** — flip to `rw` only after Phase 7 read-only checks pass.
 3. Traefik file-provider router: `chart-manager.<domain>` → service. **No auth middleware** — per the security-model decision above, the LAN is the trust boundary. Consequence the deployer must honour: the router must only be reachable from inside the network (no port-forward, no tunnel, no public DNS pointing here).
 4. The container user must be able to write the library: run with a uid in the container's `jaime` group (the `nobody:jaime 2775` + setgid scheme from `Clone Hero Library.md`). Verify with a write probe before declaring done — this exact trap has bitten before.
 

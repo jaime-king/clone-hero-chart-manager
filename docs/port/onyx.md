@@ -70,7 +70,7 @@ Exact `import`/`build` CLI flag syntax is not documented in the repo's markdown 
 
 ## 3. How clone-hero-chart-manager invokes onyx
 
-File: `/Users/jaimeking/dev/clone-hero-chart-manager/app/src/main/core/converter.ts`
+File: `app/src/main/core/converter.ts`
 
 Two-step CLI pipeline for CON → Clone Hero:
 ```
