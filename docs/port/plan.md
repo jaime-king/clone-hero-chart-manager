@@ -1,5 +1,10 @@
 # Plan: Port Clone Hero Chart Manager to a self-hosted webapp
 
+> **Status: executed.** All phases completed 2026-08-01; the app runs in
+> production. Kept as the historical record of how the port was structured.
+> Post-plan changes (permanent delete, game-launch feature removal, GHCR
+> publishing) are in the git history and README.
+
 **Source:** [xlzipx/clone-hero-chart-manager](https://github.com/xlzipx/clone-hero-chart-manager) — Electron + React + TypeScript, MIT, npm + electron-vite.
 **Target:** Node HTTP server + browser SPA, in Docker on the apps container, behind Traefik, managing `/mnt/media/clone-hero`.
 **Security model (Jaime's decision, 2026-08-01):** no app auth, no user management. The trust boundary is the local network; Traefik and the server's network position are the whole access control. The app must therefore never be exposed on a router reachable from outside the LAN.
