@@ -44,6 +44,12 @@ interface AppState {
   showSettings: boolean
   /** Mobil (<900px): otevřený slide-in drawer se Sidebar obsahem. Na desktopu se nepoužívá. */
   mobileNavOpen: boolean
+  /** Mobil (<900px): otevřený bottom sheet se VŠEMI filtry (řazení, nástroje,
+   *  obtížnost, žánr/rok/délka, charter/album, hide-owned). Na desktopu se nepoužívá. */
+  mobileFiltersOpen: boolean
+  /** Mobil (<900px): režim hromadného výběru — karty ukazují checkboxy, tap řádku
+   *  = přepnout výběr, dole visí lišta „Download selected". Na desktopu se nepoužívá. */
+  selectMode: boolean
   showLibrary: boolean
   /** Cíl pro „In library": relativní cesty (k Songs) kopií písně k odhalení v Library
    *  Manageru. null = manager otevřen normálně (kořen). Víc cest = duplikáty. */
@@ -168,6 +174,9 @@ interface AppState {
   setSelectedIndex: (i: number) => void
   setShowSettings: (v: boolean) => void
   setMobileNavOpen: (v: boolean) => void
+  setMobileFiltersOpen: (v: boolean) => void
+  /** Zapne/vypne mobilní výběrový režim; vypnutí zruší i aktuální výběr. */
+  setSelectMode: (v: boolean) => void
   setShowLibrary: (v: boolean) => void
   /** Otevře Library Manager rovnou na dané písni (kopiích) a vybere ji. */
   openLibraryAt: (rels: string[]) => void
@@ -641,6 +650,8 @@ export const useStore = create<AppState>((set, get) => {
   config: null,
   showSettings: false,
   mobileNavOpen: false,
+  mobileFiltersOpen: false,
+  selectMode: false,
   showLibrary: false,
   libraryReveal: null,
   showWhatsNew: false,
@@ -1035,6 +1046,13 @@ export const useStore = create<AppState>((set, get) => {
   setSelectedIndex: (i) => set({ selectedIndex: i }),
   setShowSettings: (v) => set({ showSettings: v }),
   setMobileNavOpen: (v) => set({ mobileNavOpen: v }),
+  // Otevření mobilního filter-sheetu si (stejně jako setShowFilters) lazy
+  // donačte číselník voleb pro dropdowny.
+  setMobileFiltersOpen: (v) => {
+    set({ mobileFiltersOpen: v })
+    if (v) void get().loadFilterOptions()
+  },
+  setSelectMode: (v) => set(v ? { selectMode: true } : { selectMode: false, selectedKeys: [] }),
   // Zavření manageru vyčistí cíl „reveal" (příště se otevře normálně na kořeni).
   // Zároveň obnoví „owned" index — uživatel mohl ve správci smazat/přesunout
   // písničky, jinak by řádky ve výsledcích držely zastaralý „In library".
@@ -1436,3 +1454,17 @@ export const useStore = create<AppState>((set, get) => {
   }
   }
 })
+
+/** Souhrnný počet aktivních filtrů pro mobilní „Filters" badge (hero přepínač,
+ *  tlačítko v search baru i hlavička filter-sheetu počítají STEJNĚ): nástroje
+ *  (každý zvlášť) + zúžená obtížnost (min/max NEBO exact — jedna položka, je to
+ *  jeden stav) + žánr/rok/dekáda/délka + charter + album + hide-owned. Sort se
+ *  nepočítá — řadit není filtrovat. */
+export const selectActiveFilterCount = (s: AppState): number =>
+  s.instrumentFilters.length +
+  (s.diffMin > 0 || s.diffMax < 6 ? 1 : 0) +
+  (['genre', 'year', 'decade', 'songLength'] as const).filter((k) => (s.filters[k]?.length ?? 0) > 0)
+    .length +
+  (s.charterFilter.trim() ? 1 : 0) +
+  (s.albumFilter.trim() ? 1 : 0) +
+  (s.hideOwned ? 1 : 0)

@@ -7651,8 +7651,9 @@ button.plrow__na:hover {
   }
 
   /* Resultsbar + tabulka + pager: obsah se zalamuje/scrolluje UVNITŘ, nikdy
-     neroztahuje shell. Řádky písní zůstávají desktopové (Phase 2) — jejich
-     838px min-width se scrolluje uvnitř .results--table. */
+     neroztahuje shell. (Fáze 1 tu měla na .results--table provizorní
+     overflow-x: auto pro 838px desktopové řádky — Fáze 2 řádky přestavěla na
+     karty, které se vejdou, takže provizorium je odstraněné.) */
   .resultsbar {
     flex-wrap: wrap;
     margin: 2px 12px;
@@ -7665,10 +7666,6 @@ button.plrow__na:hover {
   }
   .tablewrap {
     margin: 0 12px 8px;
-  }
-  .results--table {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
   .pager {
     display: flex;
@@ -7817,5 +7814,428 @@ button.plrow__na:hover {
   /* Suggest dropdown nesmí přetéct viewport do stran. */
   .suggest {
     max-width: calc(100vw - 24px);
+  }
+}
+
+/* ============================================================
+   MOBILE (Phase 2 — vyhledávání a výsledky). docs/mobile/plan.md.
+
+   Breakpointy = tytéž literály jako Phase 1 (jediný zdroj pravdy je hlavička
+   sekce Phase 1 výše): tablet <900px, phone ≤600px. Vše additivní; desktop
+   (≥900px) se NESMÍ změnit.
+
+   Pozn. k Phase 1: hero panel (.filterbar) je na mobilu nově sbalený TRVALE —
+   přepínač otevírá filter-sheet místo inline rozbalení. Rozbalovací pravidla
+   Phase 1 (.filterbar .fgroup + .fgroup, .filterbar .dropzone…) tím osiřela,
+   ale nechávám je být: jsou neškodná a sekce Phase 1 se nereorganizuje.
+   ============================================================ */
+
+/* Nové mobilní prvky (Phase 2) na desktopu neexistují. */
+.resultsbar__select,
+.selectbar,
+.sheet,
+.sheet-scrim {
+  display: none;
+}
+
+/* ── tablet (<900px): karty výsledků, filter-sheet, výběrový režim ── */
+@media (max-width: 899.98px) {
+  /* ── Sdílený vzor bottom-sheetu (`.sheet`) ─────────────────────────────
+     Scrim + panel přisátý dole, zaoblený vršek, dvh strop, safe-area.
+     Fáze 4 má pro modaly použít TENHLE vzor (queue sheet z Fáze 1 má svou
+     starší per-komponentovou kopii — kandidát na sjednocení ve Fázi 4/5). */
+  .sheet-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 96;
+    background: rgba(4, 8, 18, 0.55);
+  }
+  .sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 97;
+    display: flex;
+    flex-direction: column;
+    max-height: min(85dvh, 720px);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-top: 1px solid var(--border-strong, var(--border));
+    background: #0c1530;
+    box-shadow: 0 -12px 44px rgba(0, 0, 0, 0.55);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .sheet__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .sheet__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: auto;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .sheet__close {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .sheet__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px 16px;
+  }
+  .sheet__foot {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  /* ── Filter-sheet (FilterSheet.tsx): všechny filtry na jednom místě ──
+     Nahrazuje na mobilu desktopovou roletu FilterPanel (audit: panel 204px
+     obsahu ve 135px sloupci, spodek pod foldem) i inline rozbalení hero
+     panelu. Sort žije tady (audit: sort dropdown se otevíral mimo viewport). */
+  .filterpanel {
+    display: none;
+  }
+  .filtersheet__group + .filtersheet__group,
+  .filtersheet__panel {
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+    padding-top: 14px;
+  }
+  .filtersheet__clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 13px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .filtersheet__done {
+    width: 100%;
+    min-height: 48px;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+  /* Sort: dropdown přes celou šířku + směrové tlačítko vedle, cíle ≥44px. */
+  .filtersheet .sortctl {
+    display: flex;
+  }
+  .filtersheet .sortctl > .dd {
+    flex: 1;
+  }
+  .filtersheet .dd--sort .dd__btn {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .filtersheet .dd__btn,
+  .filtersheet .filterfield__input {
+    min-height: 44px;
+  }
+  /* Položky rozbalených menu v sheetu taky na dotykový cíl (audit: 31px). */
+  .filtersheet .dd__item {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  /* Menší kruhy nástrojů, ať se všech 5 vejde do jedné řady i na 375px. */
+  .filtersheet .instbtn__circle {
+    width: 56px;
+    height: 56px;
+  }
+  .filtersheet .sortctl__dir {
+    width: 44px;
+  }
+  /* Exact-difficulty tečky: 16px audit označil za mrňavé — v sheetu 32px. */
+  .filtersheet .ddot {
+    width: 32px;
+    height: 32px;
+  }
+  .filtersheet .diffdots {
+    gap: 9px;
+  }
+  .filtersheet__diffrow {
+    flex-wrap: wrap;
+    row-gap: 14px;
+  }
+
+  /* ── SongRow → karta (audit: řádek 838px min-width, Download na x≈883 —
+     rozbité na 375 I 768, proto tablet breakpoint, ne phone) ──────────────
+     art | titul/interpret | ⋮ nahoře, tečky nástrojů uprostřed, akce dole. */
+  .song,
+  .results--table .song {
+    grid-template-columns: 54px minmax(0, 1fr) 44px;
+    grid-template-areas:
+      'art main menu'
+      'diffs diffs diffs'
+      'action action action';
+    gap: 10px 12px;
+    padding: 12px;
+  }
+  .song__check,
+  .sk--check {
+    display: none;
+  }
+  .song__art,
+  .sk--art {
+    grid-area: art;
+    width: 54px;
+    height: 54px;
+  }
+  .song__main,
+  .sk-main {
+    grid-area: main;
+  }
+  .song__diffs,
+  .sk-diffs {
+    grid-area: diffs;
+    min-width: 0;
+  }
+  .song__action,
+  .sk--btn {
+    grid-area: action;
+  }
+  .song .rowmenu,
+  .sk--dots {
+    grid-area: menu;
+    justify-self: end;
+  }
+  .rowmenu__btn {
+    width: 44px;
+    height: 44px;
+  }
+  /* Badge řádek se zalamuje místo přetékání; charter kratší. */
+  .song__meta {
+    flex-wrap: wrap;
+    row-gap: 5px;
+  }
+  .song__charter {
+    max-width: 150px;
+  }
+  /* Tečky nástrojů: kompaktnější, ať se všech 5 sloupců vejde na 375px. */
+  .song__diffs .instruments {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .song__diffs .instrument {
+    gap: 4px;
+  }
+  .song__diffs .dots {
+    gap: 2px;
+  }
+  .song__diffs .dot {
+    width: 7px;
+    height: 7px;
+  }
+  /* Akce: Download přes šířku karty, cíl ≥44px; velikost souboru vedle. */
+  .song__action {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .song__action .dl-btn {
+    width: auto;
+    flex: 1;
+    min-height: 44px;
+  }
+  .song__action .jobchip {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+  }
+  .song__size {
+    flex-shrink: 0;
+  }
+  .sk--btn {
+    width: 100%;
+    height: 44px;
+  }
+
+  /* ── Výběrový režim (touch nemá hover checkboxy ani Ctrl/Shift-klik):
+     checkbox sloupec vlevo, akce/⋮ pryč, tap řádku = přepnout. ── */
+  .results--selecting .song {
+    grid-template-columns: 32px 54px minmax(0, 1fr);
+    grid-template-areas:
+      'check art main'
+      'check diffs diffs';
+  }
+  .results--selecting .song__check {
+    display: flex;
+    grid-area: check;
+    align-self: stretch;
+  }
+  .results--selecting .song__check .chk__box {
+    opacity: 1;
+    width: 24px;
+    height: 24px;
+  }
+  .results--selecting .song__action,
+  .results--selecting .rowmenu,
+  .results--selecting .sk--btn,
+  .results--selecting .sk--dots {
+    display: none;
+  }
+
+  /* Resultsbar: desktopové All + inline batch lištu nahrazuje Select režim. */
+  .chk--selectall,
+  .batchbar {
+    display: none;
+  }
+  .resultsbar__select {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-dim);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .resultsbar__select--on {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.14);
+    color: var(--text);
+  }
+
+  /* Připnutá lišta výběru dole (nad queue pilulkou, pod modaly z 100). */
+  .selectbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 91;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: #0c1530;
+    border-top: 1px solid var(--border-strong, var(--border));
+    box-shadow: 0 -12px 44px rgba(0, 0, 0, 0.55);
+  }
+  .selectbar__all {
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+  .selectbar__all .chk__box {
+    width: 24px;
+    height: 24px;
+  }
+  .selectbar__count {
+    flex: 1;
+    min-width: 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .selectbar__note {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+  }
+  .selectbar__dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .selectbar__dl:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .selectbar__done {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  /* Lišta překrývá spodek obsahu → pilulka fronty nad ni, obsah dostane
+     spodní rezervu, ať poslední karta/pager nejsou schované pod lištou. */
+  .app--selecting .queue-pill {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+  .app--selecting .content {
+    padding-bottom: calc(66px + env(safe-area-inset-bottom));
+  }
+
+  /* ── Našeptávač: plná šířka viewportu (kotva = input, který začíná ~20px
+     od kraje) + strop výšky, ať spodní návrhy nekončí pod foldem (audit). ── */
+  .suggest {
+    width: calc(100vw - 40px);
+    max-width: none;
+  }
+  .suggest__list {
+    max-height: min(52dvh, 430px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .suggest__item {
+    min-height: 44px;
+  }
+  .suggest__all {
+    min-height: 44px;
+  }
+
+  /* Pager: ikona „nahlásit chybu" na 44px (čísla stránek řešila Phase 1). */
+  .pager__bug {
+    width: 44px;
+    height: 44px;
   }
 }

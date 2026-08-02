@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useStore } from '../store'
+import { selectActiveFilterCount, useStore } from '../store'
 import { INSTRUMENTS, MAX_DIFFICULTY } from '../utils'
 import { DifficultyDots } from './DifficultyDots'
 import { Dropdown } from './Dropdown'
@@ -13,9 +13,40 @@ const ACCEPTED_EXT = /\.(zip|rar|7z|sng|rb3con|con)$/i
 
 const LEVELS = Array.from({ length: MAX_DIFFICULTY + 1 }, (_, i) => i) // 0..6
 
-export function FilterBar(): JSX.Element {
+/** Kruhová tlačítka nástrojů — sdílená mezi hero panelem (desktop) a mobilním
+ *  filter-sheetem (FilterSheet). Stav žije ve store, takže obě místa jsou vždy
+ *  synchronní. */
+export function InstrumentButtons(): JSX.Element {
   const filters = useStore((s) => s.instrumentFilters)
   const toggle = useStore((s) => s.toggleInstrumentFilter)
+  return (
+    <div className="instbtns">
+      {INSTRUMENTS.map((inst) => {
+        const active = filters.includes(inst.id)
+        return (
+          <button
+            key={inst.id}
+            className={`instbtn ${active ? 'instbtn--active' : ''}`}
+            onClick={() => toggle(inst.id)}
+            style={
+              {
+                '--inst-color': inst.color
+              } as React.CSSProperties
+            }
+          >
+            <span className="instbtn__circle">
+              <Icon name={inst.icon} size={28} color={inst.color} />
+            </span>
+            <span className="instbtn__label">{inst.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+export function FilterBar(): JSX.Element {
+  const filters = useStore((s) => s.instrumentFilters)
   const diffMin = useStore((s) => s.diffMin)
   const diffMax = useStore((s) => s.diffMax)
   const setDiffRange = useStore((s) => s.setDiffRange)
@@ -26,13 +57,14 @@ export function FilterBar(): JSX.Element {
   const openLocalDrop = useStore((s) => s.openLocalDrop)
   const openLocalBatch = useStore((s) => s.openLocalBatch)
   const [dragOver, setDragOver] = useState(false)
-  // Mobil (<900px): celý panel filtrů je defaultně sbalený do jednořádkového
-  // přepínače, ať seznam výsledků dostane reálnou výšku (audit: results 0px na
-  // 375 i 768). Na desktopu se přepínač nerenderuje vizuálně (CSS display:none)
-  // a panel je vždy rozbalený.
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const diffNarrowed = diffMin > 0 || diffMax < MAX_DIFFICULTY
-  const activeCount = filters.length + (diffNarrowed ? 1 : 0)
+  // Mobil (<900px): panel filtrů je TRVALE sbalený do jednořádkového přepínače,
+  // ať seznam výsledků dostane reálnou výšku (audit: results 0px na 375 i 768).
+  // Fáze 2: přepínač už nerozbaluje panel inline, ale otevírá filter-sheet
+  // (FilterSheet) se všemi filtry. Na desktopu se přepínač nerenderuje vizuálně
+  // (CSS display:none) a panel je vždy rozbalený.
+  const setMobileFiltersOpen = useStore((s) => s.setMobileFiltersOpen)
+  // Badge = souhrn všech filtrů (sheet je všechny obsahuje), ne jen nástroje.
+  const activeCount = useStore(selectActiveFilterCount)
 
   const handleDrop = (e: React.DragEvent<HTMLElement>): void => {
     e.preventDefault()
@@ -65,47 +97,21 @@ export function FilterBar(): JSX.Element {
   }
 
   return (
-    <div className={`filterbar ${mobileOpen ? '' : 'filterbar--mobile-collapsed'}`}>
+    <div className="filterbar filterbar--mobile-collapsed">
       <button
         type="button"
         className="filterbar__mobiletoggle"
-        aria-expanded={mobileOpen}
-        onClick={() => setMobileOpen((v) => !v)}
+        aria-haspopup="dialog"
+        onClick={() => setMobileFiltersOpen(true)}
       >
         <Icon name="settings" size={15} />
-        <span>Instruments &amp; difficulty</span>
+        <span>Filters &amp; instruments</span>
         {activeCount > 0 ? <span className="filterbar__mobilecount">{activeCount}</span> : null}
-        <Icon
-          name="caret"
-          size={14}
-          className="filterbar__mobilecaret"
-          style={{ transform: mobileOpen ? 'rotate(180deg)' : 'none' }}
-        />
+        <Icon name="caret" size={14} className="filterbar__mobilecaret" />
       </button>
       <div className="fgroup fgroup--instruments">
         <div className="fgroup__label">Instruments</div>
-        <div className="instbtns">
-          {INSTRUMENTS.map((inst) => {
-            const active = filters.includes(inst.id)
-            return (
-              <button
-                key={inst.id}
-                className={`instbtn ${active ? 'instbtn--active' : ''}`}
-                onClick={() => toggle(inst.id)}
-                style={
-                  {
-                    '--inst-color': inst.color
-                  } as React.CSSProperties
-                }
-              >
-                <span className="instbtn__circle">
-                  <Icon name={inst.icon} size={28} color={inst.color} />
-                </span>
-                <span className="instbtn__label">{inst.label}</span>
-              </button>
-            )
-          })}
-        </div>
+        <InstrumentButtons />
       </div>
 
       <div className="fgroup fgroup--difficulty">

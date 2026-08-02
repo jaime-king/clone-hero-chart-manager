@@ -109,13 +109,12 @@ function FilterText({
 }
 
 /**
- * Jeden sjednocený filtrovací panel. Nahoře „browse" (žánr / rok / délka —
- * serverově, jen RhythmVerse), pod tím „refine" (charter / album / skrýt
- * vlastněné — klientsky nad načtenými výsledky, funguje i na Encore). Nahrazuje
- * dřívější samostatné „Refine" tlačítko v liště výsledků.
+ * Vnitřek filtrovacího panelu (browse dropdowny + refine pole + hide-owned +
+ * clear) BEZ obálky/animace. Sdílený mezi desktopovým FilterPanel (roleta pod
+ * search barem) a mobilním FilterSheet (bottom sheet) — stav žije ve store,
+ * takže obě místa jsou vždy synchronní.
  */
-export function FilterPanel(): JSX.Element {
-  const show = useStore((s) => s.showFilters)
+export function FilterPanelFields(): JSX.Element {
   const filters = useStore((s) => s.filters)
   const options = useStore((s) => s.filterOptions)
   const database = useStore((s) => s.database)
@@ -151,21 +150,8 @@ export function FilterPanel(): JSX.Element {
   // i žánr/rok/délka/charter/album/hideOwned).
   const clearAll = (): void => clearFilters()
 
-  // Overflow povolíme až PO dovysunutí rolety (jinak by se rozbalovací menu
-  // ořezávalo o panel); při zavírání ho hned skryjeme, ať roleta pěkně zajede.
-  const [expanded, setExpanded] = useState(show)
-  useEffect(() => {
-    if (!show) {
-      setExpanded(false)
-      return undefined
-    }
-    const t = setTimeout(() => setExpanded(true), 300)
-    return () => clearTimeout(t)
-  }, [show])
-
   return (
-    <div className={`filterpanel ${show ? 'filterpanel--open' : ''}`} aria-hidden={!show}>
-      <div className={`filterpanel__inner ${show && expanded ? 'filterpanel__inner--open' : ''}`}>
+    <>
       {encoreOnly ? (
         <div className="filterpanel__encore">
           <Icon name="info" size={16} />
@@ -240,6 +226,37 @@ export function FilterPanel(): JSX.Element {
           </button>
         ) : null}
       </div>
+    </>
+  )
+}
+
+/**
+ * Jeden sjednocený filtrovací panel (desktop — roleta pod search barem). Nahoře
+ * „browse" (žánr / rok / délka — serverově, jen RhythmVerse), pod tím „refine"
+ * (charter / album / skrýt vlastněné — klientsky nad načtenými výsledky, funguje
+ * i na Encore). Nahrazuje dřívější samostatné „Refine" tlačítko v liště výsledků.
+ * Na mobilu (<900px) je celý panel schovaný — tytéž ovládací prvky žijí ve
+ * FilterSheet (bottom sheet).
+ */
+export function FilterPanel(): JSX.Element {
+  const show = useStore((s) => s.showFilters)
+
+  // Overflow povolíme až PO dovysunutí rolety (jinak by se rozbalovací menu
+  // ořezávalo o panel); při zavírání ho hned skryjeme, ať roleta pěkně zajede.
+  const [expanded, setExpanded] = useState(show)
+  useEffect(() => {
+    if (!show) {
+      setExpanded(false)
+      return undefined
+    }
+    const t = setTimeout(() => setExpanded(true), 300)
+    return () => clearTimeout(t)
+  }, [show])
+
+  return (
+    <div className={`filterpanel ${show ? 'filterpanel--open' : ''}`} aria-hidden={!show}>
+      <div className={`filterpanel__inner ${show && expanded ? 'filterpanel__inner--open' : ''}`}>
+        <FilterPanelFields />
       </div>
     </div>
   )
