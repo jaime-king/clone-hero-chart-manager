@@ -8239,3 +8239,273 @@ button.plrow__na:hover {
     height: 44px;
   }
 }
+
+/* ============================================================
+   MOBILE (Phase 3 — Library manager). docs/mobile/plan.md.
+
+   Breakpointy = tytéž literály jako Phase 1/2 (zdroj pravdy je hlavička
+   sekce Phase 1): tablet <900px, phone ≤600px. Vše additivní; desktop
+   (≥900px) se NESMÍ změnit.
+
+   Co tu je: ⋮ kebab na řádcích (touch-cesta k akcím pravého kliku — obě
+   prezentace renderují JEDEN seznam `menuItems` v LibraryManager.tsx),
+   výběrový režim s checkboxy + lištou hromadných akcí, dotykové cíle
+   toolbaru/drobečků, oprava přetékajícího song detailu a vždy viditelné
+   přehrávací tlačítko v detailu (audit §4).
+   ============================================================ */
+
+/* Nové mobilní prvky (Phase 3) na desktopu neexistují. */
+.lib__kebab,
+.lib__check,
+.lib__selectbar,
+.lib__selecttoggle {
+  display: none;
+}
+
+/* ── tablet (<900px): knihovna na dotyk ── */
+@media (max-width: 899.98px) {
+  /* Rada „Right-click for actions" je na dotyku lež — místo ní tlačítko Select. */
+  .lib__hint {
+    display: none;
+  }
+  .lib__selecttoggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-dim);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* Řádky: dotykový cíl ≥44px; ⋮ vpravo (44×44). Svislý padding menší —
+     výšku už drží kebab, jinak by řádek nabobtnal na ~64px. */
+  .lib__item {
+    min-height: 44px;
+    padding: 5px 6px 5px 12px;
+  }
+  .lib__kebab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 10px;
+    background: none;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+
+  /* ⋮ sheet: položky sdílí třídu .ctxmenu__item — tady jen dotykové rozměry. */
+  .libsheet__body {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 10px;
+  }
+  .libsheet .ctxmenu__item {
+    min-height: 48px;
+    font-size: 14px;
+    gap: 12px;
+    border-radius: 10px;
+  }
+  .libsheet .ctxmenu__sep {
+    margin: 6px 8px;
+  }
+  .libsheet__title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+  }
+
+  /* ── Výběrový režim: checkboxy místo kebabu, tap řádku = přepnout. ── */
+  .lib--selecting .lib__kebab {
+    display: none;
+  }
+  .lib--selecting .lib__check {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .lib__checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    border: 1.5px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+  }
+  .lib__item--sel .lib__checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Lišta hromadných akcí (nahrazuje patičku) — stejná sada jako desktopové
+     kontextové menu nad výběrem: playlist / copy / cut / delete. */
+  .lib__selectbar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.02);
+    flex-shrink: 0;
+  }
+  .lib__sbrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .lib__sball {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-dim);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .lib__sbcount {
+    flex: 1;
+    min-width: 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .lib__sbdone {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .lib__sbactions {
+    display: flex;
+    gap: 8px;
+  }
+  .lib__sbbtn {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 4px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .lib__sbbtn svg {
+    color: var(--text-dim);
+  }
+  .lib__sbbtn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .lib__sbbtn--danger {
+    color: var(--warn);
+    border-color: rgba(255, 107, 107, 0.4);
+  }
+  .lib__sbbtn--danger svg {
+    color: var(--warn);
+  }
+
+  /* ── Toolbar + drobečky: dotykové cíle (audit: 34px tlačítka, 27px crumby). ── */
+  .lib__btn,
+  .lib__sortsel,
+  .lib__sortdir {
+    min-height: 44px;
+  }
+  .lib__btn--icon {
+    min-width: 44px;
+    justify-content: center;
+  }
+  .lib__sortdir {
+    width: 44px;
+  }
+  .crumb {
+    min-height: 44px;
+  }
+  /* Jednotlivé segmenty cesty: smí se smrsknout s ellipsis, ať poslední drobek
+     neuteče za okraj (prostřední segmenty už schovává „…" v LibraryManager.tsx).
+     Delší segment se smrskne víc — flex-shrink dělí prostor podle šířky. */
+  .crumb__wrap {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .crumb__wrap .crumb {
+    flex-shrink: 1;
+    display: inline-block;
+    min-width: 44px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 36px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  /* Samotné „…" se nikdy nesmršťuje (jinak z něj zbude tečka). */
+  .crumb__wrap .crumb--ellipsis {
+    flex-shrink: 0;
+    min-width: 0;
+  }
+
+  /* ── Song detail: audit — 483px obsahu ve 305px kartě (tečky nástrojů
+     přetékaly, Edit uřízlý). Řádek se zalamuje, tečky wrapují, Edit přes
+     celou šířku, přehrávání vždy viditelné (hover na dotyku neexistuje). ── */
+  .songdetail {
+    flex-wrap: wrap;
+  }
+  .songdetail__meta {
+    /* Vedle 84px obalu, ale při úzkém sloupci smí zalomit POD něj. */
+    flex: 1 1 160px;
+  }
+  .songdetail__edit {
+    flex: 1 1 100%;
+    min-height: 44px;
+  }
+  .songdetail__diffs .instruments {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .songdetail__artwrap .song__preview {
+    opacity: 1;
+  }
+
+  /* ── Dialogy (rename / delete / metadata): dotykové cíle. Layout samotný
+     audit prošel („no breakage"), tak se nechává být. ── */
+  .lib__dialog input,
+  .lib__dialog-foot .btn-secondary,
+  .lib__dialog-foot .btn-primary {
+    min-height: 44px;
+  }
+}

@@ -3,6 +3,7 @@ import type { LibEntry, SongDetail } from '../../../shared/types'
 import { errMsg } from '../../../shared/errors'
 import { IS_MAC } from '../platform'
 import { useStore } from '../store'
+import { useIsMobile } from '../useIsMobile'
 import { formatLength, stripTags } from '../utils'
 import { RichText } from './RichText'
 import { LocalPreview } from './LocalPreview'
@@ -90,11 +91,17 @@ export function LibraryManager(): JSX.Element | null {
   const [playlistFor, setPlaylistFor] = useState<string[] | null>(null)
   const [dupOpen, setDupOpen] = useState(false)
   const [plmOpen, setPlmOpen] = useState(false)
+  // Mobil (<900px): ⋮ sheet s akcemi řádku + explicitní výběrový režim
+  // (touch nemá pravý klik ani Ctrl/Shift). Na desktopu se nikdy nezapnou —
+  // spouštěče jsou CSS-schované a resize zpět je tvrdě vypne (níže).
+  const isMobile = useIsMobile()
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [libSelect, setLibSelect] = useState(false)
   const dialogOpenRef = useRef(false)
   // Zkratky (Delete, Ctrl+V, Ctrl+A…) musí mlčet pod VŠEMI sub-modály — jinak
   // jde omylem smazat výběr schovaný pod otevřeným oknem Duplicates/Playlists.
   dialogOpenRef.current =
-    dialog !== null || metaFor !== null || playlistFor !== null || dupOpen || plmOpen
+    dialog !== null || metaFor !== null || playlistFor !== null || dupOpen || plmOpen || sheetOpen
   const ctxRef = useRef<HTMLDivElement>(null)
   // Detail otevřené písničky (když je aktuální složka píseň) — panel s obalem,
   // metadaty a obtížnostmi nad výpisem souborů.
@@ -249,10 +256,45 @@ export function LibraryManager(): JSX.Element | null {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show, entries, selected, cwd, clip])
 
+  // Escape zavře jen sheet, ne celý Library manager (capture předběhne
+  // window/document handlery, které by jinak zavřely celé okno).
+  useEffect(() => {
+    if (!sheetOpen) return
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        setSheetOpen(false)
+      }
+    }
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
+  }, [sheetOpen])
+
+  // Návrat na desktopovou šířku: mobilní režimy nesmí přežít (selectbar/sheet
+  // jsou CSS-schované ≥900px, stav by po nich strašil neviditelný).
+  useEffect(() => {
+    if (!isMobile) {
+      setSheetOpen(false)
+      setLibSelect(false)
+    }
+  }, [isMobile])
+
   if (!show) return null
 
+  const exitSelect = (): void => {
+    setLibSelect(false)
+    setSelected(new Set())
+    setAnchor(null)
+  }
+
   const onItemClick = (name: string, e: React.MouseEvent): void => {
-    if (e.ctrlKey || e.metaKey) {
+    if (libSelect) {
+      // Výběrový režim (mobil): tap = přepnout, modifikátory se ignorují.
+      const next = new Set(selected)
+      next.has(name) ? next.delete(name) : next.add(name)
+      setSelected(next)
+      setAnchor(name)
+    } else if (e.ctrlKey || e.metaKey) {
       const next = new Set(selected)
       next.has(name) ? next.delete(name) : next.add(name)
       setSelected(next)
@@ -281,6 +323,17 @@ export function LibraryManager(): JSX.Element | null {
       setSelected(new Set())
     }
     setCtx({ x: e.clientX, y: e.clientY })
+  }
+
+  // Mobilní ⋮ na řádku: stejná příprava výběru jako pravý klik, jen místo
+  // kontextového menu otevře bottom sheet (stejný seznam akcí — viz menuItems).
+  const openSheet = (e: React.MouseEvent, name: string): void => {
+    e.stopPropagation()
+    if (!selected.has(name)) {
+      setSelected(new Set([name]))
+      setAnchor(name)
+    }
+    setSheetOpen(true)
   }
 
   const doCut = (): void => {
@@ -332,12 +385,75 @@ export function LibraryManager(): JSX.Element | null {
   // manager pod ním, ať se nestohují modaly a nezdvojuje ztmavení pozadí.
   const subModalOpen = metaFor !== null || playlistFor !== null || dupOpen || plmOpen
 
+  // JEDINÝ zdroj akcí nad výběrem: desktopové kontextové menu (pravý klik)
+  // i mobilní ⋮ bottom sheet renderují TENHLE seznam — akce se nikdy nerozjedou.
+  // `done` zavře příslušnou prezentaci (menu vs. sheet).
+  const menuItems = (done: () => void): JSX.Element => (
+    <>
+      {singleIsDir ? (
+        <button className="ctxmenu__item" onClick={() => { void load(relOf(singleName!)); done() }}>
+          <Icon name="folder" size={14} /> Open
+        </button>
+      ) : null}
+      {single ? (
+        <button
+          className="ctxmenu__item"
+          onClick={() => { setDialog({ type: 'rename', name: singleName! }); setDialogValue(singleName!); done() }}
+        >
+          <Icon name="charter" size={14} /> Rename
+        </button>
+      ) : null}
+      {single && singleIsSong ? (
+        <button
+          className="ctxmenu__item"
+          onClick={() => { setMetaFor({ rel: relOf(singleName!), title: singleName! }); done() }}
+        >
+          <Icon name="file" size={14} /> Edit metadata
+        </button>
+      ) : null}
+      {selSongCount > 0 ? (
+        <button
+          className="ctxmenu__item"
+          onClick={() => { setPlaylistFor(selSongRels()); done() }}
+        >
+          <Icon name="note" size={14} /> Add to playlist ({selSongCount})
+        </button>
+      ) : null}
+      {selCount ? (
+        <>
+          <div className="ctxmenu__sep" />
+          <button className="ctxmenu__item" onClick={() => { doCopy(); done() }}>
+            <Icon name="copy" size={14} /> Copy
+          </button>
+          <button className="ctxmenu__item" onClick={() => { doCut(); done() }}>
+            <Icon name="scissors" size={14} /> Cut
+          </button>
+          <button className="ctxmenu__item ctxmenu__item--danger" onClick={() => { setDialog({ type: 'delete', names: selArr() }); done() }}>
+            <Icon name="trash" size={14} /> Delete
+          </button>
+          <div className="ctxmenu__sep" />
+        </>
+      ) : null}
+      <button className="ctxmenu__item" onClick={() => { setDialog({ type: 'new' }); setDialogValue(''); done() }}>
+        <Icon name="folderPlus" size={14} /> New folder
+      </button>
+      {clip ? (
+        <button className="ctxmenu__item" onClick={() => { doPaste(); done() }}>
+          <Icon name="paste" size={14} /> Paste ({clip.items.length})
+        </button>
+      ) : null}
+    </>
+  )
+
   return (
     <div
       className={`modal-overlay ${subModalOpen ? 'modal-overlay--has-sub' : ''}`}
       onMouseDown={(e) => e.target === e.currentTarget && close(false)}
     >
-      <div className="modal modal--library" onMouseDown={(e) => e.stopPropagation()}>
+      <div
+        className={`modal modal--library ${libSelect ? 'lib--selecting' : ''}`}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div className="modal__head">
           <h2>Library manager</h2>
           <button className="modal__close" onClick={() => close(false)}>
@@ -355,14 +471,31 @@ export function LibraryManager(): JSX.Element | null {
             <button className="crumb" onClick={() => void load('')}>
               <Icon name="folder" size={14} /> Songs
             </button>
-            {segments.map((seg, i) => (
-              <span key={i} className="crumb__wrap">
+            {/* Mobil + hluboká cesta: prostřední segmenty se schovají za „…"
+                (tap = skok na nejbližší schovaný předek), ať drobek nepřetéká. */}
+            {isMobile && segments.length > 2 ? (
+              <span className="crumb__wrap">
                 <span className="crumb__sep">/</span>
-                <button className="crumb" onClick={() => void load(segments.slice(0, i + 1).join('/'))}>
-                  {seg}
+                <button
+                  className="crumb crumb--ellipsis"
+                  title={segments.slice(0, -2).join(' / ')}
+                  onClick={() => void load(segments.slice(0, -2).join('/'))}
+                >
+                  …
                 </button>
               </span>
-            ))}
+            ) : null}
+            {(isMobile && segments.length > 2 ? segments.slice(-2) : segments).map((seg, i, arr) => {
+              const idx = segments.length - arr.length + i
+              return (
+                <span key={idx} className="crumb__wrap">
+                  <span className="crumb__sep">/</span>
+                  <button className="crumb" onClick={() => void load(segments.slice(0, idx + 1).join('/'))}>
+                    {seg}
+                  </button>
+                </span>
+              )
+            })}
           </div>
         </div>
 
@@ -513,9 +646,16 @@ export function LibraryManager(): JSX.Element | null {
                     : ''
                 }`}
                 onClick={(e) => onItemClick(en.name, e)}
-                onDoubleClick={() => en.type === 'dir' && void load(relOf(en.name))}
+                onDoubleClick={() => !libSelect && en.type === 'dir' && void load(relOf(en.name))}
                 onContextMenu={(e) => openCtx(e, en.name)}
               >
+                {/* Checkbox výběrového režimu (mobil) — čistě vizuální, přepíná
+                    ho tap na celý řádek. Na desktopu CSS-schovaný. */}
+                <span className="lib__check" aria-hidden="true">
+                  <span className="lib__checkbox">
+                    {selected.has(en.name) ? <Icon name="check" size={15} /> : null}
+                  </span>
+                </span>
                 <Icon
                   name={en.type === 'dir' ? 'folder' : en.name.toLowerCase().endsWith('.sng') ? 'note' : 'file'}
                   size={17}
@@ -532,23 +672,93 @@ export function LibraryManager(): JSX.Element | null {
                     <span className="lib__tag lib__tag--dir">folder</span>
                   )
                 ) : null}
+                {/* Mobilní ⋮ — dotyková cesta ke stejným akcím jako pravý klik.
+                    Na desktopu CSS-schovaný, ve výběrovém režimu taky. */}
+                <button
+                  type="button"
+                  className="lib__kebab"
+                  title="Actions"
+                  aria-label={`Actions for ${en.name}`}
+                  onClick={(e) => openSheet(e, en.name)}
+                  onDoubleClick={(e) => e.stopPropagation()}
+                >
+                  <Icon name="more" size={18} />
+                </button>
               </div>
             ))
           )}
         </div>
 
-        <div className="lib__actions">
-          <span className="lib__selinfo">
-            {selCount ? `${selCount} selected` : `${entries.length} items`}
-            {clip ? ` · ${clip.items.length} on clipboard (${clip.op})` : ''}
-          </span>
-          <div className="lib__spacer" />
-          <span className="lib__hint">
-            {IS_MAC
-              ? 'Right-click for actions · ⌘C/X/V · ⌘⌫ · ↩'
-              : 'Right-click for actions · Ctrl+C/X/V · Del · F2'}
-          </span>
-        </div>
+        {libSelect ? (
+          /* Výběrový režim (mobil): připnutá lišta hromadných akcí — stejná
+             sada jako desktop (playlist / copy / cut / delete přes ctxmenu). */
+          <div className="lib__selectbar">
+            <div className="lib__sbrow">
+              <button
+                type="button"
+                className="lib__sball"
+                onClick={() =>
+                  setSelected(
+                    selCount === entries.length
+                      ? new Set()
+                      : new Set(entries.map((x) => x.name))
+                  )
+                }
+              >
+                {selCount === entries.length && entries.length > 0 ? 'None' : 'All'}
+              </button>
+              <span className="lib__sbcount">{selCount} selected</span>
+              <button type="button" className="lib__sbdone" onClick={exitSelect} aria-label="Exit select mode">
+                <Icon name="close" size={16} />
+              </button>
+            </div>
+            <div className="lib__sbactions">
+              <button
+                type="button"
+                className="lib__sbbtn"
+                disabled={!selSongCount}
+                onClick={() => setPlaylistFor(selSongRels())}
+              >
+                <Icon name="note" size={16} />
+                <span>Playlist{selSongCount ? ` (${selSongCount})` : ''}</span>
+              </button>
+              <button type="button" className="lib__sbbtn" disabled={!selCount} onClick={doCopy}>
+                <Icon name="copy" size={16} />
+                <span>Copy</span>
+              </button>
+              <button type="button" className="lib__sbbtn" disabled={!selCount} onClick={doCut}>
+                <Icon name="scissors" size={16} />
+                <span>Cut</span>
+              </button>
+              <button
+                type="button"
+                className="lib__sbbtn lib__sbbtn--danger"
+                disabled={!selCount}
+                onClick={() => setDialog({ type: 'delete', names: selArr() })}
+              >
+                <Icon name="trash" size={16} />
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="lib__actions">
+            <span className="lib__selinfo">
+              {selCount ? `${selCount} selected` : `${entries.length} items`}
+              {clip ? ` · ${clip.items.length} on clipboard (${clip.op})` : ''}
+            </span>
+            <div className="lib__spacer" />
+            <span className="lib__hint">
+              {IS_MAC
+                ? 'Right-click for actions · ⌘C/X/V · ⌘⌫ · ↩'
+                : 'Right-click for actions · Ctrl+C/X/V · Del · F2'}
+            </span>
+            {/* Mobil: vstup do výběrového režimu (desktop má Ctrl/Shift-klik). */}
+            <button type="button" className="lib__selecttoggle" onClick={() => setLibSelect(true)}>
+              <Icon name="check" size={14} /> Select
+            </button>
+          </div>
+        )}
 
         {/* Context menu */}
         {ctx ? (
@@ -570,58 +780,30 @@ export function LibraryManager(): JSX.Element | null {
               style={{ left: ctx.x, top: ctx.y }}
               onMouseDown={(e) => e.stopPropagation()}
             >
-            {singleIsDir ? (
-              <button className="ctxmenu__item" onClick={() => { void load(relOf(singleName!)); setCtx(null) }}>
-                <Icon name="folder" size={14} /> Open
-              </button>
-            ) : null}
-            {single ? (
-              <button
-                className="ctxmenu__item"
-                onClick={() => { setDialog({ type: 'rename', name: singleName! }); setDialogValue(singleName!); setCtx(null) }}
-              >
-                <Icon name="charter" size={14} /> Rename
-              </button>
-            ) : null}
-            {single && singleIsSong ? (
-              <button
-                className="ctxmenu__item"
-                onClick={() => { setMetaFor({ rel: relOf(singleName!), title: singleName! }); setCtx(null) }}
-              >
-                <Icon name="file" size={14} /> Edit metadata
-              </button>
-            ) : null}
-            {selSongCount > 0 ? (
-              <button
-                className="ctxmenu__item"
-                onClick={() => { setPlaylistFor(selSongRels()); setCtx(null) }}
-              >
-                <Icon name="note" size={14} /> Add to playlist ({selSongCount})
-              </button>
-            ) : null}
-            {selCount ? (
-              <>
-                <div className="ctxmenu__sep" />
-                <button className="ctxmenu__item" onClick={() => { doCopy(); setCtx(null) }}>
-                  <Icon name="copy" size={14} /> Copy
+            {menuItems(() => setCtx(null))}
+            </div>
+          </>
+        ) : null}
+
+        {/* Mobilní ⋮ sheet — STEJNÉ akce jako kontextové menu (menuItems). */}
+        {sheetOpen ? (
+          <>
+            <div className="sheet-scrim" onClick={() => setSheetOpen(false)} aria-hidden="true" />
+            <div className="sheet libsheet" role="dialog" aria-modal="true" aria-label="Item actions">
+              <div className="sheet__head">
+                <span className="sheet__title libsheet__title">
+                  {single ? singleName : `${selCount} selected`}
+                </span>
+                <button
+                  type="button"
+                  className="sheet__close"
+                  onClick={() => setSheetOpen(false)}
+                  aria-label="Close actions"
+                >
+                  <Icon name="close" size={16} />
                 </button>
-                <button className="ctxmenu__item" onClick={() => { doCut(); setCtx(null) }}>
-                  <Icon name="scissors" size={14} /> Cut
-                </button>
-                <button className="ctxmenu__item ctxmenu__item--danger" onClick={() => { setDialog({ type: 'delete', names: selArr() }); setCtx(null) }}>
-                  <Icon name="trash" size={14} /> Delete
-                </button>
-                <div className="ctxmenu__sep" />
-              </>
-            ) : null}
-            <button className="ctxmenu__item" onClick={() => { setDialog({ type: 'new' }); setDialogValue(''); setCtx(null) }}>
-              <Icon name="folderPlus" size={14} /> New folder
-            </button>
-            {clip ? (
-              <button className="ctxmenu__item" onClick={() => { doPaste(); setCtx(null) }}>
-                <Icon name="paste" size={14} /> Paste ({clip.items.length})
-              </button>
-            ) : null}
+              </div>
+              <div className="sheet__body libsheet__body">{menuItems(() => setSheetOpen(false))}</div>
             </div>
           </>
         ) : null}
