@@ -1,25 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SongResult } from '../../../shared/types'
 import { selectActiveFilterCount, useStore } from '../store'
+import { useIsMobile } from '../useIsMobile'
 import { FilterPanel } from './FilterPanel'
 import { Icon } from './Icon'
-
-// Jediný breakpoint pro JS větvení (musí sedět s CSS — viz sekce MOBILE ve
-// styles.css): pod ním tlačítko Filters otevírá mobilní filter-sheet místo
-// desktopové rolety FilterPanel.
-const MOBILE_MQ = '(max-width: 899.98px)'
-
-/** Živě sleduje mobilní breakpoint (resize/rotace přepne chování bez reloadu). */
-function useIsMobile(): boolean {
-  const [mobile, setMobile] = useState(() => window.matchMedia(MOBILE_MQ).matches)
-  useEffect(() => {
-    const mq = window.matchMedia(MOBILE_MQ)
-    const onChange = (e: MediaQueryListEvent): void => setMobile(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
-  return mobile
-}
 
 // Pozn. (redesign v2): Database/System přepínače žijí v levém Sidebaru.
 // SearchBar je jen vyhledávací pole + našeptávač + tlačítko Search.
