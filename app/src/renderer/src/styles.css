@@ -7688,6 +7688,90 @@ button.plrow__na:hover {
     min-width: 0;
   }
 
+  /* ── Download queue → bottom sheet: sbalená pilulka (počet + souhrnný
+     průběh) vpravo dole; tap ji rozbalí na sheet přes obsah. ── */
+  .queue-pill {
+    position: fixed;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 90;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: var(--box, #0f1a31);
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  }
+  .queue-pill--hidden {
+    display: none;
+  }
+  .queue-pill--error {
+    border-color: rgba(255, 107, 107, 0.55);
+  }
+  .queue-pill__bar {
+    width: 56px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+  }
+  .queue-pill__fill {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 0.25s ease;
+  }
+  .queue-pill--error .queue-pill__fill {
+    background: #ff6b6b;
+  }
+  .queue-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 92;
+    background: rgba(4, 8, 18, 0.55);
+  }
+  /* Panel fronty v toku layoutu neexistuje (nahrazuje ho pilulka)… */
+  .queue-wrap {
+    display: none;
+  }
+  /* …a jako sheet je fixovaný dole, nad scrimem, pod modaly (z 100). */
+  .queue-wrap--sheet {
+    display: grid;
+    grid-template-rows: 1fr;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 95;
+  }
+  .queue-wrap--sheet .queue-inner {
+    opacity: 1;
+  }
+  .queue-wrap--sheet .queue {
+    max-height: min(70dvh, 620px);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-top: 1px solid var(--border-strong, var(--border));
+    background: #0c1530;
+    box-shadow: 0 -12px 44px rgba(0, 0, 0, 0.55);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .queue-wrap--sheet .queue__toggle,
+  .queue-wrap--sheet .queue__clear {
+    min-height: 44px;
+  }
+  .queue-wrap--sheet .queue__list {
+    max-height: min(48dvh, 480px);
+  }
 }
 
 /* ── phone (≤600px): jednosloupcové dorovnání shellu ── */
