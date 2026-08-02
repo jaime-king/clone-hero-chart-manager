@@ -79,3 +79,14 @@ Sweep every fixed-width modal (`DuplicatesModal`, `Settings`, `PlaylistManagerMo
 0 → 1 → (2, 3, 4 in any order — parallel-safe: 2 lives in search components, 3 in library components, 4 in modal CSS; they share only the Phase 1 shell and the sheet pattern, so Phase 4 defines `.sheet-on-phone` FIRST if run in parallel with 3) → 5 → 6.
 
 Phase 1 and the audit are the load-bearing work. Realistic shape: audit + shell in one sitting, the component phases one sitting each, then the real-phone punch list. The 7,430-line CSS file is the main risk — agents must extend it surgically, never reorganize it.
+## Amendment (2026-08-02) — IA restructure from Jaime's first phone test
+
+Jaime tested Phases 1+2 on his phone and redirected the plan. These decisions supersede the affected parts above. **The "desktop pixel-equivalent" ground rule is retired** — the new structure applies at ALL widths (his explicit choice); desktop still has to look coherent, but it changes.
+
+1. **My Library becomes a full page, not a modal** — a real view the app navigates to, at every width. (He judged the modal "reasonably usable" on phone, but a page "makes more sense".)
+2. **Sidebar becomes a navigation bar** — navigation-focused: Search/home, My Library, Settings, plus the remaining sidebar actions that are truly global (playlist import, Surprise me — judge and report). On phone this stays the drawer; on desktop it slims to a nav rail/bar.
+3. **Database (RhythmVerse/Encore/Both) and system (CH/PS/RB/All) switches move out of the sidebar into the Filters surface** — they scope the *search*, so they belong with the filters: into the Phase 2 FilterSheet on phone AND the desktop FilterPanel.
+4. **Header cleanup at phone width**: My Library + Settings buttons move into the drawer (title bar = wordmark + hamburger); the "FILTERS & INSTRUMENTS" disclosure is removed (duplicate of the Filters button — both already open the same sheet); Filters + Search compress to icon-only buttons inline with the search input (one row).
+5. Library manager internals: phone state after Phase 3 is good enough — no further mobile library work beyond what Phase 3 shipped.
+
+Phase 4 (modal sheet sweep) shrinks accordingly: LibraryManager leaves the modal list; remaining fixed-width modals still get the `.sheet` treatment. Phases 5–6 unchanged.
