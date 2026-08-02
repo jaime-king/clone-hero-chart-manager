@@ -12,6 +12,7 @@ export function TitleBar(): JSX.Element {
   const setShowSettings = useStore((s) => s.setShowSettings)
   const setShowLibrary = useStore((s) => s.setShowLibrary)
   const setShowAbout = useStore((s) => s.setShowAbout)
+  const setMobileNavOpen = useStore((s) => s.setMobileNavOpen)
   const [maximized, setMaximized] = useState(false)
 
   // Drž ikonu tlačítka v syncu se skutečným stavem okna (i když se maximalizuje
@@ -65,18 +66,32 @@ export function TitleBar(): JSX.Element {
           <Icon name="settings" size={16} />
         </button>
         <button
-          className="titlebar__btn"
+          className="titlebar__btn titlebar__btn--window"
           title={maximized ? 'Restore window' : 'Maximize window'}
           onClick={() => window.api.toggleMaximize()}
         >
           <Icon name={maximized ? 'restore' : 'maximize'} size={15} />
         </button>
         <button
-          className="titlebar__btn titlebar__btn--close"
+          className="titlebar__btn titlebar__btn--close titlebar__btn--window"
           title="Quit program"
           onClick={() => window.api.quitApp()}
         >
           <Icon name="close" size={15} />
+        </button>
+        {/* Mobil (<900px, viz styles.css „MOBILE"): hamburger otevře drawer se
+            Sidebar obsahem. Na desktopu je skrytý (sidebar je trvale vlevo). */}
+        <button
+          className="titlebar__btn titlebar__menu"
+          title="Menu"
+          aria-label="Open menu"
+          onClick={() => setMobileNavOpen(true)}
+        >
+          <span className="titlebar__menu-lines" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
         </button>
       </div>
     </div>

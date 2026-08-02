@@ -26,6 +26,8 @@ const SYSTEMS: { id: RhythmVerseSystem; label: string; hint: string }[] = [
 ]
 
 export function Sidebar(): JSX.Element {
+  const mobileNavOpen = useStore((s) => s.mobileNavOpen)
+  const setMobileNavOpen = useStore((s) => s.setMobileNavOpen)
   const database = useStore((s) => s.database)
   const setDatabase = useStore((s) => s.setDatabase)
   const system = useStore((s) => s.system)
@@ -115,7 +117,22 @@ export function Sidebar(): JSX.Element {
   const showSystems = database !== 'enchor'
 
   return (
-    <aside className="sidebar">
+    <>
+      {/* Mobil (<900px): scrim za drawerem — tap zavře. Na desktopu display:none. */}
+      {mobileNavOpen ? (
+        <div className="nav-scrim" onClick={() => setMobileNavOpen(false)} aria-hidden="true" />
+      ) : null}
+      <aside
+        className={`sidebar ${mobileNavOpen ? 'sidebar--open' : ''}`}
+        // Výběr akce v draweru (jakékoli tlačítko) drawer zavře; na desktopu je
+        // mobileNavOpen vždy false, takže je to no-op. Výjimka: patička s updaty —
+        // její zpětná vazba („Checking…", průběh stahování) žije uvnitř draweru.
+        onClick={(e) => {
+          const t = e.target as HTMLElement
+          if (mobileNavOpen && t.closest('button') && !t.closest('.side-footer'))
+            setMobileNavOpen(false)
+        }}
+      >
       <div className="side-group">
         <div className="side-label">Database</div>
         <div className="side-list">
@@ -296,6 +313,7 @@ export function Sidebar(): JSX.Element {
           </>
         )}
       </div>
-    </aside>
+      </aside>
+    </>
   )
 }

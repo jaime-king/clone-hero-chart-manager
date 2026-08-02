@@ -42,6 +42,8 @@ interface AppState {
   enqueuedKeys: Record<string, string> // songKey -> jobId
   config: AppConfig | null
   showSettings: boolean
+  /** Mobil (<900px): otevřený slide-in drawer se Sidebar obsahem. Na desktopu se nepoužívá. */
+  mobileNavOpen: boolean
   showLibrary: boolean
   /** Cíl pro „In library": relativní cesty (k Songs) kopií písně k odhalení v Library
    *  Manageru. null = manager otevřen normálně (kořen). Víc cest = duplikáty. */
@@ -165,6 +167,7 @@ interface AppState {
   setShowFilters: (v: boolean) => void
   setSelectedIndex: (i: number) => void
   setShowSettings: (v: boolean) => void
+  setMobileNavOpen: (v: boolean) => void
   setShowLibrary: (v: boolean) => void
   /** Otevře Library Manager rovnou na dané písni (kopiích) a vybere ji. */
   openLibraryAt: (rels: string[]) => void
@@ -637,6 +640,7 @@ export const useStore = create<AppState>((set, get) => {
   enqueuedKeys: {},
   config: null,
   showSettings: false,
+  mobileNavOpen: false,
   showLibrary: false,
   libraryReveal: null,
   showWhatsNew: false,
@@ -1030,6 +1034,7 @@ export const useStore = create<AppState>((set, get) => {
   },
   setSelectedIndex: (i) => set({ selectedIndex: i }),
   setShowSettings: (v) => set({ showSettings: v }),
+  setMobileNavOpen: (v) => set({ mobileNavOpen: v }),
   // Zavření manageru vyčistí cíl „reveal" (příště se otevře normálně na kořeni).
   // Zároveň obnoví „owned" index — uživatel mohl ve správci smazat/přesunout
   // písničky, jinak by řádky ve výsledcích držely zastaralý „In library".

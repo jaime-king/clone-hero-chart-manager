@@ -7428,3 +7428,310 @@ button.plrow__na:hover {
 .side-sep--wide {
   margin: 4px 0;
 }
+
+/* ============================================================
+   MOBILE (Phase 1 — app shell). docs/mobile/plan.md.
+
+   Breakpoints (plán, jediná definice — všude používej TYTO hodnoty):
+     tablet: @media (max-width: 899.98px)  — sidebar → drawer, chrome pryč
+     phone:  @media (max-width: 600px)     — single column, sheets
+   (@custom-media není bez PostCSS pluginu podporované, proto literály +
+   tenhle komentář jako zdroj pravdy.)
+
+   Desktop (≥900px) se NESMÍ změnit: níže jsou jen (a) base pravidla
+   skrývající nové mobilní prvky na desktopu a (b) additivní @media bloky.
+   ============================================================ */
+
+/* Nové mobilní prvky na desktopu neexistují. */
+.titlebar__menu,
+.filterbar__mobiletoggle,
+.queue-pill,
+.queue-scrim,
+.nav-scrim {
+  display: none;
+}
+
+/* ── tablet (<900px): shell — jednosloupcový layout + drawer ── */
+@media (max-width: 899.98px) {
+  /* dvh místo vh: mobilní Safari/Chrome mění výšku viewportu s adresním
+     řádkem — 100vh by nechalo spodek shellu pod lištou prohlížeče. */
+  #root {
+    height: 100dvh;
+  }
+
+  /* Audit #1: workspace měl ~722px min-width v .app { overflow: hidden } →
+     půlka UI nedosažitelná. Jediný sloupec + zákaz horizontálního přetečení
+     v celém řetězci; sidebar jde mimo tok (fixed drawer). */
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .content {
+    min-width: 0;
+    /* clip (ne hidden): nevytváří scroll kontext → focus/scrollIntoView nemá
+       KAM odjet do strany; svisle nechává obsah (suggest dropdown) být. */
+    overflow-x: clip;
+  }
+
+  /* Sidebar → slide-in drawer přes obsah, plná výška, scrim za ním. */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: min(300px, 85vw);
+    z-index: 140;
+    transform: translateX(-102%);
+    visibility: hidden;
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s 0.28s;
+    border-right: 1px solid var(--border);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55);
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+  .sidebar--open {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s;
+  }
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 130;
+    background: rgba(4, 8, 18, 0.6);
+    backdrop-filter: blur(2px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar {
+      transition: none;
+    }
+  }
+
+  /* Title bar: wordmark + My Library + Settings + hamburger. Okenní chrome
+     (maximize/quit) a TipsTicker pryč; cíle ≥44px. */
+  .titlebar__btn--window,
+  .tips {
+    display: none;
+  }
+  .titlebar__menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .titlebar__menu-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 17px;
+  }
+  .titlebar__menu-lines i {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+  .titlebar {
+    min-height: 60px;
+    padding: 8px 12px 4px;
+    gap: 8px;
+  }
+  .titlebar__left {
+    /* Brand nalevo, akce se dorazí doprava přes margin-left auto na .titlebar__actions. */
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+  }
+  .titlebar__actions {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .titlebar__btn {
+    width: 44px;
+    height: 44px;
+  }
+  .titlebar__library {
+    height: 44px;
+    padding: 0 14px;
+  }
+  .brand-text {
+    font-size: 24px;
+    white-space: nowrap;
+  }
+
+  /* ── Hero/filtry: defaultně sbaleno do 44px přepínače (audit #2: results
+     0px na 375 I 768 — hero sežral celý viewport). Rozbalení = svislé
+     skupiny pod sebou, plná šířka. ── */
+  .filterbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin: 6px 12px 0;
+    padding: 10px 12px;
+  }
+  .filterbar__mobiletoggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 6px;
+    border: none;
+    background: none;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-align: left;
+  }
+  .filterbar__mobilecount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11.5px;
+  }
+  .filterbar__mobilecaret {
+    margin-left: auto;
+    color: var(--text-faint);
+  }
+  .filterbar--mobile-collapsed .fgroup,
+  .filterbar--mobile-collapsed .dropzone {
+    display: none;
+  }
+  .filterbar .fgroup + .fgroup {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  .filterbar .dropzone {
+    margin-left: 0;
+    align-self: stretch;
+    width: auto;
+  }
+  .instbtns {
+    justify-content: space-between;
+    row-gap: 14px;
+  }
+
+  /* Info pruh + search: užší okraje a kompaktnější vertikála — každý px
+     výšky tady jde z výšky seznamu výsledků (audit #2). */
+  .rec-hint {
+    margin: 8px 12px 0;
+    padding: 7px 11px;
+    font-size: 11.5px;
+  }
+  .content .searchbar {
+    padding: 8px 12px;
+  }
+  .searchbar__input-wrap {
+    min-width: 0;
+  }
+  .content .searchbar__row--input {
+    padding: 8px;
+  }
+  .content .searchbar__input {
+    min-width: 0;
+    height: 44px;
+  }
+  .content .searchbar__go {
+    height: 44px;
+  }
+
+  /* Resultsbar + tabulka + pager: obsah se zalamuje/scrolluje UVNITŘ, nikdy
+     neroztahuje shell. Řádky písní zůstávají desktopové (Phase 2) — jejich
+     838px min-width se scrolluje uvnitř .results--table. */
+  .resultsbar {
+    flex-wrap: wrap;
+    margin: 2px 12px;
+    padding: 2px 6px;
+    row-gap: 4px;
+  }
+  .resultsbar__right {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+  .tablewrap {
+    margin: 0 12px 8px;
+  }
+  .results--table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  .pgbtn,
+  .pgnum {
+    min-width: 44px;
+    height: 44px;
+  }
+  .pager__pages {
+    flex-wrap: wrap;
+    justify-content: center;
+    min-width: 0;
+  }
+
+}
+
+/* ── phone (≤600px): jednosloupcové dorovnání shellu ── */
+@media (max-width: 600px) {
+  /* Search řádek: input přes celou šířku, Filters + Search pod ním. */
+  .content .searchbar__row--input {
+    flex-wrap: wrap;
+  }
+  .searchbar__input-wrap {
+    flex: 1 1 100%;
+  }
+  .content .searchbar__go {
+    flex: 1;
+  }
+  .searchbar__filters {
+    min-height: 44px;
+  }
+  .content .searchbar__go {
+    min-height: 44px;
+  }
+  /* Wordmark kompaktněji, ať se s akcemi vejde do 375px (EQ značka pryč —
+     text „Chart Manager." je značka sám o sobě). */
+  .brand-mark {
+    display: none;
+  }
+  .brand-text {
+    font-size: 19px;
+  }
+  .titlebar__brandbtn {
+    padding-left: 0;
+  }
+  .titlebar__library {
+    padding: 0 11px;
+    font-size: 12.5px;
+  }
+  .titlebar {
+    padding: 6px 8px 2px;
+    gap: 6px;
+  }
+  .titlebar__actions {
+    gap: 6px;
+  }
+  /* Suggest dropdown nesmí přetéct viewport do stran. */
+  .suggest {
+    max-width: calc(100vw - 24px);
+  }
+}

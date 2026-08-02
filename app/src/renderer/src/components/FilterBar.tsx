@@ -26,6 +26,13 @@ export function FilterBar(): JSX.Element {
   const openLocalDrop = useStore((s) => s.openLocalDrop)
   const openLocalBatch = useStore((s) => s.openLocalBatch)
   const [dragOver, setDragOver] = useState(false)
+  // Mobil (<900px): celý panel filtrů je defaultně sbalený do jednořádkového
+  // přepínače, ať seznam výsledků dostane reálnou výšku (audit: results 0px na
+  // 375 i 768). Na desktopu se přepínač nerenderuje vizuálně (CSS display:none)
+  // a panel je vždy rozbalený.
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const diffNarrowed = diffMin > 0 || diffMax < MAX_DIFFICULTY
+  const activeCount = filters.length + (diffNarrowed ? 1 : 0)
 
   const handleDrop = (e: React.DragEvent<HTMLElement>): void => {
     e.preventDefault()
@@ -58,7 +65,23 @@ export function FilterBar(): JSX.Element {
   }
 
   return (
-    <div className="filterbar">
+    <div className={`filterbar ${mobileOpen ? '' : 'filterbar--mobile-collapsed'}`}>
+      <button
+        type="button"
+        className="filterbar__mobiletoggle"
+        aria-expanded={mobileOpen}
+        onClick={() => setMobileOpen((v) => !v)}
+      >
+        <Icon name="settings" size={15} />
+        <span>Instruments &amp; difficulty</span>
+        {activeCount > 0 ? <span className="filterbar__mobilecount">{activeCount}</span> : null}
+        <Icon
+          name="caret"
+          size={14}
+          className="filterbar__mobilecaret"
+          style={{ transform: mobileOpen ? 'rotate(180deg)' : 'none' }}
+        />
+      </button>
       <div className="fgroup fgroup--instruments">
         <div className="fgroup__label">Instruments</div>
         <div className="instbtns">
