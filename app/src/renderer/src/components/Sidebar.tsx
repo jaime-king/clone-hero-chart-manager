@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { Database, RhythmVerseSystem, UpdateAvailable } from '../../../shared/types'
+import type { UpdateAvailable } from '../../../shared/types'
 import { errMsg } from '../../../shared/errors'
 import spotifyMark from '../assets/Spotify_Primary_Logo.webp'
 import { useStore } from '../store'
@@ -8,32 +8,18 @@ import { Icon } from './Icon'
 // Verzi, kterou uživatel „zavřel", si pamatujeme, ať ho stejné upozornění neotravuje.
 const DISMISS_KEY = 'chm.updateDismissed'
 
-// Levý panel (redesign v2 dle mockupu): svislé seznamy DATABASE a SYSTEM.
-// Stejné chování jako dřívější Segmented přepínače v SearchBaru — jen jiné
-// rozložení.
-
-const DATABASES: { id: Database; label: string; hint: string }[] = [
-  { id: 'rhythmverse', label: 'RhythmVerse', hint: 'Largest catalogue — CH, Phase Shift and Rock Band CON' },
-  { id: 'enchor', label: 'Chorus Encore', hint: 'Curated Clone Hero charts hosted directly as .sng files' },
-  { id: 'both', label: 'Both', hint: 'Merged & de-duplicated results from both sources' }
-]
-
-const SYSTEMS: { id: RhythmVerseSystem; label: string; hint: string }[] = [
-  { id: 'ch', label: 'Clone Hero', hint: 'Native charts (no conversion)' },
-  { id: 'ps', label: 'Phase Shift', hint: 'Read by Clone Hero directly' },
-  { id: 'rb3', label: 'Rock Band', hint: 'CON → converted to CH' },
-  { id: 'all', label: 'All', hint: 'All formats' }
-]
+// IA (Phase 3.5): levý panel je NAVIGACE — Search / My Library / Settings +
+// globální akce (Surprise me, Import playlist) a update patička. Database/System
+// přepínače se přestěhovaly do filtrů (FilterPanel/FilterSheet) — scopují
+// vyhledávání, ne aplikaci. Na desktopu kompaktní nav rail (ikony + popisky),
+// na mobilu (<900px) tentýž obsah jako slide-in drawer.
 
 export function Sidebar(): JSX.Element {
   const mobileNavOpen = useStore((s) => s.mobileNavOpen)
   const setMobileNavOpen = useStore((s) => s.setMobileNavOpen)
-  const database = useStore((s) => s.database)
-  const setDatabase = useStore((s) => s.setDatabase)
-  const system = useStore((s) => s.system)
-  const setSystem = useStore((s) => s.setSystem)
-  const query = useStore((s) => s.query)
-  const doSearch = useStore((s) => s.doSearch)
+  const view = useStore((s) => s.view)
+  const setView = useStore((s) => s.setView)
+  const setShowSettings = useStore((s) => s.setShowSettings)
   const surpriseMe = useStore((s) => s.surpriseMe)
   const setShowPlaylistImport = useStore((s) => s.setShowPlaylistImport)
   const openWhatsNew = useStore((s) => s.openWhatsNew)
@@ -114,8 +100,6 @@ export function Sidebar(): JSX.Element {
     }
   }
 
-  const showSystems = database !== 'enchor'
-
   return (
     <>
       {/* Mobil (<900px): scrim za drawerem — tap zavře. Na desktopu display:none. */}
@@ -133,69 +117,52 @@ export function Sidebar(): JSX.Element {
             setMobileNavOpen(false)
         }}
       >
-      <div className="side-group">
-        <div className="side-label">Database</div>
-        <div className="side-list">
-          {/* Klouzavé zvýraznění — plavně sjede na aktivní položku (index × 60 px:
-              výška 52 + mezera 8). */}
-          <span
-            className="side-indicator"
-            aria-hidden="true"
-            style={{ transform: `translateY(${DATABASES.findIndex((d) => d.id === database) * 60}px)` }}
-          />
-          {DATABASES.map((d) => (
-            <button
-              key={d.id}
-              type="button"
-              title={d.hint}
-              className={`side-item ${database === d.id ? 'side-item--on' : ''}`}
-              onClick={() => {
-                setDatabase(d.id)
-                // Vždy re-search: prázdný dotaz výsledky vyčistí (RV/Both)
-                // nebo přepne na browse-all (Encore) — žádné zatuchlé výsledky.
-                void doSearch(1)
-              }}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {showSystems ? (
-        <div className="side-group">
-          <div className="side-label">System</div>
-          <div className="side-list">
-            <span
-              className="side-indicator"
-              aria-hidden="true"
-              style={{ transform: `translateY(${SYSTEMS.findIndex((s) => s.id === system) * 60}px)` }}
-            />
-            {SYSTEMS.map((sys) => (
-              <button
-                key={sys.id}
-                type="button"
-                title={sys.hint}
-                className={`side-item ${system === sys.id ? 'side-item--on' : ''}`}
-                onClick={() => {
-                  setSystem(sys.id)
-                  // Re-search i v browse režimu (prázdný dotaz), ne jen u textu.
-                  void doSearch(1)
-                }}
-              >
-                {sys.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      {/* Navigace: Search (domů) / My Library (stránka) / Settings (modal). */}
+      <nav className="side-nav" aria-label="Main navigation">
+        <button
+          type="button"
+          className={`side-navitem ${view === 'search' ? 'side-navitem--on' : ''}`}
+          title="Search & download charts"
+          onClick={() => setView('search')}
+        >
+          <Icon name="search" size={18} className="side-navitem__icon" />
+          <span className="side-navitem__label">Search</span>
+        </button>
+        <button
+          type="button"
+          className={`side-navitem ${view === 'library' ? 'side-navitem--on' : ''}`}
+          title="Browse and manage your Songs library: folders, metadata, playlists, duplicates"
+          onClick={() => setView('library')}
+        >
+          <Icon name="folder" size={18} className="side-navitem__icon" />
+          <span className="side-navitem__label">My Library</span>
+        </button>
+        <button
+          type="button"
+          className="side-navitem"
+          title="Settings"
+          onClick={() => setShowSettings(true)}
+        >
+          <Icon name="settings" size={18} className="side-navitem__icon" />
+          <span className="side-navitem__label">Settings</span>
+        </button>
+      </nav>
 
       <div className="side-sep side-sep--wide" aria-hidden="true" />
 
-      {/* Akční tlačítka pod seznamy. „Surprise me" = náhodný chart (respektuje
-          dotaz i filtry). „Import playlist" = dohledat charty z odkazu na playlist. */}
+      {/* Globální akce. „Surprise me" = náhodný chart (respektuje dotaz i
+          filtry) — přepne na search pohled, výsledek je vidět tam. „Import
+          playlist" = dohledat charty z odkazu na playlist. */}
       <div className="side-actions">
-        <button type="button" className="side-surprise" onClick={() => surpriseMe()}>
+        <button
+          type="button"
+          className="side-surprise"
+          title="Discover 5 random charts"
+          onClick={() => {
+            setView('search')
+            surpriseMe()
+          }}
+        >
           <Icon name="dice" size={18} className="side-surprise__dice" />
           <span className="side-surprise__text">
             <span className="side-surprise__title">Surprise me</span>
@@ -206,6 +173,7 @@ export function Sidebar(): JSX.Element {
         <button
           type="button"
           className="side-surprise side-import"
+          title="Turn a playlist into charts"
           onClick={() => setShowPlaylistImport(true)}
         >
           <span

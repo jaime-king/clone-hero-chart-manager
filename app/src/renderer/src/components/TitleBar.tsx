@@ -4,13 +4,12 @@ import { Icon } from './Icon'
 import { TipsTicker } from './TipsTicker'
 
 /**
- * Horní řádek obsahu (redesign v2): jen textový brand „Chart Manager" vlevo,
- * vpravo My Library / Settings / minimize / close. Verze + „check for updates"
- * jsou dole v Sidebaru. Celý pruh je drag oblast okna.
+ * Horní řádek obsahu: textový brand „Chart Manager" vlevo, vpravo okenní
+ * chrome (Electron) a hamburger (mobil). Navigace (Search / My Library /
+ * Settings) žije v nav railu/draweru (Sidebar); verze + „check for updates"
+ * dole v něm. Celý pruh je drag oblast okna.
  */
 export function TitleBar(): JSX.Element {
-  const setShowSettings = useStore((s) => s.setShowSettings)
-  const setShowLibrary = useStore((s) => s.setShowLibrary)
   const setShowAbout = useStore((s) => s.setShowAbout)
   const setMobileNavOpen = useStore((s) => s.setMobileNavOpen)
   const [maximized, setMaximized] = useState(false)
@@ -53,18 +52,10 @@ export function TitleBar(): JSX.Element {
 
       <TipsTicker />
 
+      {/* IA (Phase 3.5): My Library + Settings se přestěhovaly do navigace
+          (nav rail na desktopu, drawer na mobilu) — rail/drawer je jediný
+          navigační domov; titlebar = brand + okenní chrome + hamburger. */}
       <div className="titlebar__actions">
-        <button
-          className="titlebar__library"
-          title="Browse and manage your Songs library: folders, metadata, playlists, duplicates"
-          onClick={() => setShowLibrary(true)}
-        >
-          <Icon name="folder" size={15} />
-          <span>My Library</span>
-        </button>
-        <button className="titlebar__btn" title="Settings" onClick={() => setShowSettings(true)}>
-          <Icon name="settings" size={16} />
-        </button>
         <button
           className="titlebar__btn titlebar__btn--window"
           title={maximized ? 'Restore window' : 'Maximize window'}

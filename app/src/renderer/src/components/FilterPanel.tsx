@@ -1,7 +1,67 @@
 import { useEffect, useRef, useState } from 'react'
-import type { FilterOption } from '../../../shared/types'
+import type { Database, FilterOption, RhythmVerseSystem } from '../../../shared/types'
 import { useStore } from '../store'
 import { Icon } from './Icon'
+import { Segmented } from './Segmented'
+
+// IA (Phase 3.5): Database/System se přestěhovaly ze Sidebaru sem — scopují
+// vyhledávání, tak patří k filtrům. Stejné chování jako v Sidebaru: přepnutí
+// vždy re-search od 1. stránky (prázdný dotaz = browse katalogu, žádné
+// zatuchlé výsledky). V badge počtu filtrů NEJSOU — jsou to přepínače režimu,
+// ne zužující filtry (selectActiveFilterCount je nikdy nepočítal).
+
+const DATABASES: { id: Database; label: string; hint: string }[] = [
+  { id: 'rhythmverse', label: 'RhythmVerse', hint: 'Largest catalogue — CH, Phase Shift and Rock Band CON' },
+  { id: 'enchor', label: 'Chorus Encore', hint: 'Curated Clone Hero charts hosted directly as .sng files' },
+  { id: 'both', label: 'Both', hint: 'Merged & de-duplicated results from both sources' }
+]
+
+const SYSTEMS: { id: RhythmVerseSystem; label: string; hint: string }[] = [
+  { id: 'ch', label: 'Clone Hero', hint: 'Native charts (no conversion)' },
+  { id: 'ps', label: 'Phase Shift', hint: 'Read by Clone Hero directly' },
+  { id: 'rb3', label: 'Rock Band', hint: 'CON → converted to CH' },
+  { id: 'all', label: 'All', hint: 'All formats' }
+]
+
+/** Přepínače zdroje (Database + System) — sdílené mezi desktopovým FilterPanel
+ *  a mobilním FilterSheet (přes FilterPanelFields). Stav žije ve store. */
+function SourceSwitches(): JSX.Element {
+  const database = useStore((s) => s.database)
+  const setDatabase = useStore((s) => s.setDatabase)
+  const system = useStore((s) => s.system)
+  const setSystem = useStore((s) => s.setSystem)
+  const doSearch = useStore((s) => s.doSearch)
+
+  return (
+    <div className="srcswitch">
+      <div className="srcswitch__group">
+        <span className="filterfield__label">Database</span>
+        <Segmented
+          variant="db"
+          options={DATABASES}
+          value={database}
+          onChange={(id) => {
+            setDatabase(id)
+            void doSearch(1)
+          }}
+        />
+      </div>
+      {database !== 'enchor' ? (
+        <div className="srcswitch__group">
+          <span className="filterfield__label">System</span>
+          <Segmented
+            options={SYSTEMS}
+            value={system}
+            onChange={(id) => {
+              setSystem(id)
+              void doSearch(1)
+            }}
+          />
+        </div>
+      ) : null}
+    </div>
+  )
+}
 
 /**
  * Jednovýběrový select (id + label) laděný jako obecný `.dd`, s prázdnou volbou.
@@ -152,6 +212,8 @@ export function FilterPanelFields(): JSX.Element {
 
   return (
     <>
+      <SourceSwitches />
+
       {encoreOnly ? (
         <div className="filterpanel__encore">
           <Icon name="info" size={16} />

@@ -34,8 +34,11 @@ const LIB_SORTS: { id: LibSortKey; label: string }[] = [
 ]
 
 export function LibraryManager(): JSX.Element | null {
-  const show = useStore((s) => s.showLibrary)
-  const close = useStore((s) => s.setShowLibrary)
+  // IA (Phase 3.5): knihovna je plnohodnotná stránka (view === 'library'),
+  // ne modal. App ji montuje jen v knihovním pohledu; `show` tu zůstává pro
+  // efekty/zkratky vázané na otevření.
+  const show = useStore((s) => s.view === 'library')
+  const setView = useStore((s) => s.setView)
   // Cíl z „In library" (kopie písně k odhalení). Víc = duplikáty → banner.
   const libraryReveal = useStore((s) => s.libraryReveal)
   const [revealActive, setRevealActive] = useState<string | null>(null)
@@ -381,8 +384,8 @@ export function LibraryManager(): JSX.Element | null {
     entries.filter((e) => selected.has(e.name) && e.isSong).map((e) => relOf(e.name))
   const selSongCount = entries.filter((e) => selected.has(e.name) && e.isSong).length
 
-  // Plnohodnotný pod-modal (metadata / playlist / duplicates) → schovej Library
-  // manager pod ním, ať se nestohují modaly a nezdvojuje ztmavení pozadí.
+  // Otevřený pod-modal (metadata / playlist / duplicates) — stránka dostane
+  // třídu --has-sub (hook pro případné ztlumení; modaly mají vlastní overlay).
   const subModalOpen = metaFor !== null || playlistFor !== null || dupOpen || plmOpen
 
   // JEDINÝ zdroj akcí nad výběrem: desktopové kontextové menu (pravý klik)
@@ -446,18 +449,21 @@ export function LibraryManager(): JSX.Element | null {
   )
 
   return (
-    <div
-      className={`modal-overlay ${subModalOpen ? 'modal-overlay--has-sub' : ''}`}
-      onMouseDown={(e) => e.target === e.currentTarget && close(false)}
+    <section
+      className={`libpage ${libSelect ? 'lib--selecting' : ''} ${
+        subModalOpen ? 'libpage--has-sub' : ''
+      }`}
+      aria-label="Library manager"
     >
-      <div
-        className={`modal modal--library ${libSelect ? 'lib--selecting' : ''}`}
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <div className="modal__head">
-          <h2>Library manager</h2>
-          <button className="modal__close" onClick={() => close(false)}>
-            <Icon name="close" size={16} />
+        <div className="libpage__head">
+          <h2>My Library</h2>
+          <button
+            className="libpage__back"
+            onClick={() => setView('search')}
+            title="Back to search"
+          >
+            <Icon name="chevronLeft" size={15} />
+            <span>Back to search</span>
           </button>
         </div>
 
@@ -814,8 +820,10 @@ export function LibraryManager(): JSX.Element | null {
             <div className="lib__dialog">
               {dialog.type === 'delete' ? (
                 <>
+                  {/* Mazání je v tomhle forku PERMANENTNÍ (server maže natvrdo,
+                      žádný koš) — text nesmí slibovat Recycle Bin. */}
                   <p>
-                    Move {dialog.names.length === 1 ? <strong>{dialog.names[0]}</strong> : `${dialog.names.length} items`} to the Recycle Bin?
+                    Permanently delete {dialog.names.length === 1 ? <strong>{dialog.names[0]}</strong> : `${dialog.names.length} items`}? This cannot be undone.
                   </p>
                   <div className="lib__dialog-foot">
                     <button className="btn-secondary" onClick={() => setDialog(null)}>Cancel</button>
@@ -850,11 +858,9 @@ export function LibraryManager(): JSX.Element | null {
           </div>
         ) : null}
 
-      </div>
-
-      {/* Pod-modaly jsou uvnitř Library overlay (sourozenci boxu), ale se svým
-          PRŮHLEDNÝM overlayem — ztmavení pozadí drží pořád Library overlay, takže
-          při přepínání nic neprobliká. Box Library se skryje přes --has-sub. */}
+      {/* Pod-modaly (metadata / playlist / duplicates) jsou teď běžné modaly
+          NAD stránkou knihovny — mají vlastní overlay se ztmavením, stránka
+          zůstává pod nimi. */}
       {metaFor ? (
         <SongMetaDialog
           rel={metaFor.rel}
@@ -870,6 +876,6 @@ export function LibraryManager(): JSX.Element | null {
         <DuplicatesModal onClose={() => setDupOpen(false)} onChanged={() => void load(cwd)} />
       ) : null}
       {plmOpen ? <PlaylistManagerModal onClose={() => setPlmOpen(false)} /> : null}
-    </div>
+    </section>
   )
 }

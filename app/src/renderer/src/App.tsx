@@ -59,6 +59,8 @@ export function App(): JSX.Element {
   const hideOwned = useStore((s) => s.hideOwned)
   const sort = useStore((s) => s.sort)
   const surprise = useStore((s) => s.surprise)
+  // IA (Phase 3.5): aktivní pohled obsahu (search | library).
+  const view = useStore((s) => s.view)
 
   // Deep režim: filtr nástroje/obtížnosti → zdrojem je celý stažený dotaz
   // (všechny stránky) a stránkuje se lokálně nad shodami.
@@ -331,6 +333,16 @@ export function App(): JSX.Element {
     }
   }, [loadConfig, applyJobUpdate])
 
+  // IA (Phase 3.5): tlačítko Zpět v prohlížeči — hash (#library) řídí view.
+  // setView má vlastní guard (prev === v → no-op), takže se sync nezacyklí.
+  useEffect(() => {
+    const onHash = (): void => {
+      useStore.getState().setView(window.location.hash === '#library' ? 'library' : 'search')
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
   // Klik mimo okno s výsledky → odznač vybraný řádek. (Uvnitř tabulky, v modalu
   // ani v našeptávači neodznačujeme.)
   useEffect(() => {
@@ -350,6 +362,7 @@ export function App(): JSX.Element {
         t?.closest('.chk--selectall') ||
         t?.closest('.dd--sort') ||
         t?.closest('.modal-overlay') ||
+        t?.closest('.libpage') || // knihovní stránka nesmí vysypat výběr ve (skrytém) searchi
         t?.closest('.suggest')
       )
         return
@@ -384,7 +397,7 @@ export function App(): JSX.Element {
         else if (st.showAbout) st.setShowAbout(false)
         else if (st.showPlaylistImport) st.setShowPlaylistImport(false)
         else if (st.showWhatsNew) st.setShowWhatsNew(false)
-        else if (st.showLibrary) st.setShowLibrary(false)
+        else if (st.view === 'library') st.setView('search')
         else if (st.showSettings) {
           // Escape = Cancel: zahoď živý náhled UI scale (jinak by neuložená
           // škála zůstala aplikovaná až do restartu).
@@ -396,7 +409,7 @@ export function App(): JSX.Element {
       // Otevřené Nastavení/Správce/What's new/Import/About: nech projít jen Escape (výše), nenaviguj.
       if (
         useStore.getState().showSettings ||
-        useStore.getState().showLibrary ||
+        useStore.getState().view === 'library' ||
         useStore.getState().showWhatsNew ||
         useStore.getState().showPlaylistImport ||
         useStore.getState().showAbout
@@ -464,6 +477,10 @@ export function App(): JSX.Element {
         <Sidebar />
         <main className="content">
       <TitleBar />
+      {/* IA (Phase 3.5): search pohled zůstává namontovaný i pod knihovnou
+          (view--off = visibility:hidden + absolute), takže výsledky, filtry
+          i scroll pozice seznamu návštěvu knihovny přežijí beze ztráty. */}
+      <div className={`view view--search ${view === 'library' ? 'view--off' : ''}`}>
       <FilterBar />
 
       {database !== 'enchor' && system !== 'ch' ? (
@@ -698,6 +715,10 @@ export function App(): JSX.Element {
           </div>
         </div>
       ) : null}
+      </div>
+      {/* IA (Phase 3.5): knihovna = plnohodnotná stránka v obsahové ploše
+          (žádný modal-overlay) — montuje se jen v knihovním pohledu. */}
+      {view === 'library' ? <LibraryManager /> : null}
         </main>
       </div>
 
@@ -747,7 +768,6 @@ export function App(): JSX.Element {
       <Settings />
       <TargetFolderModal />
       <MarketplaceModal />
-      <LibraryManager />
       <LocalDropModal />
       <WhatsNew />
       <PlaylistImportModal />

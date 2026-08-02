@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { selectActiveFilterCount, useStore } from '../store'
+import { useStore } from '../store'
 import { INSTRUMENTS, MAX_DIFFICULTY } from '../utils'
 import { DifficultyDots } from './DifficultyDots'
 import { Dropdown } from './Dropdown'
@@ -57,14 +57,10 @@ export function FilterBar(): JSX.Element {
   const openLocalDrop = useStore((s) => s.openLocalDrop)
   const openLocalBatch = useStore((s) => s.openLocalBatch)
   const [dragOver, setDragOver] = useState(false)
-  // Mobil (<900px): panel filtrů je TRVALE sbalený do jednořádkového přepínače,
-  // ať seznam výsledků dostane reálnou výšku (audit: results 0px na 375 i 768).
-  // Fáze 2: přepínač už nerozbaluje panel inline, ale otevírá filter-sheet
-  // (FilterSheet) se všemi filtry. Na desktopu se přepínač nerenderuje vizuálně
-  // (CSS display:none) a panel je vždy rozbalený.
-  const setMobileFiltersOpen = useStore((s) => s.setMobileFiltersOpen)
-  // Badge = souhrn všech filtrů (sheet je všechny obsahuje), ne jen nástroje.
-  const activeCount = useStore(selectActiveFilterCount)
+  // IA (Phase 3.5): na mobilu (<900px) je celý hero panel CSS-schovaný —
+  // tytéž ovládací prvky žijí ve FilterSheet, který otevírá ikonové tlačítko
+  // Filters v search baru. Dřívější „Filters & instruments" přepínač tady byl
+  // duplikát toho tlačítka a je odstraněný.
 
   const handleDrop = (e: React.DragEvent<HTMLElement>): void => {
     e.preventDefault()
@@ -97,18 +93,7 @@ export function FilterBar(): JSX.Element {
   }
 
   return (
-    <div className="filterbar filterbar--mobile-collapsed">
-      <button
-        type="button"
-        className="filterbar__mobiletoggle"
-        aria-haspopup="dialog"
-        onClick={() => setMobileFiltersOpen(true)}
-      >
-        <Icon name="settings" size={15} />
-        <span>Filters &amp; instruments</span>
-        {activeCount > 0 ? <span className="filterbar__mobilecount">{activeCount}</span> : null}
-        <Icon name="caret" size={14} className="filterbar__mobilecaret" />
-      </button>
+    <div className="filterbar">
       <div className="fgroup fgroup--instruments">
         <div className="fgroup__label">Instruments</div>
         <InstrumentButtons />

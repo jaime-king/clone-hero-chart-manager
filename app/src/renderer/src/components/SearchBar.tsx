@@ -263,13 +263,22 @@ export function SearchBar(): JSX.Element {
           title="Advanced filters — browse by genre, year, decade and length"
         >
           <Icon name="filter" size={15} />
-          <span>Filters</span>
+          {/* IA (Phase 3.5): na mobilu (<900px) ikonové 44px tlačítko — popisek
+              schovává CSS, badge zůstává. */}
+          <span className="searchbar__filters-label">Filters</span>
           {activeFilterCount > 0 ? (
             <span className="searchbar__filters-badge">{activeFilterCount}</span>
           ) : null}
         </button>
-        <button className="searchbar__go" onClick={runFullSearch} disabled={loading}>
-          {loading ? '…' : 'Search'}
+        <button
+          className="searchbar__go"
+          onClick={runFullSearch}
+          disabled={loading}
+          title="Search"
+          aria-label="Search"
+        >
+          <Icon name="search" size={17} className="searchbar__go-icon" />
+          <span className="searchbar__go-label">{loading ? '…' : 'Search'}</span>
         </button>
       </div>
       <FilterPanel />
