@@ -268,3 +268,120 @@ overflow their own box are the problem):
 Shared fix: the `.sheet-on-phone` pattern from the plan, plus per-modal
 single-columning for Settings and Playlists. Half the modals need *no* layout
 surgery — don't churn them.
+
+---
+
+## Phase 6 verification (2026-08-06)
+
+Full pre-deploy regression pass against the same fixture/server setup as Phase 0
+(server :3000, `ch-fixture/Songs`, web build). Viewports re-checked: **375×812**,
+**768×1024**, **1280×800**. Measurements via `getBoundingClientRect()` with
+animations/transitions disabled; interactions JS-dispatched (real tap simulation
+hard-times-out under mobile emulation in this environment — same as earlier phases).
+
+**Verdict: ship-with-notes.** Every audit-table row verifies fixed (or n/a).
+Three small regressions/gaps found and fixed in place (commits below); nothing
+structural remains.
+
+### Per-audit-row verdicts
+
+| Screen | Item (Phase 0) | 375 | 768 | 1280 | Verdict |
+|---|---|---|---|---|---|
+| Shell | 722px min-width, half UI unreachable | html/body/app scrollWidth = 375 | = 768 | = 1280 | **fixed** |
+| Shell | Sidebar unreachable when panned | drawer (fixed, x=−306 closed, opens on hamburger, closes on select/scrim) | same | n/a (nav rail 112px) | **fixed** |
+| Shell | Title bar buttons off-screen / Maximize+Quit on phone | Maximize/Quit `display:none`; hamburger 44×44 on-screen | same | chrome visible as designed | **fixed** |
+| Shell | TipsTicker sliver | `display:none` | hidden | visible 467–734px, intact | **fixed** |
+| Search | Results list 0px tall (375 AND 768) | 467px tall, 25 rows | 766px tall | 376px | **fixed** |
+| Search | Song row 838px min-width, Download/More off-screen | row 341px = column, Download on-screen | row 734px fits | row 1118px | **fixed** |
+| Search | Hero fixed 3-col, exact dots 16×16 | hero collapsed into FilterSheet (Amendment); sheet controls ≥44px (dd items 44 after cd618a7) | sheet | desktop hero panel unchanged-coherent | **fixed** |
+| Search | Sort dropdown opens off-screen | menu on-screen at 18..148 × 226..424; items 44px (was 31 — fixed this phase) | fine | fine | **fixed** (+cd618a7) |
+| Search | Filters panel clipped / below fold | full-width bottom sheet, 690px, internal scroll, Done 48px | sheet 720px | panel ≥900, DB+system switches present (Amendment) | **fixed** |
+| Search | Type-ahead suggest clipped | 335×499 at y=129, bottom 628 < 812 | fits | fits | **fixed** |
+| Search | Pager 36px / bug 32px | all pager buttons 44×44, bug 44×44 | same | same | **fixed** |
+| Search | Row checkbox hover-only, no touch batch-select | Select toggle → tap-to-toggle rows, visible 25px checks, fixed bottom selectbar w/ Download | same | hover behavior unchanged | **fixed** |
+| Search | Art preview play hover-only | always visible (opacity 1, 54px on rows, 84px in detail) | same | hover unchanged | **fixed** |
+| Download | Target-folder modal | bottom sheet 375×633, Cancel/confirm 44–48px | centered modal | unchanged | **fixed/polished** |
+| Download | Queue bar anchored to workspace edge | queue-pill fixed bottom-right 44px; tap expands fixed bottom sheet (safe-area padded), live progress | pill/sheet | desktop bar (pill `display:none`) | **fixed** |
+| Download | Job chip off-screen | superseded by pill (no off-screen chip at 375) | — | — | **fixed** |
+| Sidebar | small targets (cosmetic) | drawer items fine; version/check-updates unchanged cosmetic | — | — | accepted-cosmetic |
+| Library | Row actions right-click only | per-row kebab 44×44 → bottom sheet, items 48px (Open/Rename/Copy/Cut/Delete/New folder; Edit metadata/playlist for songs) | same | right-click ctxmenu intact, kebab hidden | **fixed** |
+| Library | Multi-select Ctrl/Shift only | Select toggle + tap-to-toggle + bottom action bar (All/count/Playlist/Copy/Cut/Delete 44–48px) | same | Ctrl-click works, toggle hidden | **fixed** |
+| Library | Song detail 483px overflow | scrollWidth 311 = clientWidth 311, no h-scroll | fits | fits | **fixed** |
+| Library | Preview play hover-only in detail | visible 84×84, plays, progress ring advances | same | hover unchanged | **fixed** |
+| Library | Breadcrumb clips at depth | collapses to `Songs/…/Anti Hero/Tier 02…`, no overflow | fine | fine | **fixed** |
+| Duplicates | Comparison view untested | seeded byte-identical pair: group renders, copies **stacked vertically** (319px cards), no overflow; quarantine move works + notice with target path; delete confirm: "Permanently delete 1 chart? This cannot be undone." (cancelled) | modal 640px centered | unchanged | **fixed/verified** |
+| Playlists | Right pane clipped to sliver | panes stacked, sheet full-screen, no overflow; create/add/rename/delete round-trip OK | 722px modal, no overflow | unchanged | **fixed** |
+| Playlist import | fits | sheet 375×273, no overflow | fine | fine | **fixed/polished** |
+| Settings | 36px clipped, forced 2-col | full sheet, single column (343px fields), no h-scroll; records-per-page round-trips (25→30→25) | centered 707px modal, no overflow | unchanged | **fixed** |
+| About / What's New | ≤12px bleed | both full-screen sheets, scrollWidth = clientWidth = 375 | fine | fine | **fixed** |
+| PWA (Phase 5) | — | `/manifest.webmanifest` 200 valid JSON (192+512 icons), icons 200 image/png, apple-touch-icon 200; links present in served HTML; **Electron build's index.html has zero manifest/icon refs** | — | — | **pass** |
+
+### Flow results
+
+All at 375×812 unless noted; spot-checked at 768 and 1280.
+
+- **Search**: "weezer" → 65 results (RhythmVerse) / 79 (Encore); switch to Encore
+  re-sources (banner + new rows); genre filter (Alternative) applies, **badge "1"**
+  on Filters button; clearing resets badge. Encore correctly hides RV-only filters
+  with explainer + "Use RhythmVerse" shortcut.
+- **Download**: Encore .sng (Weezer – Buddy Holly + 2 more) → folder sheet →
+  root → pill "1 active" → expanded sheet with live "Downloading…" →
+  completes → **"In library" badge** appears on the row. (This environment now
+  extracts fine with `CHM_SEVENZIP_PATH` pointed at the repo's bundled
+  `7zip-bin/mac/arm64/7za` — Phase 0's `spawn 7z ENOENT` was environmental.)
+- **Library**: deep nav packs → Anti Hero → Tier 02 via kebab→Open (dbl-click also
+  works); rename round-trip; select mode + bulk bar; song detail + preview
+  play/stop with advancing progress; Back to search retains query+results;
+  browser Back from `#library` returns to search with state.
+- **Duplicates**: seeded shell-copy pair found as identical group; stacked cards;
+  move-to-quarantine verified on disk; restored; permanent-delete confirm
+  captured and cancelled; seed cleaned up.
+- **Settings**: sections reachable, records-per-page 25→30 saved, verified after
+  reopen, restored to 25.
+- **Playlists**: created via library select-mode → Add to playlist → New playlist;
+  song listed; renamed (inline input + Enter); deleted (in-modal confirm with
+  correct "songs stay in your library" wording).
+
+### Fixes made this phase
+
+| Commit | What |
+|---|---|
+| `b63af19` | Escape with Duplicates/Playlists/metadata/add-to-playlist sub-modal open closed the whole library page underneath (same class as 998b3a9; capture-guard extended) |
+| `a742759` | web-api stubs `isMaximized`/`setUiScale` rejected but are called by TitleBar mount and Settings UI-scale/Escape → unhandled-rejection console error on every web load; now resolve |
+| `cd618a7` | Results sort dropdown options were 31px on phone (Phase 2 fixed only in-sheet menus); 44px now |
+| `7027cb3` | Escape with Settings open over the library closed the library underneath (App.tsx Escape chain order) |
+
+### Console errors
+
+After the fixes: **zero errors** across the whole pass at all three viewports.
+During the pass (pre-fix builds only): `isMaximized: removed in web port`
+unhandled rejection on every load (fixed, a742759) and one 404 that was this
+verification's own probe of a nonexistent `/api/settings` (not an app request).
+
+### Cross-cutting
+
+- No horizontal document overflow anywhere: html/body scrollWidth == viewport on
+  every screen visited at all three widths.
+- Fixed bottom elements all carry `env(safe-area-inset-bottom)`: drawer,
+  queue-pill, queue sheet, generic `.sheet` (filter/kebab/Phase-4 modals),
+  search selectbar, library selectbar; `modal--plm/--about` pad top too.
+  (Emulated env() is 0 — real-device check remains on the phone punch list.)
+- Electron: `typecheck` + `build` green; renderer `index.html` contains no PWA
+  manifest/icon references (web-only injection confirmed). `build:web` re-run
+  afterwards since both builds share `out/renderer`.
+- Server tests: 21/21 pass.
+
+### Known-remaining (real-phone punch list)
+
+1. **MarketplaceModal** — still no entry point with this fixture/build (needs an
+   official-DLC result); untested, same status as Phase 0.
+2. **Sticky-hover guards** (`@media (hover: none)`) — verifiable only on a real
+   touch device; emulation always reports hover-capable here.
+3. **Safe-area insets** — env() is 0 in emulation; needs a notched phone.
+4. Segmented DB/system buttons in the FilterSheet are 31px tall (< 44px rule).
+   Usable (full-width row splits the tap area); left as-is to avoid resizing the
+   shared `.seg` control this late — revisit if real-thumb testing complains.
+5. Library folder navigation on phone is kebab→Open (or double-tap); a plain
+   single tap only selects. Deliberate (selection needs a first-class gesture),
+   but watch whether it confuses on the real phone.
+6. Audio preview is play/stop only (no scrubber) — by design.
