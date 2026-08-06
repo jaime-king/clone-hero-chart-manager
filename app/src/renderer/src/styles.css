@@ -338,34 +338,8 @@ body {
   box-shadow: 0 6px 16px -4px rgba(226, 59, 91, 0.55);
 }
 /* Verze v title baru — klik otevře „What's new". */
-/* Výrazný vstup do Library manageru — vpravo v titlebaru, s akcentním
-   gradientním rámečkem, ať nezapadne mezi ikonky. */
-.titlebar__library {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background:
-    linear-gradient(180deg, rgba(20, 16, 38, 0.95), rgba(20, 16, 38, 0.95)) padding-box,
-    var(--accent-grad) border-box;
-  color: var(--text);
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: box-shadow 0.18s, transform 0.05s, color 0.15s;
-}
-.titlebar__library:hover {
-  box-shadow: var(--glow);
-}
-.titlebar__library:active {
-  transform: translateY(1px);
-}
+/* (Tlačítko .titlebar__library odstranila Fáze 3.5/4 — knihovna je stránka
+   v nav railu, ne modal z titlebaru.) */
 
 .titlebar__version {
   align-self: center;
@@ -2680,19 +2654,6 @@ body {
 .modal-overlay {
   animation: overlayIn 0.16s ease-out;
 }
-/* Library manager s otevřeným pod-modalem: schová se jen jeho BOX, ale ztmavené
-   pozadí (backdrop) zůstává na Library overlay — nikdy se nevypne, takže při
-   přepínání na Duplicates/Playlists nic neprobliká. */
-.modal-overlay--has-sub > .modal--library {
-  display: none;
-}
-/* Vnořený overlay pod-modalu = bez vlastního ztmavení/blur (to už dělá Library
-   overlay pod ním), jinak by se ztmavení zdvojilo. Box pod-modalu se pořád
-   normálně animuje (modalIn na .modal). */
-.modal-overlay .modal-overlay {
-  background: transparent;
-  backdrop-filter: none;
-}
 @keyframes modalIn {
   from {
     opacity: 0;
@@ -3113,15 +3074,7 @@ body {
   padding: 8px 10px;
 }
 
-/* ---------- Library manager ---------- */
-.modal--library {
-  position: relative;
-  width: 760px;
-  max-width: 94%;
-  height: 76%;
-  display: flex;
-  flex-direction: column;
-}
+/* ---------- Library manager (stránka .libpage — viz sekce Fáze 3.5) ---------- */
 /* Cesta (breadcrumbs) na vlastním řádku nad nástroji — dlouhá cesta tak nikdy
    netlačí do tlačítek a layout nepřeskakuje. Přeteče → vodorovný scroll řádku. */
 .lib__crumbsrow {
@@ -4916,30 +4869,6 @@ body {
     transition: none;
   }
 }
-.titlebar__library {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 16px;
-  border: none;
-  border-radius: 10px;
-  background: var(--accent-grad);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: 0;
-  cursor: pointer;
-  transition: filter 0.15s, transform 0.05s;
-}
-.titlebar__library:hover {
-  filter: brightness(1.1);
-  box-shadow: none;
-}
-.titlebar__library:active {
-  transform: translateY(1px);
-}
 .titlebar__btn {
   border-radius: 10px;
 }
@@ -5439,10 +5368,6 @@ body {
   background: none;
   border: none;
 }
-.titlebar__library {
-  height: 40px;
-  font-size: 13.5px;
-}
 .titlebar__btn {
   width: 38px;
   height: 38px;
@@ -5845,7 +5770,6 @@ body {
 /* ── Plochá tlačítka — žádné neony, gradienty, stíny ani 3D ── */
 
 /* Primární (My Library, Search, Download, hromadné stažení): solid modrá. */
-.titlebar__library,
 .searchbar__go,
 .dl-btn,
 .btn-primary,
@@ -5856,8 +5780,6 @@ body {
   transform: none !important;
   filter: none;
 }
-.titlebar__library::before,
-.titlebar__library::after,
 .searchbar__go::before,
 .searchbar__go::after,
 .dl-btn::before,
@@ -5868,7 +5790,6 @@ body {
 .batchbar__dl::after {
   display: none !important;
 }
-.titlebar__library:hover,
 .searchbar__go:hover,
 .dl-btn:hover,
 .btn-primary:hover,
@@ -5876,7 +5797,6 @@ body {
   background: #4d78f5;
   filter: none;
 }
-.titlebar__library:active,
 .searchbar__go:active,
 .dl-btn:active,
 .btn-primary:active,
@@ -6224,7 +6144,6 @@ body {
 .pgnum:focus-visible,
 .dd__btn:focus-visible,
 .titlebar__btn:focus-visible,
-.titlebar__library:focus-visible,
 .dl-btn:focus-visible,
 .searchbar__go:focus-visible,
 .instbtn:focus-visible,
@@ -6408,7 +6327,6 @@ body {
 }
 
 /* Primární tlačítka → světlá pilulka s tmavým textem (typický „graphite" tah). */
-[data-theme='graphite'] .titlebar__library,
 [data-theme='graphite'] .searchbar__go,
 [data-theme='graphite'] .dl-btn,
 [data-theme='graphite'] .btn-primary,
@@ -6417,7 +6335,6 @@ body {
   background: linear-gradient(180deg, #f3f3f6 0%, #d4d4d8 100%);
   color: #131315;
 }
-[data-theme='graphite'] .titlebar__library:hover,
 [data-theme='graphite'] .searchbar__go:hover,
 [data-theme='graphite'] .dl-btn:hover,
 [data-theme='graphite'] .btn-primary:hover,
@@ -6426,7 +6343,6 @@ body {
   background: linear-gradient(180deg, #ffffff 0%, #dcdce0 100%);
   color: #131315;
 }
-[data-theme='graphite'] .titlebar__library:active,
 [data-theme='graphite'] .searchbar__go:active,
 [data-theme='graphite'] .dl-btn:active,
 [data-theme='graphite'] .batchbar__dl:active {
@@ -6591,7 +6507,6 @@ body {
 }
 
 /* Světlé primární pilulky — vyvýšené s horním leskem. */
-[data-theme='graphite'] .titlebar__library,
 [data-theme='graphite'] .searchbar__go,
 [data-theme='graphite'] .dl-btn:not(.dl-btn--store),
 [data-theme='graphite'] .btn-primary,
@@ -6602,7 +6517,6 @@ body {
     0 1px 2px rgba(0, 0, 0, 0.5), 0 5px 14px rgba(0, 0, 0, 0.4) !important;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
 }
-[data-theme='graphite'] .titlebar__library:active,
 [data-theme='graphite'] .searchbar__go:active,
 [data-theme='graphite'] .dl-btn:active,
 [data-theme='graphite'] .batchbar__dl:active {
@@ -7555,10 +7469,6 @@ button.plrow__na:hover {
     width: 44px;
     height: 44px;
   }
-  .titlebar__library {
-    height: 44px;
-    padding: 0 14px;
-  }
   .brand-text {
     font-size: 24px;
     white-space: nowrap;
@@ -7799,10 +7709,6 @@ button.plrow__na:hover {
   }
   .titlebar__brandbtn {
     padding-left: 0;
-  }
-  .titlebar__library {
-    padding: 0 11px;
-    font-size: 12.5px;
   }
   .titlebar {
     padding: 6px 8px 2px;

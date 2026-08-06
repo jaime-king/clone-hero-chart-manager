@@ -384,10 +384,6 @@ export function LibraryManager(): JSX.Element | null {
     entries.filter((e) => selected.has(e.name) && e.isSong).map((e) => relOf(e.name))
   const selSongCount = entries.filter((e) => selected.has(e.name) && e.isSong).length
 
-  // Otevřený pod-modal (metadata / playlist / duplicates) — stránka dostane
-  // třídu --has-sub (hook pro případné ztlumení; modaly mají vlastní overlay).
-  const subModalOpen = metaFor !== null || playlistFor !== null || dupOpen || plmOpen
-
   // JEDINÝ zdroj akcí nad výběrem: desktopové kontextové menu (pravý klik)
   // i mobilní ⋮ bottom sheet renderují TENHLE seznam — akce se nikdy nerozjedou.
   // `done` zavře příslušnou prezentaci (menu vs. sheet).
@@ -450,9 +446,7 @@ export function LibraryManager(): JSX.Element | null {
 
   return (
     <section
-      className={`libpage ${libSelect ? 'lib--selecting' : ''} ${
-        subModalOpen ? 'libpage--has-sub' : ''
-      }`}
+      className={`libpage ${libSelect ? 'lib--selecting' : ''}`}
       aria-label="Library manager"
     >
         <div className="libpage__head">
