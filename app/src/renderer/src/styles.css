@@ -8697,3 +8697,165 @@ button.plrow__na:hover {
     padding: 12px 12px 0;
   }
 }
+
+/* ============================================================
+   MOBILE (Phase 4 — modaly jako sheety). docs/mobile/plan.md.
+
+   Pod ≤600px (phone) se KAŽDÝ `.modal` mění na sheet ukotvený dole:
+   - výchozí = bottom sheet (výška podle obsahu, strop 85dvh, zaoblený
+     vršek) — krátké modaly: What's new, playlist import, target folder,
+     marketplace/confirm, local drop;
+   - obsahově vysoké modaly = full-screen (100dvh): Settings, Duplicates,
+     Playlists, About — mají scrollovací tělo delší než viewport, bottom
+     sheet by jen přidal mrtvý proužek nahoře.
+
+   Vzor záměrně ZRCADLÍ sdílené `.sheet` třídy Fáze 2 (metriky, safe-area,
+   momentum scroll); nepoužívá je přímo, protože modaly už mají jednotnou
+   kostru .modal__head/__body/__foot a `.sheet` základ žije v <900px bloku
+   (modaly zůstávají vycentrované až do 600px). Hlavička je sticky (flex,
+   ne scroll), zavírací křížek 44×44, tělo scrolluje s momentum.
+
+   ≥600px se tady nemění NIC.
+   ============================================================ */
+@media (max-width: 599.98px) {
+  .modal-overlay {
+    /* Sheet leží dole na hraně viewportu — zaoblení overlaye (desktopové
+       okno) by full-width sheet uřízlo. */
+    border-radius: 0;
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: 0;
+  }
+  .modal {
+    width: 100%;
+    max-width: none;
+    max-height: min(85dvh, 100dvh - 48px);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    /* Scroll přebírá __body; overflow:auto na boxu by odscrolloval hlavičku. */
+    overflow: hidden;
+    border: none;
+    border-top: 1px solid var(--border-strong);
+    border-radius: 16px 16px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: sheetIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes sheetIn {
+    from {
+      opacity: 0.4;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .modal__head {
+    flex-shrink: 0;
+    padding: 13px 16px;
+  }
+  .modal__close {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .modal__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px;
+  }
+  .modal__foot {
+    flex-shrink: 0;
+  }
+  /* Akční tlačítka patičky na výšku prstu. */
+  .modal__foot button {
+    min-height: 44px;
+  }
+
+  /* ── Full-screen varianty (obsah vyšší než viewport) ── */
+  .modal--settings,
+  .modal--dup,
+  .modal--plm,
+  .modal--about {
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    border-top: none;
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* ── Settings: jeden sloupec (audit: 2×135px sloupce lámaly labely) ── */
+  .modal--settings {
+    width: 100%;
+  }
+  .settings-cols {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Duplicates: porovnání kopií pod sebou ──
+     Detail kopie (obal + metadata) se skládá svisle a bez 30px odsazení —
+     na 375px by řádek art+meta nutil vodorovný scroll. Rozbalovací (i) a
+     checkbox řádky na 44px cíle. */
+  .dup__detail {
+    flex-direction: column;
+    margin-left: 12px;
+  }
+  .dup__openbtn {
+    width: 44px;
+    height: 44px;
+  }
+  /* Řada obtížností nástrojů smí zalomit — stejný fix jako .songdetail__diffs
+     ve Fázi 3 (audit: dots row hnal detail do vodorovného scrollu). */
+  .dup__detailmeta .instruments {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .dup__row {
+    min-height: 44px;
+  }
+  /* Charter jméno se na úzkém řádku vzdává (je i v detailu kopie). */
+  .dup__charter {
+    display: none;
+  }
+  /* Mezi-pruhy (rozsah/picker/chyba) nesmí flex sežrat na nulu. */
+  .dup__scope,
+  .dup__picker,
+  .dup__notice,
+  .modal--dup > .lib__error {
+    flex-shrink: 0;
+  }
+  /* Patička (Rescan · N selected · Move · Delete) se na 375px nevejde do
+     jedné řady — Rescan utíkal na x=−95. Zalom ji. */
+  .dup__foot {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 8px;
+  }
+  .dup__startopts {
+    /* Karty voleb pod sebe — vedle sebe měly 139px a lámaly text. */
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Playlists: panely pod sebou místo 270px|1fr (audit: pravý panel
+     byl 40px sliver). Seznam playlistů dostane horní třetinu, písně zbytek. ── */
+  .plm__body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(120px, 34%) minmax(0, 1fr);
+  }
+  .plm__list {
+    min-height: 44px;
+  }
+  .plm__iconbtn {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* ── Add-to-playlist dialog (lib__dialog — zůstává vycentrovaný, viz
+     Fáze 3): jen dotykové cíle řádků existujících playlistů. ── */
+  .pldlg__item {
+    min-height: 44px;
+  }
+}
