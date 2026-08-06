@@ -273,6 +273,23 @@ export function LibraryManager(): JSX.Element | null {
     return () => document.removeEventListener('keydown', onKey, true)
   }, [sheetOpen])
 
+  // Totéž pro potvrzovací/vstupní dialog (delete/rename/new): Escape zavře
+  // JEN dialog. Bez capture stráže globální handler v App.tsx vidí
+  // view === 'library' a odnaviguje celou stránku knihovny pod otevřeným
+  // dialogem — delete dialog nemá žádný input, jehož onKeyDown by Escape
+  // zastavil (rename/new ho měly, ty capture předběhne se stejným efektem).
+  useEffect(() => {
+    if (!dialog) return
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        setDialog(null)
+      }
+    }
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
+  }, [dialog])
+
   // Návrat na desktopovou šířku: mobilní režimy nesmí přežít (selectbar/sheet
   // jsou CSS-schované ≥900px, stav by po nich strašil neviditelný).
   useEffect(() => {
