@@ -8083,8 +8083,11 @@ button.badge--owned {
   .filtersheet .filterfield__input {
     min-height: 44px;
   }
-  /* Položky rozbalených menu v sheetu taky na dotykový cíl (audit: 31px). */
-  .filtersheet .dd__item {
+  /* Položky rozbalených menu v sheetu taky na dotykový cíl (audit: 31px).
+     Phase 6: totéž pro sort dropdown NAD výsledky — žije mimo sheet a při
+     původní opravě vypadl (položky měl pořád 31px). */
+  .filtersheet .dd__item,
+  .dd--sort .dd__item {
     display: flex;
     align-items: center;
     min-height: 44px;
