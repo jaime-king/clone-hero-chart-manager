@@ -7663,18 +7663,33 @@ button.badge--owned {
     padding: 8px 12px 4px;
     gap: 8px;
   }
-  .titlebar__left {
-    /* Brand nalevo, akce se dorazí doprava přes margin-left auto na .titlebar__actions. */
-    min-width: 0;
-    flex-shrink: 1;
-    overflow: hidden;
+  /* Hamburger vlevo, brand opticky uprostřed. Titlebar je flex (redesign v2),
+     takže: akce (jen hamburger, 44px) dostanou order -1, brand se vystředí
+     auto-marginy a ::after je prázdná 44px protiváha vpravo. */
+  .titlebar::after {
+    /* Základní .titlebar::after je display:none/absolute (desktop dekor) —
+       tady je z něj statická 44px protiváha hamburgeru. */
+    content: '';
+    display: block;
+    position: static;
+    width: 44px;
+    height: 1px;
+    flex: none;
+    background: none;
   }
   .titlebar__actions {
-    margin-left: auto;
+    order: -1;
+    margin-left: 0;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+  }
+  .titlebar__left {
+    margin-inline: auto;
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
   }
   .titlebar__btn {
     width: 44px;
