@@ -290,6 +290,28 @@ export function LibraryManager(): JSX.Element | null {
     return () => document.removeEventListener('keydown', onKey, true)
   }, [dialog])
 
+  // A totéž pro sub-modály (Duplicates / Playlists / metadata / add-to-playlist):
+  // Escape mimo input zavře JEN vrchní sub-modál. Jejich inputy si Escape řeší
+  // samy (onKeyDown + stopPropagation — např. zrušení inline přejmenování v
+  // Playlists), proto psaní necháváme projít; ale s fokusem mimo input by
+  // globální handler v App.tsx viděl view === 'library' a odnavigoval celou
+  // knihovnu pod otevřeným modálem.
+  useEffect(() => {
+    if (!(dupOpen || plmOpen || metaFor || playlistFor)) return
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key !== 'Escape') return
+      const tag = (e.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      e.stopPropagation()
+      if (playlistFor) setPlaylistFor(null)
+      else if (metaFor) setMetaFor(null)
+      else if (dupOpen) setDupOpen(false)
+      else if (plmOpen) setPlmOpen(false)
+    }
+    document.addEventListener('keydown', onKey, true)
+    return () => document.removeEventListener('keydown', onKey, true)
+  }, [dupOpen, plmOpen, metaFor, playlistFor])
+
   // Návrat na desktopovou šířku: mobilní režimy nesmí přežít (selectbar/sheet
   // jsou CSS-schované ≥900px, stav by po nich strašil neviditelný).
   useEffect(() => {
