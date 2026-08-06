@@ -397,13 +397,14 @@ export function App(): JSX.Element {
         else if (st.showAbout) st.setShowAbout(false)
         else if (st.showPlaylistImport) st.setShowPlaylistImport(false)
         else if (st.showWhatsNew) st.setShowWhatsNew(false)
-        else if (st.view === 'library') st.setView('search')
         else if (st.showSettings) {
-          // Escape = Cancel: zahoď živý náhled UI scale (jinak by neuložená
-          // škála zůstala aplikovaná až do restartu).
+          // Nastavení PŘED knihovnou: jde otevřít i nad ní (drawer → Settings)
+          // a Escape musí zavřít vrchní vrstvu — dřív zavřel knihovnu POD
+          // otevřeným Nastavením. Escape = Cancel: zahoď živý náhled UI scale
+          // (jinak by neuložená škála zůstala aplikovaná až do restartu).
           void window.api.setUiScale(st.config?.uiScale ?? 1)
           st.setShowSettings(false)
-        }
+        } else if (st.view === 'library') st.setView('search')
         return
       }
       // Otevřené Nastavení/Správce/What's new/Import/About: nech projít jen Escape (výše), nenaviguj.
