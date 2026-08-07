@@ -333,14 +333,6 @@ body {
 .titlebar__btn:active {
   transform: translateY(0) scale(0.92);
 }
-@media (hover: hover) {
-  .titlebar__btn--close:hover {
-    background: #e23b5b;
-    border-color: #e23b5b;
-    color: #fff;
-    box-shadow: 0 6px 16px -4px rgba(226, 59, 91, 0.55);
-  }
-}
 /* Verze v title baru — klik otevře „What's new". */
 /* (Tlačítko .titlebar__library odstranila Fáze 3.5/4 — knihovna je stránka
    v nav railu, ne modal z titlebaru.) */
@@ -534,8 +526,8 @@ body {
   }
 }
 
-/* Pozn.: Aktualizace se řeší dole v sidebaru (.side-update-card*), horní pruh
-   „updatebar" byl odstraněn. */
+/* Pozn.: In-app aktualizace byly odstraněny (web-only — updaty řeší nový
+   container image); v patičce sidebaru zbývá jen verze (.side-version). */
 
 /* ---------- Search bar ---------- */
 .searchbar {
@@ -1427,78 +1419,6 @@ body {
   }
 }
 
-/* ---------- Drop zone for manual files ---------- */
-.dropzone {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 230px;
-  max-width: 380px;
-  padding: 10px 16px;
-  border: 1.5px dashed var(--border-strong);
-  border-radius: 12px;
-  color: var(--text-dim);
-  background: rgba(255, 255, 255, 0.015);
-  transition: border-color 0.16s, background 0.16s, color 0.16s, transform 0.16s;
-  cursor: pointer;
-  user-select: none;
-  font: inherit;
-  text-align: left;
-}
-.dropzone:active {
-  transform: scale(0.99);
-}
-.dropzone:hover {
-  border-color: var(--accent);
-  color: var(--text);
-}
-.dropzone--hover {
-  border-color: var(--accent);
-  background: rgba(var(--accent-rgb), 0.12);
-  color: var(--text);
-  transform: scale(1.02);
-  box-shadow: var(--glow);
-  animation: none;
-}
-/* Klidová zóna má statický rámeček — dřívější nekonečné „dýchání" border-color
-   překreslovalo prvek v každém snímku i při naprosté nečinnosti (zbytečná zátěž
-   CPU/GPU). Zvýraznění řeší až hover (glow). */
-.dropzone:not(.dropzone--hover) {
-  border-color: var(--border-strong);
-}
-.dropzone svg,
-.dropzone > .instbtn__circle,
-.dropzone > span:first-child {
-  flex-shrink: 0;
-  color: var(--accent);
-}
-.dropzone__text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.25;
-  min-width: 0;
-}
-.dropzone__text strong {
-  font-size: 12.5px;
-  color: var(--text);
-  font-weight: 700;
-}
-.dropzone__text span {
-  font-size: 10.5px;
-  color: var(--text-faint);
-  letter-spacing: 0.4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Pole Artist + Title v drop modálu */
-.drop-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
 
 /* ---------- Recommendation hint ---------- */
 .rec-hint {
@@ -3736,13 +3656,7 @@ body {
   font-size: 12px;
   color: var(--text-dim);
 }
-.dup__reveal {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 2px;
-}
+
 
 /* Levá část řádku: název složky + odznaky extras pod ním. */
 .dup__rowmain {
@@ -5068,10 +4982,7 @@ body {
   text-transform: uppercase;
   color: var(--text-faint);
 }
-.filterbar .dropzone {
-  margin-left: auto;
-  align-self: center;
-}
+
 
 /* ── Info tab + search ────────────────────────────────────── */
 .rec-hint {
@@ -5096,64 +5007,6 @@ body {
 .filterbar .fgroup + .fgroup {
   border-left: 1px solid var(--border);
   padding-left: 26px;
-}
-
-/* Drop zóna (1:1 dle mockupu): ikona vedle tučného dvouřádkového textu,
- * přípony pod tím, čárkovaný rámeček; při hoveru se ROZZÁŘÍ (pulzující glow). */
-.filterbar .dropzone {
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  align-self: stretch;
-  width: 252px;
-  min-width: 0;
-  max-width: none;
-  gap: 10px;
-  padding: 14px 18px;
-  border-radius: 13px;
-}
-.dropzone__main {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--text-dim);
-}
-.dropzone__main strong {
-  text-align: left;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.3;
-  color: var(--text);
-  white-space: nowrap;
-}
-.dropzone__ext {
-  font-size: 12.5px;
-  letter-spacing: 0.02em;
-  color: var(--text-faint);
-  white-space: nowrap;
-}
-.filterbar .dropzone:hover,
-.filterbar .dropzone--hover {
-  border-color: var(--accent);
-  background: rgba(var(--accent-rgb), 0.08);
-  animation: dropzoneGlow 1.6s ease-in-out infinite;
-}
-@keyframes dropzoneGlow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.35), 0 0 14px rgba(var(--accent-rgb), 0.25);
-  }
-  50% {
-    box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.6), 0 0 30px rgba(var(--accent-rgb), 0.5);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .filterbar .dropzone:hover,
-  .filterbar .dropzone--hover {
-    animation: none;
-    box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.5), 0 0 20px rgba(var(--accent-rgb), 0.35);
-  }
 }
 
 /* ── Resultsbar + tabulková hlavička ──────────────────────── */
@@ -5841,45 +5694,7 @@ body {
     background: rgba(255, 255, 255, 0.06);
   }
 }
-.side-update {
-  display: block;
-  width: 100%;
-  padding: 9px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-dim);
-  font-size: 12.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
-}
-@media (hover: hover) {
-  .side-update:hover:not(:disabled) {
-    color: var(--text);
-    background: rgba(var(--accent-rgb), 0.12);
-    border-color: rgba(var(--accent-rgb), 0.4);
-  }
-}
-.side-update:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-.side-update__result {
-  font-size: 11.5px;
-  line-height: 1.4;
-  color: var(--text-faint);
-  padding-left: 2px;
-}
-.side-update__result--available {
-  color: #9ab4ff;
-}
-.side-update__result--uptodate {
-  color: var(--ok);
-}
-.side-update__result--error {
-  color: var(--warn);
-}
+
 
 /* Checkbox „All" zarovnaný do stejné svislice jako řádkové checkboxy
    (řádkový box je vycentrovaný v 22px sloupci ~16,5 px od levé hrany lišty). */
@@ -6011,202 +5826,6 @@ body {
   display: none;
 }
 
-/* „Check for updates": bez ohraničení, jen plochý podklad (jako launch tlačítka). */
-.side-update {
-  border: none;
-  background: rgba(255, 255, 255, 0.04);
-}
-@media (hover: hover) {
-  .side-update:hover:not(:disabled) {
-    border: none;
-    background: rgba(var(--accent-rgb), 0.14);
-  }
-}
-
-/* Obíhající úhel pro conic-gradient border (viz .side-update-card--live níže). */
-@property --runangle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: 0deg;
-}
-@keyframes runBorder {
-  to {
-    --runangle: 360deg;
-  }
-}
-
-/* ── Update panel v sidebaru (dostupné / stahování / připraveno) ── */
-.side-update-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 12px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.16) 0%, rgba(var(--accent-rgb), 0.05) 100%);
-  animation: sideUpdateIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes sideUpdateIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.side-update-card__title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text);
-}
-/* Pulzující tečka před titulkem — signál „něco nového". */
-.side-update-card__title::before {
-  content: '';
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent-2);
-  box-shadow: 0 0 8px var(--accent-2);
-  animation: sideUpdatePulse 1.8s ease-in-out infinite;
-}
-@keyframes sideUpdatePulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
-}
-.side-update-card__desc {
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--text-dim);
-}
-.side-update-card__btn {
-  margin-top: 2px;
-  width: 100%;
-  padding: 8px 12px;
-  border: none;
-  border-radius: var(--r-md);
-  background: var(--accent);
-  color: #fff;
-  font-weight: 600;
-  font-size: 12.5px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-@media (hover: hover) {
-  .side-update-card__btn:hover {
-    background: #4d78f5;
-  }
-}
-.side-update-card__close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-faint);
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
-}
-@media (hover: hover) {
-  .side-update-card__close:hover {
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.08);
-  }
-}
-.side-update-progress {
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-.side-update-progress__fill {
-  height: 100%;
-  background: var(--accent-grad);
-  border-radius: 3px;
-  transition: width 0.2s ease;
-}
-
-/* „Ready" (staženo) → zelený nádech místo modrého. */
-.side-update-card--ready {
-  background: linear-gradient(180deg, rgba(45, 214, 192, 0.18) 0%, rgba(45, 214, 192, 0.05) 100%);
-}
-.side-update-card--ready .side-update-card__title::before {
-  background: var(--ok);
-  box-shadow: 0 0 8px var(--ok);
-}
-.side-update-card--ready .side-update-card__btn {
-  background: #22a883;
-}
-@media (hover: hover) {
-  .side-update-card--ready .side-update-card__btn:hover {
-    background: #27bd92;
-  }
-}
-
-/* Obíhající okraj (jako u běžících launcherů) pro „živá" upozornění. */
-.side-update-card--live::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.5px;
-  background: conic-gradient(
-    from var(--runangle),
-    rgba(var(--accent-2-rgb), 0) 0deg,
-    rgba(var(--accent-2-rgb), 0) 230deg,
-    var(--accent-2) 290deg,
-    #b9ccff 320deg,
-    var(--accent-2) 350deg,
-    rgba(var(--accent-2-rgb), 0) 360deg
-  );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  animation: runBorder 2.6s linear infinite;
-  pointer-events: none;
-}
-/* Ready → zelený obíhající okraj. */
-.side-update-card--ready.side-update-card--live::before {
-  background: conic-gradient(
-    from var(--runangle),
-    rgba(45, 214, 192, 0) 0deg,
-    rgba(45, 214, 192, 0) 230deg,
-    var(--ok) 290deg,
-    #b6ffe9 320deg,
-    var(--ok) 350deg,
-    rgba(45, 214, 192, 0) 360deg
-  );
-}
-@media (prefers-reduced-motion: reduce) {
-  .side-update-card,
-  .side-update-card__title::before {
-    animation: none;
-  }
-  .side-update-card--live::before {
-    animation: none;
-    background: linear-gradient(90deg, var(--accent-2), #b9ccff);
-  }
-  .side-update-card--ready.side-update-card--live::before {
-    background: linear-gradient(90deg, var(--ok), #b6ffe9);
-  }
-}
-
 /* ── Klouzavé zvýraznění položek DATABASE / SYSTEM ──
    Jedna „ryba" (indikátor) na skupinu plavně sjede na aktivní položku
    plynulým dojezdem BEZ přestřelení — jinak by u poslední položky pružina
@@ -6275,12 +5894,6 @@ body {
     color: #fff;
   }
 }
-@media (hover: hover) {
-  .titlebar__btn--close:hover {
-    background: #e23b5b;
-    color: #fff;
-  }
-}
 
 /* ── Stejný flat styl pro pager a dropdowny (MIN/MAX, sort) ──
    Čtvercový/pilulkový podklad zůstává, jen bez ohraničení; hover jen zesvětlí. */
@@ -6308,8 +5921,6 @@ body {
    Custom tlačítka/položky měly jen slabý defaultní ring na tmavém pozadí.
    :focus-visible se ukáže jen při ovládání klávesnicí, ne po kliknutí myší. */
 .side-item:focus-visible,
-.side-update:focus-visible,
-.side-update-card__btn:focus-visible,
 .suggest__item:focus-visible,
 .pgbtn:focus-visible,
 .pgnum:focus-visible,
@@ -6526,7 +6137,6 @@ body {
 [data-theme='graphite'] .badge--native,
 [data-theme='graphite'] .chk--selectall .chk__label,
 [data-theme='graphite'] .filterchip,
-[data-theme='graphite'] .side-update__result--available,
 [data-theme='graphite'] .rec-hint {
   color: #cfcfd6;
 }
@@ -6624,28 +6234,6 @@ body {
   }
 }
 
-/* Tlačítko v update kartě → světlá pilulka (jako ostatní primární). „Ready"
-   stav zůstává zelený (status). */
-[data-theme='graphite'] .side-update-card__btn {
-  background: linear-gradient(180deg, #f3f3f6 0%, #d4d4d8 100%);
-  color: #131315;
-}
-@media (hover: hover) {
-  [data-theme='graphite'] .side-update-card__btn:hover {
-    background: linear-gradient(180deg, #ffffff 0%, #dcdce0 100%);
-    color: #131315;
-  }
-}
-[data-theme='graphite'] .side-update-card--ready .side-update-card__btn {
-  background: #22a883;
-  color: #fff;
-}
-@media (hover: hover) {
-  [data-theme='graphite'] .side-update-card--ready .side-update-card__btn:hover {
-    background: #27bd92;
-  }
-}
-
 /* ============================================================
    GRAFIT — „vyrytý" / soft-3D vzhled (jen grafit).
    Vyvýšené prvky: světlá horní hrana + měkký stín dolů.
@@ -6659,7 +6247,6 @@ body {
 [data-theme='graphite'] .pgbtn,
 [data-theme='graphite'] .pgnum:not(.pgnum--active),
 [data-theme='graphite'] .dd__btn,
-[data-theme='graphite'] .side-update,
 [data-theme='graphite'] .theme-opt {
   background: linear-gradient(180deg, #26272c 0%, #191a1d 100%) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.55),
@@ -6672,17 +6259,8 @@ body {
   [data-theme='graphite'] .pgbtn:hover:not(:disabled),
   [data-theme='graphite'] .pgnum:hover:not(.pgnum--active),
   [data-theme='graphite'] .dd__btn:hover:not(:disabled),
-  [data-theme='graphite'] .side-update:hover:not(:disabled),
   [data-theme='graphite'] .theme-opt:hover {
     background: linear-gradient(180deg, #2e2f34 0%, #202126 100%) !important;
-  }
-}
-/* Křížek: hover se zalije červeně (jako v běžných oknech). Musí být ZA grafitovým
-   !important hoverem výše a taky s !important, aby ho přebil (stejná specificita). */
-@media (hover: hover) {
-  [data-theme='graphite'] .titlebar__btn--close:hover {
-    background: #e23b5b !important;
-    color: #fff !important;
   }
 }
 /* Stisk = zatlačení dovnitř (engraved). */
@@ -6698,8 +6276,7 @@ body {
 [data-theme='graphite'] .dl-btn:not(.dl-btn--store),
 [data-theme='graphite'] .btn-primary,
 [data-theme='graphite'] .batchbar__dl,
-[data-theme='graphite'] .pgnum--active,
-[data-theme='graphite'] .side-update-card__btn {
+[data-theme='graphite'] .pgnum--active{
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 -2px 3px rgba(0, 0, 0, 0.12),
     0 1px 2px rgba(0, 0, 0, 0.5), 0 5px 14px rgba(0, 0, 0, 0.4) !important;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
@@ -7637,7 +7214,7 @@ button.badge--owned {
 
   /* Title bar: wordmark + My Library + Settings + hamburger. Okenní chrome
      (maximize/quit) a TipsTicker pryč; cíle ≥44px. */
-  .titlebar__btn--window,
+  
   .tips {
     display: none;
   }
@@ -7742,8 +7319,7 @@ button.badge--owned {
     margin-left: auto;
     color: var(--text-faint);
   }
-  .filterbar--mobile-collapsed .fgroup,
-  .filterbar--mobile-collapsed .dropzone {
+  .filterbar--mobile-collapsed .fgroup{
     display: none;
   }
   .filterbar .fgroup + .fgroup {
@@ -7752,11 +7328,7 @@ button.badge--owned {
     border-top: 1px solid var(--border);
     padding-top: 14px;
   }
-  .filterbar .dropzone {
-    margin-left: 0;
-    align-self: stretch;
-    width: auto;
-  }
+  
   .instbtns {
     justify-content: space-between;
     row-gap: 14px;
@@ -8858,23 +8430,11 @@ button.badge--owned {
     align-self: center;
     text-align: center;
   }
-  .side-update {
-    padding: 8px 6px;
-    font-size: 10.5px;
-  }
-  .side-update__result {
-    font-size: 10px;
-    text-align: center;
-  }
-  .side-update-card {
-    padding: 10px 8px;
-  }
-  .side-update-card__title {
-    font-size: 11px;
-  }
-  .side-update-card__desc {
-    font-size: 10px;
-  }
+  
+  
+  
+  
+  
 }
 
 /* ── Mobil (<900px): hlavička + jednořádkový search ────────── */
@@ -9105,8 +8665,8 @@ button.badge--owned {
       nezůstane nic svítit; pro myš (hover: hover) se nemění NIC.
       Nezabalené zůstaly: reveal pravidla náhledů (řeší se níže), stavy co
       hover jen UDRŽUJÍ (.pgnum--active:hover, .side-item--on:hover,
-      .song--selected:hover), brand easter-egg, drag-and-drop dropzone
-      (jen myš) a negace v prefers-reduced-motion.
+      .song--selected:hover), brand easter-egg
+      a negace v prefers-reduced-motion.
    2. `.suggest__item--hover` (zvýraznění klávesnicí) je oddělené od
       `.suggest__item:hover`, aby stráž nesebrala klávesovou navigaci.
 

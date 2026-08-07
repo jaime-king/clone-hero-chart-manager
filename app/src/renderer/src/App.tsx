@@ -4,7 +4,6 @@ import { FilterBar } from './components/FilterBar'
 import { FilterSheet } from './components/FilterSheet'
 import { Icon } from './components/Icon'
 import { LibraryManager } from './components/LibraryManager'
-import { LocalDropModal } from './components/LocalDropModal'
 import { MarketplaceModal } from './components/MarketplaceModal'
 import { AboutModal } from './components/AboutModal'
 import { PlaylistImportModal } from './components/PlaylistImportModal'
@@ -382,8 +381,6 @@ export function App(): JSX.Element {
       // Když je otevřený modal výběru složky, klávesy řeší samotný modal.
       if (useStore.getState().pendingSong) return
       if (useStore.getState().pendingBatch) return
-      if (useStore.getState().pendingLocalBatch) return
-      if (useStore.getState().pendingLocal) return
       // Dotaz na obchod (oficiální DLC): jen Escape zavře.
       if (useStore.getState().marketplacePrompt) {
         if (e.key === 'Escape') useStore.getState().closeMarketplace()
@@ -769,7 +766,6 @@ export function App(): JSX.Element {
       <Settings />
       <TargetFolderModal />
       <MarketplaceModal />
-      <LocalDropModal />
       <WhatsNew />
       <PlaylistImportModal />
       <AboutModal />

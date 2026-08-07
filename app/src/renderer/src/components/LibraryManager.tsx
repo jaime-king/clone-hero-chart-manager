@@ -14,11 +14,6 @@ import { PlaylistDialog } from './PlaylistDialog'
 import { PlaylistManagerModal } from './PlaylistManagerModal'
 import { SongMetaDialog } from './SongMetaDialog'
 
-// Web build: libOpen je `delete` (web-api.ts hází) — v prohlížeči nemá „Open
-// in Explorer" žádný význam, takže se tlačítko nevykresluje. Stejný idiom
-// jako dropzone ve FilterBar.tsx.
-const isWeb = (window.api.platform as unknown as string) === 'web'
-
 type Dialog =
   | { type: 'new' }
   | { type: 'rename'; name: string }
@@ -580,11 +575,6 @@ export function LibraryManager(): JSX.Element | null {
               <Icon name="caret" size={12} style={{ transform: sortDir === 'asc' ? 'rotate(180deg)' : 'none' }} />
             </button>
           </div>
-          {!isWeb && (
-            <button className="lib__btn lib__btn--icon" onClick={() => window.api.libOpen(cwd)} title="Open in Explorer">
-              <Icon name="external" size={15} />
-            </button>
-          )}
           <button className="lib__btn lib__btn--icon" onClick={() => void load(cwd)} title="Refresh">
             <Icon name="refresh" size={15} />
           </button>

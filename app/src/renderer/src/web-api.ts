@@ -1,7 +1,8 @@
-// Web build's implementation of `window.api` — the browser-side counterpart
-// to `app/src/preload/index.ts`. Same method-name surface, same TypeScript
-// types (`RendererApi`), so renderer source (App.tsx, store.ts, components/*)
-// needs zero changes to run against this instead of the Electron preload.
+// The app's `window.api` implementation (installed by main.web.tsx). Started
+// life as the browser-side counterpart to the Electron preload; since the
+// fork went web-only it is the only implementation of `RendererApi`, and the
+// `delete`-classified methods (docs/port/api-inventory.md) were removed from
+// the interface together with their Electron-only callers.
 //
 // Classification source of truth: docs/port/api-inventory.md (Phase 1) plus
 // the Phase 2/3 facts confirming `dialog:chooseDir` and `lib:moveOut` ship as
@@ -11,15 +12,7 @@
 //   { result } / throw on { error }.
 // - `onJobUpdate`   → shared EventSource('/api/events'), subscribes to the
 //   `jobs:update` event, fans out to registered callbacks.
-// - other `on*` streams (game/update/maximize — all `delete`) → no-op
-//   subscribe so mounting components don't crash; returns a matching
-//   unsubscribe function.
-// - `delete`-classified invoke/send methods → throw `<name>: removed in web
-//   port`, except `openExternal`, which has a trivial, fully-portable client
-//   implementation (`window.open`) and would be a pointless regression to
-//   stub out — see the note on it below.
 // - `platform` → `'web'` (see note below).
-// - `getDroppedFilePath` → throws (manual-install feature is deleted).
 
 import type {
   AppConfig,
@@ -44,11 +37,10 @@ import type {
   SongMeta,
   SongResult,
   SortDir,
-  SortKey,
-  UpdateCheckResult
+  SortKey
 } from '../../shared/types'
 
-/** POST /api/<channel> with the preload's argument order, JSON body {args}. */
+/** POST /api/<channel> with the original IPC argument order, JSON body {args}. */
 async function callHttp<T>(channel: string, args: unknown[]): Promise<T> {
   const res = await fetch(`/api/${channel}`, {
     method: 'POST',
@@ -66,11 +58,6 @@ async function callHttp<T>(channel: string, args: unknown[]): Promise<T> {
     throw new Error(body.error?.message || `${channel}: request failed (HTTP ${res.status})`)
   }
   return body.result as T
-}
-
-/** Permanent stub for a channel classified `delete` in the API inventory. */
-function removed(name: string): never {
-  throw new Error(`${name}: removed in web port`)
 }
 
 // ---- jobs:update over SSE — single shared EventSource for the whole tab ----
@@ -132,12 +119,6 @@ export const webApi: RendererApi = {
   enqueueDownload: (song: SongResult, targetSubfolder?: string) =>
     callHttp<string>('jobs:enqueue', [song, targetSubfolder]),
 
-  // Manual-install pipeline — deleted (plan: no manual install/upload flow).
-  enqueueLocalFile: (_localPath: string, _song: SongResult, _targetSubfolder?: string) =>
-    Promise.reject(new Error('enqueueLocalFile: removed in web port')),
-  enqueueLocalBatch: (_paths: string[], _targetSubfolder?: string) =>
-    Promise.reject(new Error('enqueueLocalBatch: removed in web port')),
-
   listSongFolders: () => callHttp<string[]>('library:listFolders', []),
   ownedSongKeys: () => callHttp<string[]>('library:ownedKeys', []),
   ownedFolders: (artist: string, title: string) =>
@@ -155,9 +136,6 @@ export const webApi: RendererApi = {
     callHttp<void>('lib:moveOut', [relItems, destAbsDir]),
   libMove: (src: string, destDir: string) => callHttp<void>('lib:move', [src, destDir]),
   libCopy: (src: string, destDir: string) => callHttp<void>('lib:copy', [src, destDir]),
-  // Native file-manager openers — no server-side equivalent.
-  libOpen: (_rel: string) => removed('libOpen'),
-  libReveal: (_relItem: string) => removed('libReveal'),
   libReadMeta: (relItem: string) => callHttp<SongMeta>('lib:readMeta', [relItem]),
   libWriteMeta: (relItem: string, fields: SongMeta) =>
     callHttp<void>('lib:writeMeta', [relItem, fields]),
@@ -192,20 +170,6 @@ export const webApi: RendererApi = {
   chooseDirectory: (defaultPath?: string) =>
     callHttp<string | null>('dialog:chooseDir', [defaultPath]),
 
-  // Manual-install (drag/drop + native file picker) — out of scope per plan.
-  getDroppedFilePath: (_file: File): string | null => removed('getDroppedFilePath'),
-  chooseSongFile: () =>
-    Promise.reject(new Error('chooseSongFile: removed in web port')) as Promise<{
-      path: string
-      name: string
-    } | null>,
-
-  peekFileMeta: (_path: string) =>
-    Promise.reject(new Error('peekFileMeta: removed in web port')) as Promise<{
-      artist: string
-      title: string
-    } | null>,
-
   resolveUrl: (url: string) => callHttp<string>('url:resolve', [url]),
 
   preview: async (artist: string, title: string) => {
@@ -222,40 +186,16 @@ export const webApi: RendererApi = {
   },
   songAudio: (rel: string) => callHttp<SongAudio>('preview:songAudio', [rel]),
 
-  // ---- Window-chrome (frameless titlebar) — no BrowserWindow in a tab ----
-  toggleMaximize: () => removed('toggleMaximize'),
-  // TitleBar volá při mountu bez guardu — reject tu znamenal unhandled
-  // rejection v konzoli při KAŽDÉM načtení webu. Tab není nikdy
-  // „maximalizovaný" ve smyslu window-chrome, takže resolve(false).
-  isMaximized: () => Promise.resolve(false),
-  onMaximizeChange: (_cb: (max: boolean) => void) => () => {},
-  quitApp: () => removed('quitApp'),
-
-  // `openExternal` is classified `delete` in the inventory, but only because
+  // `openExternal` was classified `delete` in the inventory, but only because
   // its Electron implementation (`shell.openExternal`) has no server-side
   // meaning — the feature itself (open a manual-download page in a new tab)
-  // is trivially portable client-side. Stubbing it to throw would silently
-  // break "manual host" download links (App.tsx's openSongExternal / the
-  // MEGA-Mediafire hint) for no reason, so it gets a real, if tiny,
-  // implementation instead of a removal stub. Flagged here since it's the
-  // one deliberate deviation from the blanket "delete → throw" rule.
+  // is trivially portable client-side, so it kept a real, if tiny,
+  // implementation ("manual host" download links depend on it).
   openExternal: (url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer')
   },
 
-  // ---- electron-updater — updates ship as a new container image instead ----
-  downloadUpdate: () =>
-    Promise.reject(new Error('downloadUpdate: removed in web port')) as Promise<
-      { ok: true } | { ok: false; error: string }
-    >,
-  installUpdate: () => Promise.reject(new Error('installUpdate: removed in web port')),
-  onUpdateAvailable: () => () => {},
-  onUpdateProgress: () => () => {},
-  onUpdateDownloaded: () => () => {},
-
   appVersion: () => callHttp<string>('app:version', []),
-  checkForUpdates: () =>
-    Promise.reject(new Error('checkForUpdates: removed in web port')) as Promise<UpdateCheckResult>,
   // Settings volá setUiScale při ±/Reset/Cancel a App.tsx při Escape —
   // reject tu házel unhandled rejection při běžném ovládání Nastavení.
   // Na webu škálu řeší zoom prohlížeče; no-op resolve místo výjimky.

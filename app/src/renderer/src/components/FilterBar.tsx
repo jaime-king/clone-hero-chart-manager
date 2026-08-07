@@ -1,15 +1,8 @@
-import { useState } from 'react'
 import { useStore } from '../store'
 import { INSTRUMENTS, MAX_DIFFICULTY } from '../utils'
 import { DifficultyDots } from './DifficultyDots'
 import { Dropdown } from './Dropdown'
 import { Icon } from './Icon'
-
-// Přípony, které pipeline umí zpracovat (archivy + .sng + Rock Band CON).
-// Soubory BEZ přípony pouštíme dál a necháme backend rozhodnout podle magic
-// bytů — některé hostingy stripují přípony (RB3 CON downloady z Mediafire
-// často přijdou jen jako "ArtistTitle" bez .rb3con).
-const ACCEPTED_EXT = /\.(zip|rar|7z|sng|rb3con|con)$/i
 
 const LEVELS = Array.from({ length: MAX_DIFFICULTY + 1 }, (_, i) => i) // 0..6
 
@@ -54,43 +47,10 @@ export function FilterBar(): JSX.Element {
   // Difficulty je použitelná vždy: s vybranými nástroji filtruje je, bez výběru
   // platí „jakýkoli nástroj v rozsahu".
   const anyInstrument = filters.length === 0
-  const openLocalDrop = useStore((s) => s.openLocalDrop)
-  const openLocalBatch = useStore((s) => s.openLocalBatch)
-  const [dragOver, setDragOver] = useState(false)
   // IA (Phase 3.5): na mobilu (<900px) je celý hero panel CSS-schovaný —
   // tytéž ovládací prvky žijí ve FilterSheet, který otevírá ikonové tlačítko
   // Filters v search baru. Dřívější „Filters & instruments" přepínač tady byl
   // duplikát toho tlačítka a je odstraněný.
-
-  const handleDrop = (e: React.DragEvent<HTMLElement>): void => {
-    e.preventDefault()
-    setDragOver(false)
-    const files = Array.from(e.dataTransfer.files || [])
-    if (files.length === 0) return
-    const paths = files
-      .map((f) => window.api.getDroppedFilePath(f))
-      .filter((p): p is string => !!p)
-    if (paths.length === 0) {
-      window.alert('Could not read the file paths. Try again, or use the click-to-browse option.')
-      return
-    }
-
-    // Jediný soubor s příponou → modal s potvrzením metadat (nejlepší UX).
-    // Víc položek nebo složka → hromadná dávka (metadata z názvů, jeden výběr cíle).
-    const single = files[0]
-    const singleHasExt = /\.[a-z0-9]{1,8}$/i.test(single.name)
-    if (paths.length === 1 && singleHasExt) {
-      if (!ACCEPTED_EXT.test(single.name)) {
-        window.alert(
-          `Unsupported file: "${single.name}". Drop a .zip / .rar / .7z / .sng / Rock Band CON file, multiple files, or a folder.`
-        )
-        return
-      }
-      void openLocalDrop(paths[0], single.name)
-      return
-    }
-    void openLocalBatch(paths)
-  }
 
   return (
     <div className="filterbar">
@@ -142,52 +102,6 @@ export function FilterBar(): JSX.Element {
         </div>
       </div>
 
-      {/* Manual install (drag/drop + native file picker) is out of scope for
-          the web port (docs/port/plan.md guardrail 4: getDroppedFilePath and
-          dialog:chooseSongFile are `delete`, not rewritten as an upload flow —
-          see docs/port/api-inventory.md rows #41/#42/#6/#7). web-api.ts's
-          window.api.platform reports 'web' only in the web build (never a
-          real NodeJS.Platform value an Electron preload would return), so
-          this is a clean, build-target-scoped condition: the Electron app
-          keeps the panel unconditionally, the web build never renders it. */}
-      {/* Cast: web-api.ts's `platform` is typed as NodeJS.Platform to match the
-          preload contract exactly, but returns the literal 'web' at runtime
-          (see its comment) — a value TypeScript doesn't consider part of
-          that type, hence the cast rather than a direct comparison. */}
-      {(window.api.platform as unknown as string) !== 'web' && (
-        <button
-          type="button"
-          className={`dropzone ${dragOver ? 'dropzone--hover' : ''}`}
-          onClick={async () => {
-            const picked = await window.api.chooseSongFile()
-            if (picked) void openLocalDrop(picked.path, picked.name)
-          }}
-          onDragOver={(e) => {
-            e.preventDefault()
-            e.dataTransfer.dropEffect = 'copy'
-            setDragOver(true)
-          }}
-          onDragEnter={(e) => {
-            e.preventDefault()
-            setDragOver(true)
-          }}
-          onDragLeave={(e) => {
-            e.preventDefault()
-            setDragOver(false)
-          }}
-          onDrop={handleDrop}
-        >
-          <span className="dropzone__main">
-            <Icon name="download" size={20} />
-            <strong>
-              Drop files or a folder,
-              <br />
-              or click to browse
-            </strong>
-          </span>
-          <span className="dropzone__ext">.zip · .rar · .7z · .sng · .CON · .DTX</span>
-        </button>
-      )}
     </div>
   )
 }

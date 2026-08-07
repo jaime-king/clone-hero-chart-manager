@@ -18,8 +18,8 @@ deleted not rewritten. **`?`** suffix = genuinely ambiguous, see the note.
 | 3 | `getFilterOptions` | `search:filterOptions` | invoke | `system?` | `Promise<FilterOptions>` | main/ipc.ts:135-139 | http |
 | 4 | `resolvePlaylist` | `playlist:resolve` | invoke | `url` | `Promise<PlaylistResolveResult>` | main/ipc.ts:294 | http |
 | 5 | `enqueueDownload` | `jobs:enqueue` | invoke | `song, targetSubfolder?` | `Promise<string>` | main/ipc.ts:146-148 → core/jobs.ts:134-142 | http |
-| 6 | `enqueueLocalFile` | `jobs:enqueueLocal` | invoke | `localPath, song, targetSubfolder?` | `Promise<string>` | main/ipc.ts:149-153 → core/jobs.ts:148-173 | delete — this is the manual-install pipeline: jobs.ts:144-147 comment says explicitly "soubor, který uživatel ručně stáhnul z MEGA/Mediafire… a chce nainstalovat" (a file the user manually downloaded and wants installed). Same out-of-scope feature as `getDroppedFilePath`/`chooseSongFile`, just not named in the guardrails — see Strays §3.1 |
-| 7 | `enqueueLocalBatch` | `jobs:enqueueLocalBatch` | invoke | `paths, targetSubfolder?` | `Promise<string[]>` | main/ipc.ts:154-158 → core/jobs.ts:182-200 | delete — batch variant of #6, same reasoning |
+| 6 | `enqueueLocalFile` | `jobs:enqueueLocal` | invoke | `localPath, song, targetSubfolder?` | `Promise<string>` | main/ipc.ts:149-153 → core/jobs.ts:148-173 | delete — this is the manual-install pipeline: jobs.ts:144-147 comment says explicitly "soubor, který uživatel ručně stáhnul z MEGA/Mediafire… a chce nainstalovat" (a file the user manually downloaded and wants installed). Same out-of-scope feature as `getDroppedFilePath`/`chooseSongFile`, just not named in the guardrails — see Strays §3.1 — **removed 2026-08-07 (web-only)** |
+| 7 | `enqueueLocalBatch` | `jobs:enqueueLocalBatch` | invoke | `paths, targetSubfolder?` | `Promise<string[]>` | main/ipc.ts:154-158 → core/jobs.ts:182-200 | delete — batch variant of #6, same reasoning — **removed 2026-08-07 (web-only)** |
 | 8 | `listSongFolders` | `library:listFolders` | invoke | — | `Promise<string[]>` | main/ipc.ts:163 | http |
 | 9 | `ownedSongKeys` | `library:ownedKeys` | invoke | — | `Promise<string[]>` | main/ipc.ts:164 | http |
 | 10 | `ownedFolders` | `library:ownedFolders` | invoke | `artist, title` | `Promise<string[]>` | main/ipc.ts:165-167 | http |
@@ -31,8 +31,8 @@ deleted not rewritten. **`?`** suffix = genuinely ambiguous, see the note.
 | 16 | `libMoveOut` | `lib:moveOut` | invoke | `relItems, destAbsDir` | `Promise<void>` | main/ipc.ts:177-179 → core/librarymgr.ts:217-260 | delete? — `destAbsDir` is an arbitrary absolute path on the machine's filesystem, normally supplied via the `dialog:chooseDir` native picker (#40). No browser client can hand the server an arbitrary server-side path; this only makes sense if paired with a server-side directory-browse UI, which is a new feature, not a mechanical port |
 | 17 | `libMove` | `lib:move` | invoke | `src, destDir` | `Promise<void>` | main/ipc.ts:180 | http |
 | 18 | `libCopy` | `lib:copy` | invoke | `src, destDir` | `Promise<void>` | main/ipc.ts:181 | http |
-| 19 | `libOpen` | `lib:open` | send | `rel` | `void` | main/ipc.ts:182 → core/librarymgr.ts:269-271 (`shell.openPath`) | delete — opens the item in the native OS file manager; no server equivalent. Not named in the guardrails' delete-category list — see Strays §3.2 |
-| 20 | `libReveal` | `lib:reveal` | send | `relItem` | `void` | main/ipc.ts:183 → core/librarymgr.ts:273-275 (`shell.showItemInFolder`) | delete — reveals in Finder/Explorer; same reasoning as #19 |
+| 19 | `libOpen` | `lib:open` | send | `rel` | `void` | main/ipc.ts:182 → core/librarymgr.ts:269-271 (`shell.openPath`) | delete — opens the item in the native OS file manager; no server equivalent. Not named in the guardrails' delete-category list — see Strays §3.2 — **removed 2026-08-07 (web-only)** |
+| 20 | `libReveal` | `lib:reveal` | send | `relItem` | `void` | main/ipc.ts:183 → core/librarymgr.ts:273-275 (`shell.showItemInFolder`) | delete — reveals in Finder/Explorer; same reasoning as #19 — **removed 2026-08-07 (web-only)** |
 | 21 | `libReadMeta` | `lib:readMeta` | invoke | `relItem` | `Promise<SongMeta>` | main/ipc.ts:184 | http |
 | 22 | `libWriteMeta` | `lib:writeMeta` | invoke | `relItem, fields` | `Promise<void>` | main/ipc.ts:185-187 | http |
 | 23 | `libSongInfo` | `lib:songInfo` | invoke | `rels` | `Promise<LibSongInfo[]>` | main/ipc.ts:188 | http |
@@ -53,9 +53,9 @@ deleted not rewritten. **`?`** suffix = genuinely ambiguous, see the note.
 | 38 | `setConfig` | `config:set` | invoke | `patch` | `Promise<AppConfig>` | main/ipc.ts:208-220 | http |
 | 39 | `songsDirExists` | `config:songsDirExists` | invoke | — | `Promise<boolean>` | main/ipc.ts:207 | http |
 | 40 | `chooseDirectory` | `dialog:chooseDir` | invoke | `defaultPath?` | `Promise<string \| null>` | main/ipc.ts:224-232 (`dialog.showOpenDialog`) | delete? — native Electron folder-picker over the server's own filesystem; used today for (a) overriding `songsDir` in Settings — moot once `CHM_LIBRARY_ROOT` is the source of truth (plan §Phase 2), and (b) picking the duplicate-quarantine target in `DuplicatesModal.tsx` — a genuine feature need with no direct web equivalent |
-| 41 | `getDroppedFilePath` | — (no IPC; `webUtils.getPathForFile` in preload only) | other | `file: File` | `string \| null` | preload/index.ts:137-143 (no main handler) | delete — named out of scope in the plan (manual install) |
-| 42 | `chooseSongFile` | `dialog:chooseSongFile` | invoke | — | `Promise<{path,name}\|null>` | main/ipc.ts:234-251 | delete — named out of scope in the plan (manual install) |
-| 43 | `peekFileMeta` | `file:peekMeta` | invoke | `path` | `Promise<{artist,title}\|null>` | main/ipc.ts:280 | delete — only caller is `renderer/src/store.ts:1248`, itself only reachable from the dropped/picked-file (manual install) flow being deleted |
+| 41 | `getDroppedFilePath` | — (no IPC; `webUtils.getPathForFile` in preload only) | other | `file: File` | `string \| null` | preload/index.ts:137-143 (no main handler) | delete — named out of scope in the plan (manual install) — **removed 2026-08-07 (web-only)** |
+| 42 | `chooseSongFile` | `dialog:chooseSongFile` | invoke | — | `Promise<{path,name}\|null>` | main/ipc.ts:234-251 | delete — named out of scope in the plan (manual install) — **removed 2026-08-07 (web-only)** |
+| 43 | `peekFileMeta` | `file:peekMeta` | invoke | `path` | `Promise<{artist,title}\|null>` | main/ipc.ts:280 | delete — only caller is `renderer/src/store.ts:1248`, itself only reachable from the dropped/picked-file (manual install) flow being deleted — **removed 2026-08-07 (web-only)** |
 | 44 | `resolveUrl` | `url:resolve` | invoke | `url` | `Promise<string>` | main/ipc.ts:284-291 | http |
 | 45 | `preview` | `preview:get` | invoke | `artist, title` | `Promise<PreviewResult>` | main/ipc.ts:142 | http |
 | 46 | `songAudio` | `preview:songAudio` | invoke | `rel` | `Promise<SongAudio>` | main/ipc.ts:144 | http (metadata call; actual audio bytes move to the Phase 5 `GET /api/audio` range endpoint) |
@@ -66,21 +66,21 @@ deleted not rewritten. **`?`** suffix = genuinely ambiguous, see the note.
 | 51 | `chooseExeFile` | `dialog:chooseExe` | invoke | — | `Promise<string\|null>` | main/ipc.ts:260-278 | delete — picks the CH/YARG executable for the deleted game-launch feature — **removed 2026-08-02** |
 | 52 | `onGameStatus` | `game:status` | on-stream | `cb: (game) => void` | unsubscribe fn | emitted main/ipc.ts:338 (`pollGameInner`) | delete — feeds the deleted game-detection feature, not a portable stream — **removed 2026-08-02** |
 | 53 | `hideOverlay` | `overlay:hide` | send | — | `void` | main/ipc.ts:296 | delete — window control — **removed 2026-08-02** |
-| 54 | `toggleMaximize` | `overlay:toggleMaximize` | send | — | `void` | main/ipc.ts:297 | delete — window control |
-| 55 | `isMaximized` | `overlay:isMaximized` | invoke | — | `Promise<boolean>` | main/ipc.ts:298 | delete — window control |
-| 56 | `onMaximizeChange` | `overlay:maximized` | on-stream | `cb: (max) => void` | unsubscribe fn | emitted main/overlay.ts:145-149 (`sendMax`) | delete — window-control stream |
-| 57 | `quitApp` | `app:quit` | send | — | `void` | main/ipc.ts:299 | delete — desktop app lifecycle |
+| 54 | `toggleMaximize` | `overlay:toggleMaximize` | send | — | `void` | main/ipc.ts:297 | delete — window control — **removed 2026-08-07 (web-only)** |
+| 55 | `isMaximized` | `overlay:isMaximized` | invoke | — | `Promise<boolean>` | main/ipc.ts:298 | delete — window control — **removed 2026-08-07 (web-only)** |
+| 56 | `onMaximizeChange` | `overlay:maximized` | on-stream | `cb: (max) => void` | unsubscribe fn | emitted main/overlay.ts:145-149 (`sendMax`) | delete — window-control stream — **removed 2026-08-07 (web-only)** |
+| 57 | `quitApp` | `app:quit` | send | — | `void` | main/ipc.ts:299 | delete — desktop app lifecycle — **removed 2026-08-07 (web-only)** |
 | 58 | `pauseHotkeys` | `hotkeys:pause` | send | — | `void` | main/ipc.ts:300 | delete — global hotkeys — **removed 2026-08-02** |
 | 59 | `resumeHotkeys` | `hotkeys:resume` | send | — | `void` | main/ipc.ts:301 | delete — global hotkeys — **removed 2026-08-02** |
 | 60 | `onHotkey` | `hotkey` | on-stream | `cb: (action) => void` | unsubscribe fn | emitter `sendHotkey()` main/hotkeys.ts:37-39 | delete — global-hotkey stream; also dead code today, see Strays §3.3 — **removed 2026-08-02** (`main/hotkeys.ts` deleted entirely, along with `main/tray.ts` — its only purpose was toggling this same hide/show behavior) |
 | 61 | `openExternal` | `shell:openExternal` | send | `url` | `void` | main/ipc.ts:302-304 (`shell.openExternal`) | delete — becomes a plain `<a target="_blank">` in the browser, no server round-trip needed |
-| 62 | `downloadUpdate` | `update:download` | invoke | — | `Promise<{ok,...}>` | core/autoupdate.ts:71-78 (win) / 127-130 (mac) | delete — electron-updater |
-| 63 | `installUpdate` | `update:install` | invoke | — | `Promise<void>` | core/autoupdate.ts:79-81 / 131-133 | delete — electron-updater |
-| 64 | `onUpdateAvailable` | `update:available` | on-stream | `cb: (info) => void` | unsubscribe fn | emitted core/autoupdate.ts:47-49, 63, 105, 139, 150 | delete — autoupdate stream |
-| 65 | `onUpdateProgress` | `update:progress` | on-stream | `cb: (p) => void` | unsubscribe fn | emitted core/autoupdate.ts:50-52 | delete — autoupdate stream |
-| 66 | `onUpdateDownloaded` | `update:downloaded` | on-stream | `cb: (info) => void` | unsubscribe fn | emitted core/autoupdate.ts:53-55 | delete — autoupdate stream |
+| 62 | `downloadUpdate` | `update:download` | invoke | — | `Promise<{ok,...}>` | core/autoupdate.ts:71-78 (win) / 127-130 (mac) | delete — electron-updater — **removed 2026-08-07 (web-only)** |
+| 63 | `installUpdate` | `update:install` | invoke | — | `Promise<void>` | core/autoupdate.ts:79-81 / 131-133 | delete — electron-updater — **removed 2026-08-07 (web-only)** |
+| 64 | `onUpdateAvailable` | `update:available` | on-stream | `cb: (info) => void` | unsubscribe fn | emitted core/autoupdate.ts:47-49, 63, 105, 139, 150 | delete — autoupdate stream — **removed 2026-08-07 (web-only)** |
+| 65 | `onUpdateProgress` | `update:progress` | on-stream | `cb: (p) => void` | unsubscribe fn | emitted core/autoupdate.ts:50-52 | delete — autoupdate stream — **removed 2026-08-07 (web-only)** |
+| 66 | `onUpdateDownloaded` | `update:downloaded` | on-stream | `cb: (info) => void` | unsubscribe fn | emitted core/autoupdate.ts:53-55 | delete — autoupdate stream — **removed 2026-08-07 (web-only)** |
 | 67 | `appVersion` | `app:version` | invoke | — | `Promise<string>` | main/ipc.ts:305 (`app.getVersion()`) | http — needs a version-source shim (package.json version or `CHM_VERSION` env var) since `app.getVersion()` won't exist server-side; see Table 2 note on `update.ts` |
-| 68 | `checkForUpdates` | `update:check` | invoke | — | `Promise<UpdateCheckResult>` | core/autoupdate.ts:84-109 / 135-143 | delete — electron-updater / manual-update feature |
+| 68 | `checkForUpdates` | `update:check` | invoke | — | `Promise<UpdateCheckResult>` | core/autoupdate.ts:84-109 / 135-143 | delete — electron-updater / manual-update feature — **removed 2026-08-07 (web-only)** |
 | 69 | `setUiScale` | `ui:scale` | invoke | `scale` | `Promise<void>` | main/ipc.ts:222 → main/overlay.ts:43-47 (`webContents.setZoomFactor`) | delete — mutates an Electron `BrowserWindow`'s zoom; the browser has its own native zoom |
 | 70 | `getReleaseNotes` | `app:releaseNotes` | invoke | `version?` | `Promise<ReleaseNotes\|null>` | main/ipc.ts:306 → core/update.ts | http |
 | 71 | `getReleaseNotesSince` | `app:releaseNotesSince` | invoke | `since?, max?` | `Promise<ReleaseNotes[]>` | main/ipc.ts:307-309 → core/update.ts | http |
@@ -89,7 +89,7 @@ deleted not rewritten. **`?`** suffix = genuinely ambiguous, see the note.
 
 | Module | Class | Electron / desktop-only imports and call sites forcing the classification |
 |---|---|---|
-| `autoupdate.ts` | delete | `import { app, ipcMain, type BrowserWindow } from 'electron'` (line 14); wraps `electron-updater`'s `autoUpdater` throughout (lines 21, 44-118). The feature itself (in-app update download/install) is out of scope for a server deployment — updates ship as a new container image — so the module is deleted rather than shimmed. |
+| `autoupdate.ts` | delete | `import { app, ipcMain, type BrowserWindow } from 'electron'` (line 14); wraps `electron-updater`'s `autoUpdater` throughout (lines 21, 44-118). The feature itself (in-app update download/install) is out of scope for a server deployment — updates ship as a new container image — so the module is deleted rather than shimmed. **File removed 2026-08-07 (web-only cleanup), together with the entire Electron target (`main/index.ts`, `ipc.ts`, `menu.ts`, `overlay.ts`, `preload/`).** |
 | `config.ts` | shim | `import { app } from 'electron'` (line 3); `app.getPath('userData')` at lines 14, 209; `app.getPath('exe')` at line 27. **Expected shim, confirmed.** |
 | `converter.ts` | keep | No electron import. Uses `getConfig()` (shimmed) and `run()` from `proc.ts`. Onyx CON conversion, feature-flagged per plan Phase 5 §5, but the module itself is unchanged. |
 | `download.ts` | keep | No electron import. Pure Node `fs`/`stream` for fetching and writing archive files. |
