@@ -8,6 +8,11 @@ import { Icon } from './Icon'
 // Verzi, kterou uživatel „zavřel", si pamatujeme, ať ho stejné upozornění neotravuje.
 const DISMISS_KEY = 'chm.updateDismissed'
 
+// Web build: checkForUpdates je `delete` (web-api.ts vždy rejectne), takže by
+// tlačítko „Check for updates" vždy skončilo chybou — v prohlížeči se
+// nevykresluje vůbec. Stejný idiom jako dropzone ve FilterBar.tsx.
+const isWeb = (window.api.platform as unknown as string) === 'web'
+
 // IA (Phase 3.5): levý panel je NAVIGACE — Search / My Library / Settings +
 // globální akce (Surprise me, Import playlist) a update patička. Database/System
 // přepínače se přestěhovaly do filtrů (FilterPanel/FilterSheet) — scopují
@@ -261,23 +266,27 @@ export function Sidebar(): JSX.Element {
             >
               version {version || '…'}
             </button>
-            <button
-              type="button"
-              className="side-update"
-              onClick={() => void checkUpdates()}
-              disabled={checkState === 'checking'}
-            >
-              {checkState === 'checking' ? 'Checking…' : 'Check for updates'}
-            </button>
-            {checkState === 'uptodate' ? (
-              <span className="side-update__result side-update__result--uptodate">
-                You&apos;re on the latest version.
-              </span>
-            ) : checkState === 'error' ? (
-              <span className="side-update__result side-update__result--error">
-                Couldn&apos;t check right now.
-              </span>
-            ) : null}
+            {!isWeb && (
+              <>
+                <button
+                  type="button"
+                  className="side-update"
+                  onClick={() => void checkUpdates()}
+                  disabled={checkState === 'checking'}
+                >
+                  {checkState === 'checking' ? 'Checking…' : 'Check for updates'}
+                </button>
+                {checkState === 'uptodate' ? (
+                  <span className="side-update__result side-update__result--uptodate">
+                    You&apos;re on the latest version.
+                  </span>
+                ) : checkState === 'error' ? (
+                  <span className="side-update__result side-update__result--error">
+                    Couldn&apos;t check right now.
+                  </span>
+                ) : null}
+              </>
+            )}
           </>
         )}
       </div>

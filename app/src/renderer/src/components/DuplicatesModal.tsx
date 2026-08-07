@@ -8,6 +8,10 @@ import { InstrumentDifficulty } from './InstrumentDifficulty'
 import { LocalPreview } from './LocalPreview'
 import { RichText } from './RichText'
 
+// Web build: libReveal je `delete` (web-api.ts hází) — „Show in Explorer" se
+// v prohlížeči nevykresluje. Stejný idiom jako dropzone ve FilterBar.tsx.
+const isWeb = (window.api.platform as unknown as string) === 'web'
+
 // Odznaky „co má složka navíc" — pomáhá rozhodnout, kterou kopii si nechat.
 // Zobrazí se jen to, co je reálně přítomné.
 const EXTRA_META: { key: keyof DupExtras; label: string; title: string }[] = [
@@ -111,9 +115,11 @@ function CopyDetail({ rel }: { rel: string }): JSX.Element {
         {line1 ? <div className="dup__detailsub">{line1}</div> : null}
         {line2 ? <div className="dup__detailsub">{line2}</div> : null}
         {info ? <InstrumentDifficulty difficulties={info.difficulties} /> : null}
-        <button className="linkbtn dup__reveal" onClick={() => window.api.libReveal(rel)}>
-          <Icon name="external" size={12} /> Show in Explorer
-        </button>
+        {!isWeb && (
+          <button className="linkbtn dup__reveal" onClick={() => window.api.libReveal(rel)}>
+            <Icon name="external" size={12} /> Show in Explorer
+          </button>
+        )}
       </div>
     </div>
   )
