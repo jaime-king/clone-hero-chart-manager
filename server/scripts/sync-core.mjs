@@ -22,12 +22,13 @@ const repoRoot = dirname(serverRoot)
 const appSrc = join(repoRoot, 'app', 'src')
 const gen = join(serverRoot, 'src', 'gen')
 
-// Modules NOT mirrored: autoupdate.ts (classified `delete` in
-// docs/port/api-inventory.md — desktop-only feature with no server meaning;
-// gamedetect.ts was the other `delete` module but has since been removed
-// from the app entirely, so it no longer needs excluding) and config.ts
-// (replaced by the shim below).
-const EXCLUDED = new Set(['autoupdate.ts', 'config.ts'])
+// Modules NOT mirrored: filemeta.ts (backed only the `file:peekMeta` channel
+// = manual install, removed in the web-only cleanup — no server code imports
+// it; NOT filetype.ts, which jobs.ts uses in the download pipeline) and
+// config.ts (replaced by the shim below). autoupdate.ts and gamedetect.ts,
+// the two `delete`-classified modules docs/port/api-inventory.md called out,
+// have since been removed from the app entirely and need no exclusion.
+const EXCLUDED = new Set(['filemeta.ts', 'config.ts'])
 
 rmSync(gen, { recursive: true, force: true })
 mkdirSync(join(gen, 'main', 'core'), { recursive: true })
