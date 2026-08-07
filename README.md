@@ -26,6 +26,7 @@ SPA, and IPC became HTTP + one SSE stream.
 | Drag-and-drop manual install, native file pickers | Removed — catalog download + library management only |
 | "Open Clone Hero / YARG" buttons, game detection, overlay hotkey, reminder pill, tray, auto-update | Removed — meaningless on a server |
 | Per-user OS config | Environment variables |
+| Electron desktop build target | Removed entirely (2026-08) — this fork is **web-only**; the Electron runtime, builder config and desktop-only UI chains are gone |
 
 Everything else below survives from upstream unchanged.
 
@@ -165,15 +166,12 @@ cd server && npm install
 CHM_LIBRARY_ROOT=~/fixture/Songs CHM_DATA_DIR=/tmp/chm-data npm run dev
 
 # Web renderer (the server serves app/out/renderer)
-cd app && npm install && npm run build:web
+cd app && npm install && npm run build
 
 # Security test suite (path containment — with no auth, this is the
 # app's entire protection layer; keep it green)
 cd server && npm test
 ```
-
-The original Electron app still builds (`cd app && npm run build` /
-`npm run dist`), minus the desktop-only features this fork deleted.
 
 ### How the port works
 
