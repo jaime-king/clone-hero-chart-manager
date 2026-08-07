@@ -2,139 +2,27 @@
   "name": "chm",
   "version": "1.1.3",
   "description": "Clone Hero Chart Manager (CHM): search, download and convert Clone Hero charts from RhythmVerse and Chorus Encore.",
-  "main": "./out/main/index.js",
   "author": "ZIPEEK",
   "license": "MIT",
   "scripts": {
-    "dev": "electron-vite dev",
-    "build": "electron-vite build",
-    "build:web": "vite build --config vite.web.config.ts && mv out/renderer/index.web.html out/renderer/index.html",
-    "start": "electron-vite preview",
-    "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
-    "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
-    "typecheck": "npm run typecheck:node && npm run typecheck:web",
-    "dist": "electron-vite build && electron-builder --win nsis",
-    "dist:portable": "electron-vite build && electron-builder --win portable",
-    "dist:mac": "electron-vite build && electron-builder --mac"
-  },
-  "build": {
-    "appId": "com.zipeek.chm",
-    "productName": "Clone Hero Chart Manager",
-    "directories": {
-      "output": "dist",
-      "buildResources": "build"
-    },
-    "afterPack": "build/adhoc-sign.cjs",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "xlzipx",
-        "repo": "clone-hero-chart-manager"
-      }
-    ],
-    "files": [
-      "out/**/*",
-      "build/icon.png",
-      "package.json"
-    ],
-    "win": {
-      "target": [
-        "nsis"
-      ],
-      "icon": "build/icon.ico",
-      "extraResources": [
-        {
-          "from": "../native/onyx/onyx-command-line-20251011-windows-x64",
-          "to": "onyx"
-        },
-        {
-          "from": "../native/7zip/7z.exe",
-          "to": "tools/7z.exe"
-        },
-        {
-          "from": "../native/7zip/7z.dll",
-          "to": "tools/7z.dll"
-        },
-        {
-          "from": "../native/7zip/License.txt",
-          "to": "tools/7-Zip-License.txt"
-        },
-        {
-          "from": "../LICENSE",
-          "to": "LICENSE.txt"
-        },
-        {
-          "from": "../THIRD-PARTY.txt",
-          "to": "THIRD-PARTY.txt"
-        }
-      ]
-    },
-    "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ],
-      "category": "public.app-category.music",
-      "icon": "build/icon-1024.png",
-      "identity": null,
-      "extraResources": [
-        {
-          "from": "../native/onyx-mac",
-          "to": "onyx"
-        },
-        {
-          "from": "../native/7zip-mac/7zz",
-          "to": "tools/7zz"
-        },
-        {
-          "from": "../LICENSE",
-          "to": "LICENSE.txt"
-        },
-        {
-          "from": "../THIRD-PARTY.txt",
-          "to": "THIRD-PARTY.txt"
-        }
-      ]
-    },
-    "dmg": {
-      "artifactName": "CHM-${version}-mac-${arch}.dmg"
-    },
-    "portable": {
-      "artifactName": "CHM-Portable-${version}.exe"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Clone Hero Chart Manager",
-      "artifactName": "CHM-Setup-${version}.exe",
-      "uninstallDisplayName": "Clone Hero Chart Manager"
-    }
+    "build": "vite build --config vite.web.config.ts && mv out/renderer/index.web.html out/renderer/index.html",
+    "typecheck": "tsc --noEmit -p tsconfig.web.json"
   },
   "dependencies": {
-    "electron-updater": "^6.8.9",
     "parse-sng": "^4.0.3",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
-    "electron": "^33.3.0",
-    "electron-builder": "^25.1.8",
-    "electron-vite": "^2.3.0",
-    "png-to-ico": "^3.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.7.2",
     "vite": "^5.4.11"
   },
   "allowScripts": {
-    "electron@33.4.11": true,
     "esbuild@0.21.5": true,
     "fsevents@2.3.3": true
   }

@@ -19,7 +19,6 @@
   },
   "include": [
     "src/renderer/**/*",
-    "src/shared/**/*",
-    "src/preload/**/*"
+    "src/shared/**/*"
   ]
 }

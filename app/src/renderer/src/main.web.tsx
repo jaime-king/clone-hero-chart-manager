@@ -10,9 +10,9 @@
 // until after `window.api` is set, or the module-eval-time read of
 // `window.api.platform` would throw on `undefined`.
 //
-// This file (and index.web.html, which points to it) is the only injection
-// seam; main.tsx/index.html stay untouched and keep building the Electron
-// preload-backed app.
+// This file (and index.web.html, which points to it) is the app's only entry
+// point — the Electron target (main.tsx/index.html + preload) was removed
+// when the fork went web-only.
 
 import { webApi } from './web-api'
 import './styles.css'
