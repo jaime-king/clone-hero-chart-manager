@@ -119,14 +119,14 @@ Everything else below survives from upstream unchanged.
 
 ## Running it
 
-Image: `ghcr.io/jaime-king/clone-hero-chart-manager:webapp` (linux/amd64,
+Image: `ghcr.io/jaime-king/clone-hero-chart-manager:main` (linux/amd64,
 built by [GitHub Actions](.github/workflows/build-image.yml) on every push;
 each build is also tagged with its commit sha for rollbacks).
 
 ```yaml
 services:
   chart-manager:
-    image: ghcr.io/jaime-king/clone-hero-chart-manager:webapp
+    image: ghcr.io/jaime-king/clone-hero-chart-manager:main
     restart: unless-stopped
     ports:
       - 8300:8300
