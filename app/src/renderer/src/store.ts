@@ -42,7 +42,19 @@ interface AppState {
   enqueuedKeys: Record<string, string> // songKey -> jobId
   config: AppConfig | null
   showSettings: boolean
-  showLibrary: boolean
+  /** Mobil (<900px): otevřený slide-in drawer se Sidebar obsahem. Na desktopu se nepoužívá. */
+  mobileNavOpen: boolean
+  /** Mobil (<900px): otevřený bottom sheet se VŠEMI filtry (řazení, nástroje,
+   *  obtížnost, žánr/rok/délka, charter/album, hide-owned). Na desktopu se nepoužívá. */
+  mobileFiltersOpen: boolean
+  /** Mobil (<900px): režim hromadného výběru — karty ukazují checkboxy, tap řádku
+   *  = přepnout výběr, dole visí lišta „Download selected". Na desktopu se nepoužívá. */
+  selectMode: boolean
+  /** IA (Phase 3.5): aktivní pohled obsahu. 'search' = vyhledávání (výchozí),
+   *  'library' = Správce knihovny jako plnohodnotná stránka (dřív modal).
+   *  Vyhledávací pohled zůstává namontovaný (jen skrytý), takže výsledky,
+   *  filtry i scroll pozice přepnutí přežijí. */
+  view: 'search' | 'library'
   /** Cíl pro „In library": relativní cesty (k Songs) kopií písně k odhalení v Library
    *  Manageru. null = manager otevřen normálně (kořen). Víc cest = duplikáty. */
   libraryReveal: string[] | null
@@ -165,7 +177,14 @@ interface AppState {
   setShowFilters: (v: boolean) => void
   setSelectedIndex: (i: number) => void
   setShowSettings: (v: boolean) => void
-  setShowLibrary: (v: boolean) => void
+  setMobileNavOpen: (v: boolean) => void
+  setMobileFiltersOpen: (v: boolean) => void
+  /** Zapne/vypne mobilní výběrový režim; vypnutí zruší i aktuální výběr. */
+  setSelectMode: (v: boolean) => void
+  /** Přepne pohled obsahu (search ↔ library). Odchod z knihovny obnoví
+   *  „owned" index a vyčistí reveal cíl — stejné vedlejší efekty jako mělo
+   *  zavření dřívějšího modalu. Synchronizuje i URL hash (#library). */
+  setView: (v: 'search' | 'library') => void
   /** Otevře Library Manager rovnou na dané písni (kopiích) a vybere ji. */
   openLibraryAt: (rels: string[]) => void
   setShowWhatsNew: (v: boolean) => void
@@ -637,7 +656,11 @@ export const useStore = create<AppState>((set, get) => {
   enqueuedKeys: {},
   config: null,
   showSettings: false,
-  showLibrary: false,
+  mobileNavOpen: false,
+  mobileFiltersOpen: false,
+  selectMode: false,
+  // Deep-link: načtení s #library v URL otevře rovnou knihovnu (jinak search).
+  view: typeof window !== 'undefined' && window.location.hash === '#library' ? 'library' : 'search',
   libraryReveal: null,
   showWhatsNew: false,
   whatsNewSince: null,
@@ -1030,14 +1053,39 @@ export const useStore = create<AppState>((set, get) => {
   },
   setSelectedIndex: (i) => set({ selectedIndex: i }),
   setShowSettings: (v) => set({ showSettings: v }),
-  // Zavření manageru vyčistí cíl „reveal" (příště se otevře normálně na kořeni).
-  // Zároveň obnoví „owned" index — uživatel mohl ve správci smazat/přesunout
-  // písničky, jinak by řádky ve výsledcích držely zastaralý „In library".
-  setShowLibrary: (v) => {
-    set(v ? { showLibrary: true } : { showLibrary: false, libraryReveal: null })
-    if (!v) void get().loadOwnedKeys()
+  setMobileNavOpen: (v) => set({ mobileNavOpen: v }),
+  // Otevření mobilního filter-sheetu si (stejně jako setShowFilters) lazy
+  // donačte číselník voleb pro dropdowny.
+  setMobileFiltersOpen: (v) => {
+    set({ mobileFiltersOpen: v })
+    if (v) void get().loadFilterOptions()
   },
-  openLibraryAt: (rels) => set({ libraryReveal: rels, showLibrary: true }),
+  setSelectMode: (v) => set(v ? { selectMode: true } : { selectMode: false, selectedKeys: [] }),
+  // Odchod z knihovny vyčistí cíl „reveal" (příště se otevře normálně na kořeni)
+  // a obnoví „owned" index — uživatel mohl ve správci smazat/přesunout písničky,
+  // jinak by řádky ve výsledcích držely zastaralý „In library".
+  setView: (v) => {
+    const prev = get().view
+    if (prev === v) return
+    set(v === 'library' ? { view: 'library' } : { view: 'search', libraryReveal: null })
+    if (prev === 'library') void get().loadOwnedKeys()
+    // Hash deep-link (#library): vstup do knihovny přidá historii (funguje
+    // Zpět v prohlížeči), návrat na search hash tiše smaže (replaceState —
+    // žádný hashchange, žádná smyčka se syncem v App.tsx).
+    try {
+      if (v === 'library') {
+        if (window.location.hash !== '#library') window.location.hash = 'library'
+      } else if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search)
+      }
+    } catch {
+      /* Electron file:// edge — hash je jen bonus */
+    }
+  },
+  openLibraryAt: (rels) => {
+    set({ libraryReveal: rels })
+    get().setView('library')
+  },
   setShowWhatsNew: (v) => set({ showWhatsNew: v }),
   setShowPlaylistImport: (v) => set({ showPlaylistImport: v }),
   setShowAbout: (v) => set({ showAbout: v }),
@@ -1431,3 +1479,17 @@ export const useStore = create<AppState>((set, get) => {
   }
   }
 })
+
+/** Souhrnný počet aktivních filtrů pro mobilní „Filters" badge (hero přepínač,
+ *  tlačítko v search baru i hlavička filter-sheetu počítají STEJNĚ): nástroje
+ *  (každý zvlášť) + zúžená obtížnost (min/max NEBO exact — jedna položka, je to
+ *  jeden stav) + žánr/rok/dekáda/délka + charter + album + hide-owned. Sort se
+ *  nepočítá — řadit není filtrovat. */
+export const selectActiveFilterCount = (s: AppState): number =>
+  s.instrumentFilters.length +
+  (s.diffMin > 0 || s.diffMax < 6 ? 1 : 0) +
+  (['genre', 'year', 'decade', 'songLength'] as const).filter((k) => (s.filters[k]?.length ?? 0) > 0)
+    .length +
+  (s.charterFilter.trim() ? 1 : 0) +
+  (s.albumFilter.trim() ? 1 : 0) +
+  (s.hideOwned ? 1 : 0)

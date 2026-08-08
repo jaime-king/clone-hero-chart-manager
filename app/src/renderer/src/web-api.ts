@@ -224,7 +224,10 @@ export const webApi: RendererApi = {
 
   // ---- Window-chrome (frameless titlebar) — no BrowserWindow in a tab ----
   toggleMaximize: () => removed('toggleMaximize'),
-  isMaximized: () => Promise.reject(new Error('isMaximized: removed in web port')),
+  // TitleBar volá při mountu bez guardu — reject tu znamenal unhandled
+  // rejection v konzoli při KAŽDÉM načtení webu. Tab není nikdy
+  // „maximalizovaný" ve smyslu window-chrome, takže resolve(false).
+  isMaximized: () => Promise.resolve(false),
   onMaximizeChange: (_cb: (max: boolean) => void) => () => {},
   quitApp: () => removed('quitApp'),
 
@@ -253,8 +256,10 @@ export const webApi: RendererApi = {
   appVersion: () => callHttp<string>('app:version', []),
   checkForUpdates: () =>
     Promise.reject(new Error('checkForUpdates: removed in web port')) as Promise<UpdateCheckResult>,
-  setUiScale: (_scale: number) =>
-    Promise.reject(new Error('setUiScale: removed in web port')) as Promise<void>,
+  // Settings volá setUiScale při ±/Reset/Cancel a App.tsx při Escape —
+  // reject tu házel unhandled rejection při běžném ovládání Nastavení.
+  // Na webu škálu řeší zoom prohlížeče; no-op resolve místo výjimky.
+  setUiScale: (_scale: number) => Promise.resolve(),
   getReleaseNotes: (version?: string) =>
     callHttp<ReleaseNotes | null>('app:releaseNotes', [version]),
   getReleaseNotesSince: (since?: string, max?: number) =>

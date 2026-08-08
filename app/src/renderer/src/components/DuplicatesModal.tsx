@@ -194,6 +194,14 @@ export function DuplicatesModal({
   const deleteChecked = async (): Promise<void> => {
     if (checked.size === 0 || busy) return
     const count = checked.size
+    // Mazání je v tomhle forku PERMANENTNÍ (server maže natvrdo, žádný koš) —
+    // proto potvrzení; dřívější text sliboval Recycle Bin, což byla lež.
+    if (
+      !window.confirm(
+        `Permanently delete ${count} ${count === 1 ? 'chart' : 'charts'}? This cannot be undone.`
+      )
+    )
+      return
     setBusy(true)
     setError(null)
     setNotice(null)
@@ -210,7 +218,7 @@ export function DuplicatesModal({
     onChanged()
     await scan()
     if (failed) setError(failed)
-    else setNotice(`Moved ${count} ${count === 1 ? 'chart' : 'charts'} to the Recycle Bin.`)
+    else setNotice(`Permanently deleted ${count} ${count === 1 ? 'chart' : 'charts'}.`)
     setBusy(false)
   }
 
@@ -539,7 +547,7 @@ export function DuplicatesModal({
           <button
             className="btn-secondary"
             disabled={checked.size === 0 || busy}
-            title="Move the ticked charts to a folder of your choice instead of deleting them. Handy as a quarantine, and works where the Recycle Bin does not (e.g. Wine on Linux)."
+            title="Move the ticked charts to a folder of your choice instead of deleting them — a safer quarantine, since deleting is permanent."
             onClick={() => void moveChecked()}
           >
             Move to folder…
@@ -549,7 +557,7 @@ export function DuplicatesModal({
             disabled={checked.size === 0 || busy}
             onClick={() => void deleteChecked()}
           >
-            {busy ? 'Working…' : `Move ${checked.size || ''} to Recycle Bin`}
+            {busy ? 'Working…' : `Delete ${checked.size || ''} permanently`}
           </button>
         </div>
         ) : null}

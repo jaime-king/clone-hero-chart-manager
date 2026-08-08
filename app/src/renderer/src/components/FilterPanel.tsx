@@ -1,7 +1,67 @@
 import { useEffect, useRef, useState } from 'react'
-import type { FilterOption } from '../../../shared/types'
+import type { Database, FilterOption, RhythmVerseSystem } from '../../../shared/types'
 import { useStore } from '../store'
 import { Icon } from './Icon'
+import { Segmented } from './Segmented'
+
+// IA (Phase 3.5): Database/System se přestěhovaly ze Sidebaru sem — scopují
+// vyhledávání, tak patří k filtrům. Stejné chování jako v Sidebaru: přepnutí
+// vždy re-search od 1. stránky (prázdný dotaz = browse katalogu, žádné
+// zatuchlé výsledky). V badge počtu filtrů NEJSOU — jsou to přepínače režimu,
+// ne zužující filtry (selectActiveFilterCount je nikdy nepočítal).
+
+const DATABASES: { id: Database; label: string; hint: string }[] = [
+  { id: 'rhythmverse', label: 'RhythmVerse', hint: 'Largest catalogue — CH, Phase Shift and Rock Band CON' },
+  { id: 'enchor', label: 'Chorus Encore', hint: 'Curated Clone Hero charts hosted directly as .sng files' },
+  { id: 'both', label: 'Both', hint: 'Merged & de-duplicated results from both sources' }
+]
+
+const SYSTEMS: { id: RhythmVerseSystem; label: string; hint: string }[] = [
+  { id: 'ch', label: 'Clone Hero', hint: 'Native charts (no conversion)' },
+  { id: 'ps', label: 'Phase Shift', hint: 'Read by Clone Hero directly' },
+  { id: 'rb3', label: 'Rock Band', hint: 'CON → converted to CH' },
+  { id: 'all', label: 'All', hint: 'All formats' }
+]
+
+/** Přepínače zdroje (Database + System) — sdílené mezi desktopovým FilterPanel
+ *  a mobilním FilterSheet (přes FilterPanelFields). Stav žije ve store. */
+function SourceSwitches(): JSX.Element {
+  const database = useStore((s) => s.database)
+  const setDatabase = useStore((s) => s.setDatabase)
+  const system = useStore((s) => s.system)
+  const setSystem = useStore((s) => s.setSystem)
+  const doSearch = useStore((s) => s.doSearch)
+
+  return (
+    <div className="srcswitch">
+      <div className="srcswitch__group">
+        <span className="filterfield__label">Database</span>
+        <Segmented
+          variant="db"
+          options={DATABASES}
+          value={database}
+          onChange={(id) => {
+            setDatabase(id)
+            void doSearch(1)
+          }}
+        />
+      </div>
+      {database !== 'enchor' ? (
+        <div className="srcswitch__group">
+          <span className="filterfield__label">System</span>
+          <Segmented
+            options={SYSTEMS}
+            value={system}
+            onChange={(id) => {
+              setSystem(id)
+              void doSearch(1)
+            }}
+          />
+        </div>
+      ) : null}
+    </div>
+  )
+}
 
 /**
  * Jednovýběrový select (id + label) laděný jako obecný `.dd`, s prázdnou volbou.
@@ -109,13 +169,12 @@ function FilterText({
 }
 
 /**
- * Jeden sjednocený filtrovací panel. Nahoře „browse" (žánr / rok / délka —
- * serverově, jen RhythmVerse), pod tím „refine" (charter / album / skrýt
- * vlastněné — klientsky nad načtenými výsledky, funguje i na Encore). Nahrazuje
- * dřívější samostatné „Refine" tlačítko v liště výsledků.
+ * Vnitřek filtrovacího panelu (browse dropdowny + refine pole + hide-owned +
+ * clear) BEZ obálky/animace. Sdílený mezi desktopovým FilterPanel (roleta pod
+ * search barem) a mobilním FilterSheet (bottom sheet) — stav žije ve store,
+ * takže obě místa jsou vždy synchronní.
  */
-export function FilterPanel(): JSX.Element {
-  const show = useStore((s) => s.showFilters)
+export function FilterPanelFields(): JSX.Element {
   const filters = useStore((s) => s.filters)
   const options = useStore((s) => s.filterOptions)
   const database = useStore((s) => s.database)
@@ -151,21 +210,10 @@ export function FilterPanel(): JSX.Element {
   // i žánr/rok/délka/charter/album/hideOwned).
   const clearAll = (): void => clearFilters()
 
-  // Overflow povolíme až PO dovysunutí rolety (jinak by se rozbalovací menu
-  // ořezávalo o panel); při zavírání ho hned skryjeme, ať roleta pěkně zajede.
-  const [expanded, setExpanded] = useState(show)
-  useEffect(() => {
-    if (!show) {
-      setExpanded(false)
-      return undefined
-    }
-    const t = setTimeout(() => setExpanded(true), 300)
-    return () => clearTimeout(t)
-  }, [show])
-
   return (
-    <div className={`filterpanel ${show ? 'filterpanel--open' : ''}`} aria-hidden={!show}>
-      <div className={`filterpanel__inner ${show && expanded ? 'filterpanel__inner--open' : ''}`}>
+    <>
+      <SourceSwitches />
+
       {encoreOnly ? (
         <div className="filterpanel__encore">
           <Icon name="info" size={16} />
@@ -240,6 +288,37 @@ export function FilterPanel(): JSX.Element {
           </button>
         ) : null}
       </div>
+    </>
+  )
+}
+
+/**
+ * Jeden sjednocený filtrovací panel (desktop — roleta pod search barem). Nahoře
+ * „browse" (žánr / rok / délka — serverově, jen RhythmVerse), pod tím „refine"
+ * (charter / album / skrýt vlastněné — klientsky nad načtenými výsledky, funguje
+ * i na Encore). Nahrazuje dřívější samostatné „Refine" tlačítko v liště výsledků.
+ * Na mobilu (<900px) je celý panel schovaný — tytéž ovládací prvky žijí ve
+ * FilterSheet (bottom sheet).
+ */
+export function FilterPanel(): JSX.Element {
+  const show = useStore((s) => s.showFilters)
+
+  // Overflow povolíme až PO dovysunutí rolety (jinak by se rozbalovací menu
+  // ořezávalo o panel); při zavírání ho hned skryjeme, ať roleta pěkně zajede.
+  const [expanded, setExpanded] = useState(show)
+  useEffect(() => {
+    if (!show) {
+      setExpanded(false)
+      return undefined
+    }
+    const t = setTimeout(() => setExpanded(true), 300)
+    return () => clearTimeout(t)
+  }, [show])
+
+  return (
+    <div className={`filterpanel ${show ? 'filterpanel--open' : ''}`} aria-hidden={!show}>
+      <div className={`filterpanel__inner ${show && expanded ? 'filterpanel__inner--open' : ''}`}>
+        <FilterPanelFields />
       </div>
     </div>
   )

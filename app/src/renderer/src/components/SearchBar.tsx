@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SongResult } from '../../../shared/types'
-import { useStore } from '../store'
+import { selectActiveFilterCount, useStore } from '../store'
+import { useIsMobile } from '../useIsMobile'
 import { FilterPanel } from './FilterPanel'
 import { Icon } from './Icon'
 
@@ -43,6 +44,9 @@ export function SearchBar(): JSX.Element {
   const filters = useStore((s) => s.filters)
   const showFilters = useStore((s) => s.showFilters)
   const setShowFilters = useStore((s) => s.setShowFilters)
+  const setMobileFiltersOpen = useStore((s) => s.setMobileFiltersOpen)
+  const mobileFilterCount = useStore(selectActiveFilterCount)
+  const isMobile = useIsMobile()
   const inputRef = useRef<HTMLInputElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
 
@@ -147,9 +151,12 @@ export function SearchBar(): JSX.Element {
     query.trim().length >= 2 &&
     (suggestLoading || suggest.length > 0 || suggestTotal === 0)
 
-  const activeFilterCount = (['genre', 'year', 'decade', 'songLength'] as const).filter(
+  // Desktop badge počítá jen browse filtry (roleta FilterPanel nic víc nemá);
+  // mobil ukazuje souhrn VŠECH filtrů — tlačítko tam otevírá kompletní sheet.
+  const desktopFilterCount = (['genre', 'year', 'decade', 'songLength'] as const).filter(
     (k) => (filters[k]?.length ?? 0) > 0
   ).length
+  const activeFilterCount = isMobile ? mobileFilterCount : desktopFilterCount
 
   return (
     <div className="searchbar">
@@ -248,20 +255,30 @@ export function SearchBar(): JSX.Element {
         </div>
         <button
           type="button"
-          className={`searchbar__filters ${showFilters ? 'searchbar__filters--open' : ''} ${
+          className={`searchbar__filters ${showFilters && !isMobile ? 'searchbar__filters--open' : ''} ${
             activeFilterCount > 0 ? 'searchbar__filters--active' : ''
           }`}
-          onClick={() => setShowFilters(!showFilters)}
+          // Mobil: otevři filter-sheet (kompletní filtry); desktop: roleta panelu.
+          onClick={() => (isMobile ? setMobileFiltersOpen(true) : setShowFilters(!showFilters))}
           title="Advanced filters — browse by genre, year, decade and length"
         >
           <Icon name="filter" size={15} />
-          <span>Filters</span>
+          {/* IA (Phase 3.5): na mobilu (<900px) ikonové 44px tlačítko — popisek
+              schovává CSS, badge zůstává. */}
+          <span className="searchbar__filters-label">Filters</span>
           {activeFilterCount > 0 ? (
             <span className="searchbar__filters-badge">{activeFilterCount}</span>
           ) : null}
         </button>
-        <button className="searchbar__go" onClick={runFullSearch} disabled={loading}>
-          {loading ? '…' : 'Search'}
+        <button
+          className="searchbar__go"
+          onClick={runFullSearch}
+          disabled={loading}
+          title="Search"
+          aria-label="Search"
+        >
+          <Icon name="search" size={17} className="searchbar__go-icon" />
+          <span className="searchbar__go-label">{loading ? '…' : 'Search'}</span>
         </button>
       </div>
       <FilterPanel />

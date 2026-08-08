@@ -25,6 +25,10 @@ export function DownloadQueue(): JSX.Element | null {
   const cancelJob = useStore((s) => s.cancelJob)
   const cancelAllJobs = useStore((s) => s.cancelAllJobs)
   const [open, setOpen] = useState(true)
+  // Mobil (<900px): panel fronty je defaultně sbalený do pilulky vpravo dole
+  // (počet + souhrnný průběh); tap ji rozbalí na bottom sheet přes obsah.
+  // Na desktopu se pilulka nerenderuje vizuálně (CSS) a sheetOpen se neuplatní.
+  const [sheetOpen, setSheetOpen] = useState(false)
   // ID úloh, u kterých uživatel klikl zrušit, ale běžící krok (konverze) ještě
   // dobíhá. Dává OKAMŽITOU zpětnou vazbu „Canceling…", než dorazí finální stav
   // z main procesu — jinak by se po kliknutí zdánlivě nic nedělo.
@@ -64,12 +68,41 @@ export function DownloadQueue(): JSX.Element | null {
   if (!rendered) return null
 
   const display = shouldShow ? list : lastList.current
-  const active = display.filter((j) => !TERMINAL.has(j.stage)).length
+  const activeJobs = display.filter((j) => !TERMINAL.has(j.stage))
+  const active = activeJobs.length
   const finished = display.length - active
   const anyDone = display.some((j) => j.stage === 'done')
+  const anyError = display.some((j) => j.stage === 'error')
+  // Souhrnný průběh pro mobilní pilulku: průměr běžících úloh (indeterminate
+  // -1 počítej jako 0); bez běžících úloh je hotovo → plná lišta.
+  const aggregate =
+    active > 0
+      ? activeJobs.reduce((sum, j) => sum + Math.max(0, j.progress), 0) / active
+      : 1
 
   return (
-    <div className={`queue-wrap ${shown ? 'queue-wrap--open' : ''}`}>
+    <>
+      {/* Mobilní pilulka (CSS ji ukazuje jen <900px, když sheet není otevřený). */}
+      <button
+        type="button"
+        className={`queue-pill ${sheetOpen ? 'queue-pill--hidden' : ''} ${anyError && active === 0 ? 'queue-pill--error' : ''}`}
+        onClick={() => setSheetOpen(true)}
+        aria-label="Open download queue"
+      >
+        <Icon name="download" size={15} />
+        <span className="queue-pill__label">
+          {active > 0 ? `${active} active` : anyError ? 'Download failed' : `${finished} done`}
+        </span>
+        <span className="queue-pill__bar" aria-hidden="true">
+          <span className="queue-pill__fill" style={{ width: `${Math.round(aggregate * 100)}%` }} />
+        </span>
+      </button>
+      {sheetOpen ? (
+        <div className="queue-scrim" onClick={() => setSheetOpen(false)} aria-hidden="true" />
+      ) : null}
+      <div
+        className={`queue-wrap ${shown ? 'queue-wrap--open' : ''} ${sheetOpen ? 'queue-wrap--sheet' : ''}`}
+      >
       <div className="queue-inner">
         <div className={`queue ${open ? 'queue--open' : ''}`}>
       <div className="queue__header">
@@ -161,5 +194,6 @@ export function DownloadQueue(): JSX.Element | null {
         </div>
       </div>
     </div>
+    </>
   )
 }

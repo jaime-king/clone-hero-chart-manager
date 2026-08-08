@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { DownloadQueue } from './components/DownloadQueue'
 import { FilterBar } from './components/FilterBar'
+import { FilterSheet } from './components/FilterSheet'
 import { Icon } from './components/Icon'
 import { LibraryManager } from './components/LibraryManager'
 import { LocalDropModal } from './components/LocalDropModal'
@@ -58,6 +59,8 @@ export function App(): JSX.Element {
   const hideOwned = useStore((s) => s.hideOwned)
   const sort = useStore((s) => s.sort)
   const surprise = useStore((s) => s.surprise)
+  // IA (Phase 3.5): aktivní pohled obsahu (search | library).
+  const view = useStore((s) => s.view)
 
   // Deep režim: filtr nástroje/obtížnosti → zdrojem je celý stažený dotaz
   // (všechny stránky) a stránkuje se lokálně nad shodami.
@@ -162,6 +165,11 @@ export function App(): JSX.Element {
   const setSelection = useStore((s) => s.setSelection)
   const clearSelection = useStore((s) => s.clearSelection)
   const openBatchDownload = useStore((s) => s.openBatchDownload)
+  // Mobilní výběrový režim (<900px): checkboxy na kartách + připnutá lišta dole.
+  // Na desktopu se přepínač nerenderuje vizuálně (CSS display:none), takže
+  // selectMode tam zůstává false a nic z toho neexistuje.
+  const selectMode = useStore((s) => s.selectMode)
+  const setSelectMode = useStore((s) => s.setSelectMode)
 
   const selectedSet = useMemo(() => new Set(selectedKeys), [selectedKeys])
   // Zaškrtnutelné = auto-stažitelné a ještě nezařazené do fronty.
@@ -217,6 +225,16 @@ export function App(): JSX.Element {
     const idx = list.findIndex((s) => s.key === key)
     if (idx < 0) return
     const st = useStore.getState()
+    // Mobilní výběrový režim: tap = přepnout checkbox (jen u hromadně
+    // stažitelných řádků); modifikátory/kotvy se neřeší — na touch nejsou.
+    if (st.selectMode) {
+      const song = list[idx]
+      if (isAutoDownloadable(song) && !st.enqueuedKeys[song.key]) {
+        st.toggleSelected(song.key)
+        st.setSelectedIndex(idx)
+      }
+      return
+    }
     if (shift && st.selectedIndex >= 0) {
       const a = Math.min(st.selectedIndex, idx)
       const b = Math.max(st.selectedIndex, idx)
@@ -237,6 +255,8 @@ export function App(): JSX.Element {
     const song = visibleRef.current.find((s) => s.key === key)
     if (!song) return
     const st = useStore.getState()
+    // Ve výběrovém režimu dvojtap nesmí spouštět download — tap = výběr.
+    if (st.selectMode) return
     if (song.official) st.openMarketplace(song)
     else if (detectManualHost(song.source, song.downloadUrl || song.downloadPageUrl))
       openSongExternal(song)
@@ -313,11 +333,24 @@ export function App(): JSX.Element {
     }
   }, [loadConfig, applyJobUpdate])
 
+  // IA (Phase 3.5): tlačítko Zpět v prohlížeči — hash (#library) řídí view.
+  // setView má vlastní guard (prev === v → no-op), takže se sync nezacyklí.
+  useEffect(() => {
+    const onHash = (): void => {
+      useStore.getState().setView(window.location.hash === '#library' ? 'library' : 'search')
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
   // Klik mimo okno s výsledky → odznač vybraný řádek. (Uvnitř tabulky, v modalu
   // ani v našeptávači neodznačujeme.)
   useEffect(() => {
     const onDown = (e: MouseEvent): void => {
       const st = useStore.getState()
+      // Ve výběrovém režimu výběr drží, dokud ho uživatel sám neukončí
+      // (Done/×) — tap do pageru/lišt ho nesmí vysypat.
+      if (st.selectMode) return
       if (st.selectedIndex < 0 && st.selectedKeys.length === 0) return
       const t = e.target as HTMLElement | null
       // NEodznačuj jen na prvcích, kde s výběrem dál pracuješ (řádky, batch
@@ -329,6 +362,7 @@ export function App(): JSX.Element {
         t?.closest('.chk--selectall') ||
         t?.closest('.dd--sort') ||
         t?.closest('.modal-overlay') ||
+        t?.closest('.libpage') || // knihovní stránka nesmí vysypat výběr ve (skrytém) searchi
         t?.closest('.suggest')
       )
         return
@@ -358,22 +392,25 @@ export function App(): JSX.Element {
 
       if (e.key === 'Escape') {
         const st = useStore.getState()
-        if (st.showAbout) st.setShowAbout(false)
+        if (st.mobileFiltersOpen) st.setMobileFiltersOpen(false)
+        else if (st.selectMode) st.setSelectMode(false)
+        else if (st.showAbout) st.setShowAbout(false)
         else if (st.showPlaylistImport) st.setShowPlaylistImport(false)
         else if (st.showWhatsNew) st.setShowWhatsNew(false)
-        else if (st.showLibrary) st.setShowLibrary(false)
         else if (st.showSettings) {
-          // Escape = Cancel: zahoď živý náhled UI scale (jinak by neuložená
-          // škála zůstala aplikovaná až do restartu).
+          // Nastavení PŘED knihovnou: jde otevřít i nad ní (drawer → Settings)
+          // a Escape musí zavřít vrchní vrstvu — dřív zavřel knihovnu POD
+          // otevřeným Nastavením. Escape = Cancel: zahoď živý náhled UI scale
+          // (jinak by neuložená škála zůstala aplikovaná až do restartu).
           void window.api.setUiScale(st.config?.uiScale ?? 1)
           st.setShowSettings(false)
-        }
+        } else if (st.view === 'library') st.setView('search')
         return
       }
       // Otevřené Nastavení/Správce/What's new/Import/About: nech projít jen Escape (výše), nenaviguj.
       if (
         useStore.getState().showSettings ||
-        useStore.getState().showLibrary ||
+        useStore.getState().view === 'library' ||
         useStore.getState().showWhatsNew ||
         useStore.getState().showPlaylistImport ||
         useStore.getState().showAbout
@@ -435,12 +472,16 @@ export function App(): JSX.Element {
   }, [page])
 
   return (
-    <div className="app">
+    <div className={`app ${selectMode ? 'app--selecting' : ''}`}>
       <div className="noise-overlay" aria-hidden="true" />
       <div className="workspace">
         <Sidebar />
         <main className="content">
       <TitleBar />
+      {/* IA (Phase 3.5): search pohled zůstává namontovaný i pod knihovnou
+          (view--off = visibility:hidden + absolute), takže výsledky, filtry
+          i scroll pozice seznamu návštěvu knihovny přežijí beze ztráty. */}
+      <div className={`view view--search ${view === 'library' ? 'view--off' : ''}`}>
       <FilterBar />
 
       {database !== 'enchor' && system !== 'ch' ? (
@@ -474,6 +515,18 @@ export function App(): JSX.Element {
               </span>
               <span className="chk__label">All</span>
             </label>
+          ) : null}
+          {/* Mobil (<900px, CSS): vstup do výběrového režimu — hover checkboxy
+              ani Ctrl/Shift-klik na touch neexistují. Na desktopu display:none. */}
+          {checkableSongs.length > 0 ? (
+            <button
+              type="button"
+              className={`resultsbar__select ${selectMode ? 'resultsbar__select--on' : ''}`}
+              onClick={() => setSelectMode(!selectMode)}
+            >
+              <Icon name="check" size={13} />
+              <span>{selectMode ? 'Done' : 'Select'}</span>
+            </button>
           ) : null}
           <span className="resultsbar__count">
             {surprise ? (
@@ -557,7 +610,7 @@ export function App(): JSX.Element {
 
       <div className="tablewrap">
       <div
-        className={`results ${loading || (source.length > 0 && !error && visible.length > 0) ? 'results--table' : ''}`}
+        className={`results ${loading || (source.length > 0 && !error && visible.length > 0) ? 'results--table' : ''} ${selectMode ? 'results--selecting' : ''}`}
       >
         {loading ? (
           surprise ? (
@@ -663,14 +716,59 @@ export function App(): JSX.Element {
           </div>
         </div>
       ) : null}
+      </div>
+      {/* IA (Phase 3.5): knihovna = plnohodnotná stránka v obsahové ploše
+          (žádný modal-overlay) — montuje se jen v knihovním pohledu. */}
+      {view === 'library' ? <LibraryManager /> : null}
         </main>
       </div>
 
+      {/* Mobil: připnutá lišta výběrového režimu (desktop: CSS display:none).
+          Ukazuje se hned při vstupu do režimu — i s 0 vybranými — ať je vidět,
+          že režim běží a kudy z něj ven. */}
+      {selectMode ? (
+        <div className="selectbar">
+          {checkableSongs.length > 0 ? (
+            <label className="chk selectbar__all" title="Select all downloadable songs">
+              <input type="checkbox" checked={allChecked} onChange={toggleSelectAll} />
+              <span className="chk__box">
+                <Icon name="check" size={12} />
+              </span>
+              <span className="chk__label">All</span>
+            </label>
+          ) : null}
+          <span className="selectbar__count">
+            {selectedCount} selected
+            {selectedCount > 0 && downloadableCount < selectedCount ? (
+              <span className="selectbar__note">{downloadableCount} downloadable</span>
+            ) : null}
+          </span>
+          <button
+            type="button"
+            className="selectbar__dl"
+            onClick={downloadSelected}
+            disabled={downloadableCount === 0}
+          >
+            <Icon name="download" size={14} />{' '}
+            {downloadableCount > 0 ? `Download ${downloadableCount}` : 'Download'}
+          </button>
+          <button
+            type="button"
+            className="selectbar__done"
+            onClick={() => setSelectMode(false)}
+            title="Exit selection mode"
+            aria-label="Exit selection mode"
+          >
+            <Icon name="close" size={15} />
+          </button>
+        </div>
+      ) : null}
+
+      <FilterSheet />
       <DownloadQueue />
       <Settings />
       <TargetFolderModal />
       <MarketplaceModal />
-      <LibraryManager />
       <LocalDropModal />
       <WhatsNew />
       <PlaylistImportModal />

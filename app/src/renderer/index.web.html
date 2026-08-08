@@ -8,6 +8,18 @@
       content="default-src 'self'; img-src 'self' https://rhythmverse.co https://*.rhythmverse.co https://files.enchor.us https://*.enchor.us data:; media-src 'self' blob: chm-audio:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'"
     />
     <title>Clone Hero Chart Manager</title>
+    <!-- PWA-lite (Fáze 5): manifest → „Add to Home Screen" = samostatné okno.
+         Záměrně BEZ service workeru (plán, rozhodnutí #3): server je na
+         stejné LAN, cache by přidala jen riziko zastaralosti.
+         Jen web build; Electronového index.html se netýká. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0e0e10" />
+    <!-- iOS nečte ikony z manifestu — chce vlastní meta + PNG touch ikonu. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Chart Manager" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
   </head>
   <body>
     <div id="root"></div>

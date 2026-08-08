@@ -319,53 +319,31 @@ body {
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease,
     transform 0.18s cubic-bezier(0.34, 1.5, 0.5, 1), box-shadow 0.2s ease;
 }
-.titlebar__btn:hover {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 80%),
-    rgba(var(--accent-rgb), 0.2);
-  border-color: rgba(var(--accent-rgb), 0.45);
-  color: var(--text);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px -4px rgba(var(--accent-rgb), 0.45);
+@media (hover: hover) {
+  .titlebar__btn:hover {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 80%),
+      rgba(var(--accent-rgb), 0.2);
+    border-color: rgba(var(--accent-rgb), 0.45);
+    color: var(--text);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -4px rgba(var(--accent-rgb), 0.45);
+  }
 }
 .titlebar__btn:active {
   transform: translateY(0) scale(0.92);
 }
-.titlebar__btn--close:hover {
-  background: #e23b5b;
-  border-color: #e23b5b;
-  color: #fff;
-  box-shadow: 0 6px 16px -4px rgba(226, 59, 91, 0.55);
+@media (hover: hover) {
+  .titlebar__btn--close:hover {
+    background: #e23b5b;
+    border-color: #e23b5b;
+    color: #fff;
+    box-shadow: 0 6px 16px -4px rgba(226, 59, 91, 0.55);
+  }
 }
 /* Verze v title baru — klik otevře „What's new". */
-/* Výrazný vstup do Library manageru — vpravo v titlebaru, s akcentním
-   gradientním rámečkem, ať nezapadne mezi ikonky. */
-.titlebar__library {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background:
-    linear-gradient(180deg, rgba(20, 16, 38, 0.95), rgba(20, 16, 38, 0.95)) padding-box,
-    var(--accent-grad) border-box;
-  color: var(--text);
-  font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: box-shadow 0.18s, transform 0.05s, color 0.15s;
-}
-.titlebar__library:hover {
-  box-shadow: var(--glow);
-}
-.titlebar__library:active {
-  transform: translateY(1px);
-}
+/* (Tlačítko .titlebar__library odstranila Fáze 3.5/4 — knihovna je stránka
+   v nav railu, ne modal z titlebaru.) */
 
 .titlebar__version {
   align-self: center;
@@ -512,9 +490,11 @@ body {
     background 0.14s ease,
     border-color 0.14s ease;
 }
-.scaler__btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .scaler__btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: var(--accent);
+  }
 }
 .scaler__btn:disabled {
   opacity: 0.35;
@@ -548,8 +528,10 @@ body {
   cursor: pointer;
   text-decoration: underline;
 }
-.linkbtn:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .linkbtn:hover {
+    color: var(--text);
+  }
 }
 
 /* Pozn.: Aktualizace se řeší dole v sidebaru (.side-update-card*), horní pruh
@@ -634,8 +616,10 @@ body {
   white-space: nowrap;
   transition: color 0.2s ease, transform 0.12s ease;
 }
-.seg__btn:hover:not(.seg__btn--active) {
-  color: var(--text);
+@media (hover: hover) {
+  .seg__btn:hover:not(.seg__btn--active) {
+    color: var(--text);
+  }
 }
 .seg__btn:active:not(.seg__btn--active) {
   transform: scale(0.94);
@@ -776,10 +760,17 @@ body {
 .suggest__item:nth-child(7) {
   animation-delay: 0.21s;
 }
-.suggest__item--hover,
-.suggest__item:hover {
+/* `--hover` = zvýraznění šipkami z klávesnice — musí žít i na dotykových
+   zařízeních, proto stojí mimo (hover: hover) stráž níže. */
+.suggest__item--hover {
   background: rgba(var(--accent-rgb), 0.14);
   box-shadow: inset 2px 0 0 var(--accent);
+}
+@media (hover: hover) {
+  .suggest__item:hover {
+    background: rgba(var(--accent-rgb), 0.14);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
 }
 .suggest__art {
   width: 44px;
@@ -843,9 +834,11 @@ body {
   cursor: pointer;
   transition: background 0.12s;
 }
-.suggest__all:hover {
-  background: rgba(var(--accent-rgb), 0.12);
-  color: #fff;
+@media (hover: hover) {
+  .suggest__all:hover {
+    background: rgba(var(--accent-rgb), 0.12);
+    color: #fff;
+  }
 }
 /* Uživatelé s omezeným pohybem: žádné odvíjení ani stagger. */
 @media (prefers-reduced-motion: reduce) {
@@ -912,13 +905,17 @@ body {
   transition: transform 0.6s ease;
   pointer-events: none;
 }
-.searchbar__go:hover:not(:disabled) {
-  transform: translateY(-2px);
-  filter: brightness(1.06);
-  box-shadow: 0 12px 30px rgba(var(--accent-2-rgb), 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+@media (hover: hover) {
+  .searchbar__go:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+    box-shadow: 0 12px 30px rgba(var(--accent-2-rgb), 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
 }
-.searchbar__go:hover:not(:disabled)::after {
-  transform: translateX(130%);
+@media (hover: hover) {
+  .searchbar__go:hover:not(:disabled)::after {
+    transform: translateX(130%);
+  }
 }
 .searchbar__go:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
@@ -945,8 +942,10 @@ body {
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
-.searchbar__filters:hover {
-  background: rgba(255, 255, 255, 0.06);
+@media (hover: hover) {
+  .searchbar__filters:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
 }
 .searchbar__filters--open,
 .searchbar__filters--active {
@@ -1083,9 +1082,11 @@ body {
   cursor: pointer;
   white-space: nowrap;
 }
-.filterpanel__clear:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.06);
+@media (hover: hover) {
+  .filterpanel__clear:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+  }
 }
 /* Encore: místo zašedlých polí nabídka přepnout na RhythmVerse. */
 .filterpanel__encore {
@@ -1118,8 +1119,10 @@ body {
   cursor: pointer;
   white-space: nowrap;
 }
-.filterpanel__switch:hover {
-  filter: brightness(1.06);
+@media (hover: hover) {
+  .filterpanel__switch:hover {
+    filter: brightness(1.06);
+  }
 }
 
 /* ---------- Filter bar ---------- */
@@ -1150,9 +1153,11 @@ body {
   cursor: pointer;
   transition: all 0.14s;
 }
-.fchip:hover {
-  background: var(--panel-hover);
-  color: var(--text);
+@media (hover: hover) {
+  .fchip:hover {
+    background: var(--panel-hover);
+    color: var(--text);
+  }
 }
 .fchip--active {
   background: rgba(var(--accent-rgb), 0.16);
@@ -1193,14 +1198,18 @@ body {
   transition: transform 0.16s ease, border-color 0.14s ease, background 0.14s ease,
     box-shadow 0.14s ease;
 }
-.instbtn:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .instbtn:hover {
+    color: var(--text);
+  }
 }
-.instbtn:hover .instbtn__circle {
-  transform: translateY(-2px);
-  background: var(--panel-hover);
-  border-color: var(--inst-color);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--inst-color) inset;
+@media (hover: hover) {
+  .instbtn:hover .instbtn__circle {
+    transform: translateY(-2px);
+    background: var(--panel-hover);
+    border-color: var(--inst-color);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--inst-color) inset;
+  }
 }
 .instbtn--active {
   color: var(--text);
@@ -1255,8 +1264,10 @@ body {
   cursor: help;
   transition: color 0.12s;
 }
-.info:hover {
-  color: var(--accent);
+@media (hover: hover) {
+  .info:hover {
+    color: var(--accent);
+  }
 }
 
 /* ---------- Difficulty dots picker ---------- */
@@ -1286,8 +1297,10 @@ body {
   background: var(--accent);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25), 0 0 9px rgba(var(--accent-rgb), 0.65);
 }
-.diffdots:not(.diffdots--off) .ddot:hover {
-  transform: scale(1.18);
+@media (hover: hover) {
+  .diffdots:not(.diffdots--off) .ddot:hover {
+    transform: scale(1.18);
+  }
 }
 .ddot:disabled {
   cursor: default;
@@ -1319,9 +1332,11 @@ body {
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
 }
-.sortctl__dir:hover:not(:disabled) {
-  background: var(--panel-hover);
-  color: var(--text);
+@media (hover: hover) {
+  .sortctl__dir:hover:not(:disabled) {
+    background: var(--panel-hover);
+    color: var(--text);
+  }
 }
 .sortctl__dir:disabled {
   opacity: 0.35;
@@ -1343,9 +1358,11 @@ body {
   cursor: pointer;
   transition: border-color 0.12s, background 0.12s;
 }
-.dd__btn:hover:not(:disabled) {
-  background: var(--panel-hover);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .dd__btn:hover:not(:disabled) {
+    background: var(--panel-hover);
+    border-color: var(--accent);
+  }
 }
 .dd__btn:disabled {
   opacity: 0.5;
@@ -1393,8 +1410,10 @@ body {
   cursor: pointer;
   white-space: nowrap;
 }
-.dd__item:hover {
-  background: var(--panel-hover);
+@media (hover: hover) {
+  .dd__item:hover {
+    background: var(--panel-hover);
+  }
 }
 .dd__item--sel {
   background: var(--accent-grad);
@@ -1402,8 +1421,10 @@ body {
 }
 /* Vybraná položka si i pod kurzorem drží svůj (světlý/akcentní) podklad —
    jinak by hover přebil pozadí na tmavé a text by na něm zmizel. */
-.dd__item--sel:hover {
-  background: var(--accent-grad);
+@media (hover: hover) {
+  .dd__item--sel:hover {
+    background: var(--accent-grad);
+  }
 }
 
 /* ---------- Drop zone for manual files ---------- */
@@ -1581,8 +1602,10 @@ body {
   transition: background 0.16s, border-color 0.16s, color 0.16s, transform 0.08s;
   flex-shrink: 0;
 }
-.chk:hover .chk__box {
-  border-color: var(--accent);
+@media (hover: hover) {
+  .chk:hover .chk__box {
+    border-color: var(--accent);
+  }
 }
 .chk input:checked + .chk__box {
   background: var(--accent-grad);
@@ -1663,9 +1686,11 @@ body {
   box-shadow: 0 4px 14px -4px rgba(var(--accent-2-rgb), 0.5);
   transition: transform 0.15s, filter 0.15s;
 }
-.batchbar__dl:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.06);
+@media (hover: hover) {
+  .batchbar__dl:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+  }
 }
 .batchbar__dl:active {
   transform: translateY(0) scale(0.97);
@@ -1693,9 +1718,11 @@ body {
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.batchbar__clear:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text);
+@media (hover: hover) {
+  .batchbar__clear:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text);
+  }
 }
 
 /* ---------- Results list ---------- */
@@ -1774,11 +1801,13 @@ body {
     color 0.14s ease,
     transform 0.1s ease;
 }
-.pickchip:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: var(--accent);
-  color: var(--text);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .pickchip:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: var(--accent);
+    color: var(--text);
+    transform: translateY(-1px);
+  }
 }
 @keyframes chLogoIn {
   from {
@@ -1838,10 +1867,12 @@ body {
     transform: translateY(0);
   }
 }
-.song:hover {
-  background: var(--row-hover);
-  border-color: rgba(var(--accent-rgb), 0.22);
-  transform: translateX(3px);
+@media (hover: hover) {
+  .song:hover {
+    background: var(--row-hover);
+    border-color: rgba(var(--accent-rgb), 0.22);
+    transform: translateX(3px);
+  }
 }
 /* Checkbox sloupec — box se plně zobrazí na hover řádku nebo když je zaškrtnutý. */
 .song__check {
@@ -1888,9 +1919,11 @@ body {
   flex-shrink: 0;
   transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
-.song:hover .song__art {
-  transform: scale(1.04);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+@media (hover: hover) {
+  .song:hover .song__art {
+    transform: scale(1.04);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
 }
 .song__art img {
   width: 100%;
@@ -2095,11 +2128,15 @@ body {
   pointer-events: none;
   transition: left 0.55s ease;
 }
-.dl-btn:hover::before {
-  left: 130%;
+@media (hover: hover) {
+  .dl-btn:hover::before {
+    left: 130%;
+  }
 }
-.dl-btn:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .dl-btn:hover {
+    filter: brightness(1.08);
+  }
 }
 .dl-btn:active {
   transform: translateY(1px);
@@ -2110,11 +2147,13 @@ body {
   color: var(--text-dim);
   box-shadow: none;
 }
-.dl-btn--store:hover {
-  filter: none;
-  background: var(--panel-hover);
-  border-color: var(--accent);
-  color: var(--text);
+@media (hover: hover) {
+  .dl-btn--store:hover {
+    filter: none;
+    background: var(--panel-hover);
+    border-color: var(--accent);
+    color: var(--text);
+  }
 }
 .song__size {
   font-size: 11px;
@@ -2196,9 +2235,11 @@ body {
   border-radius: 8px;
   transition: all 0.12s;
 }
-.rowmenu__btn:hover {
-  background: var(--panel-hover);
-  color: var(--text);
+@media (hover: hover) {
+  .rowmenu__btn:hover {
+    background: var(--panel-hover);
+    color: var(--text);
+  }
 }
 .rowmenu__backdrop {
   /* Neviditelný fullscreen panel – zachytí kliknutí mimo menu. Renderuje se
@@ -2246,8 +2287,10 @@ body {
 .rowmenu__item svg {
   color: var(--text-dim);
 }
-.rowmenu__item:hover {
-  background: var(--panel-hover);
+@media (hover: hover) {
+  .rowmenu__item:hover {
+    background: var(--panel-hover);
+  }
 }
 
 /* ---------- Pager ---------- */
@@ -2292,9 +2335,11 @@ body {
   cursor: pointer;
   line-height: 1;
 }
-.filterchip__x:hover {
-  background: var(--accent-2);
-  color: #fff;
+@media (hover: hover) {
+  .filterchip__x:hover {
+    background: var(--accent-2);
+    color: #fff;
+  }
 }
 .pager__clear {
   background: none;
@@ -2305,8 +2350,10 @@ body {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.pager__clear:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .pager__clear:hover {
+    color: var(--text);
+  }
 }
 .pager__pages {
   display: flex;
@@ -2331,9 +2378,11 @@ body {
   font-weight: 600;
   transition: all 0.12s;
 }
-.pgbtn:hover:not(:disabled),
-.pgnum:hover {
-  background: var(--panel-hover);
+@media (hover: hover) {
+  .pgbtn:hover:not(:disabled),
+  .pgnum:hover {
+    background: var(--panel-hover);
+  }
 }
 .pgbtn:disabled {
   opacity: 0.35;
@@ -2378,9 +2427,11 @@ body {
   opacity: 0.8;
   transition: opacity 0.14s ease, background 0.14s ease;
 }
-.pager__bug:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.07);
+@media (hover: hover) {
+  .pager__bug:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.07);
+  }
 }
 /* Bílá (barva textu), ne původní černá kresba — jinak by na tmavém zanikla. */
 .pager__bugicon {
@@ -2473,8 +2524,10 @@ body {
   padding: 10px 16px;
   white-space: nowrap;
 }
-.queue__clear:hover {
-  color: var(--warn);
+@media (hover: hover) {
+  .queue__clear:hover {
+    color: var(--warn);
+  }
 }
 .queue__count {
   color: var(--text-dim);
@@ -2510,8 +2563,10 @@ body {
   cursor: pointer;
   font-size: 12.5px;
 }
-.queue__rescan button:hover {
-  background: var(--panel-hover);
+@media (hover: hover) {
+  .queue__rescan button:hover {
+    background: var(--panel-hover);
+  }
 }
 .queue__list {
   overflow-y: auto;
@@ -2627,13 +2682,17 @@ body {
   cursor: pointer;
   transition: background 0.14s ease, color 0.14s ease;
 }
-.qjob__cancel:hover {
-  background: rgba(255, 90, 90, 0.15);
-  color: #ff6b6b;
+@media (hover: hover) {
+  .qjob__cancel:hover {
+    background: rgba(255, 90, 90, 0.15);
+    color: #ff6b6b;
+  }
 }
 /* „Stop all" = varovný akcent, odliší od neutrálního „Clear history". */
-.queue__stopall:hover {
-  color: #ff6b6b;
+@media (hover: hover) {
+  .queue__stopall:hover {
+    color: #ff6b6b;
+  }
 }
 .qjob__msg {
   font-size: 11.5px;
@@ -2679,19 +2738,6 @@ body {
 }
 .modal-overlay {
   animation: overlayIn 0.16s ease-out;
-}
-/* Library manager s otevřeným pod-modalem: schová se jen jeho BOX, ale ztmavené
-   pozadí (backdrop) zůstává na Library overlay — nikdy se nevypne, takže při
-   přepínání na Duplicates/Playlists nic neprobliká. */
-.modal-overlay--has-sub > .modal--library {
-  display: none;
-}
-/* Vnořený overlay pod-modalu = bez vlastního ztmavení/blur (to už dělá Library
-   overlay pod ním), jinak by se ztmavení zdvojilo. Box pod-modalu se pořád
-   normálně animuje (modalIn na .modal). */
-.modal-overlay .modal-overlay {
-  background: transparent;
-  backdrop-filter: none;
 }
 @keyframes modalIn {
   from {
@@ -2771,9 +2817,11 @@ body {
     background 0.15s ease,
     color 0.15s ease;
 }
-.modal__close:hover {
-  background: var(--panel-hover);
-  color: var(--text);
+@media (hover: hover) {
+  .modal__close:hover {
+    background: var(--panel-hover);
+    color: var(--text);
+  }
 }
 .modal__body {
   padding: 22px;
@@ -2912,8 +2960,10 @@ body {
   flex: 0 0 auto;
   position: relative;
 }
-.check input[type='checkbox']:hover {
-  border-color: var(--accent);
+@media (hover: hover) {
+  .check input[type='checkbox']:hover {
+    border-color: var(--accent);
+  }
 }
 .check input[type='checkbox']:checked {
   background: var(--accent-grad);
@@ -2989,9 +3039,11 @@ body {
   box-shadow: 0 8px 24px -8px rgba(var(--accent-2-rgb), 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 34px -8px rgba(var(--accent-2-rgb), 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+@media (hover: hover) {
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 34px -8px rgba(var(--accent-2-rgb), 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
 }
 .btn-secondary {
   background: var(--panel);
@@ -3007,10 +3059,12 @@ body {
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, transform 0.15s;
 }
-.btn-secondary:hover {
-  border-color: var(--accent);
-  background: rgba(var(--accent-rgb), 0.1);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.1);
+    transform: translateY(-1px);
+  }
 }
 
 /* ---------- Confirm / marketplace modal ---------- */
@@ -3097,8 +3151,10 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.folder-item:hover {
-  background: var(--panel-hover);
+@media (hover: hover) {
+  .folder-item:hover {
+    background: var(--panel-hover);
+  }
 }
 .folder-item--sel {
   background: rgba(var(--accent-rgb), 0.18);
@@ -3113,15 +3169,7 @@ body {
   padding: 8px 10px;
 }
 
-/* ---------- Library manager ---------- */
-.modal--library {
-  position: relative;
-  width: 760px;
-  max-width: 94%;
-  height: 76%;
-  display: flex;
-  flex-direction: column;
-}
+/* ---------- Library manager (stránka .libpage — viz sekce Fáze 3.5) ---------- */
 /* Cesta (breadcrumbs) na vlastním řádku nad nástroji — dlouhá cesta tak nikdy
    netlačí do tlačítek a layout nepřeskakuje. Přeteče → vodorovný scroll řádku. */
 .lib__crumbsrow {
@@ -3160,9 +3208,11 @@ body {
   cursor: pointer;
   transition: all 0.12s;
 }
-.lib__btn:hover:not(:disabled) {
-  background: var(--panel-hover);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .lib__btn:hover:not(:disabled) {
+    background: var(--panel-hover);
+    border-color: var(--accent);
+  }
 }
 /* Řazení knihovny: select klíče + toggle směru. Sladěné 1:1 s .lib__btn (výška,
    font, barvy, hover), spojené v jeden segment (radius jen na krajích). */
@@ -3185,15 +3235,17 @@ body {
   outline: none;
   transition: all 0.12s;
 }
-.lib__sortsel:hover {
-  background: var(--panel-hover);
-  border-color: var(--accent);
-  /* Select nemá pravý border (splývá s tlačítkem směru vedle) → na hover by ho
-     accent rámeček neuzavřel zprava. Dokreslíme pravou hranu stínem (bez posunu
-     layoutu) a z-indexem ji položíme přes border sousedního tlačítka. */
-  box-shadow: 1px 0 0 0 var(--accent);
-  position: relative;
-  z-index: 1;
+@media (hover: hover) {
+  .lib__sortsel:hover {
+    background: var(--panel-hover);
+    border-color: var(--accent);
+    /* Select nemá pravý border (splývá s tlačítkem směru vedle) → na hover by ho
+       accent rámeček neuzavřel zprava. Dokreslíme pravou hranu stínem (bez posunu
+       layoutu) a z-indexem ji položíme přes border sousedního tlačítka. */
+    box-shadow: 1px 0 0 0 var(--accent);
+    position: relative;
+    z-index: 1;
+  }
 }
 .lib__sortsel option {
   background: var(--bg-solid);
@@ -3212,10 +3264,12 @@ body {
   cursor: pointer;
   transition: all 0.12s;
 }
-.lib__sortdir:hover {
-  background: var(--panel-hover);
-  border-color: var(--accent);
-  color: var(--text);
+@media (hover: hover) {
+  .lib__sortdir:hover {
+    background: var(--panel-hover);
+    border-color: var(--accent);
+    color: var(--text);
+  }
 }
 .lib__btn:disabled {
   opacity: 0.4;
@@ -3225,9 +3279,11 @@ body {
   background: rgba(var(--accent-rgb), 0.18);
   border-color: rgba(var(--accent-rgb), 0.5);
 }
-.lib__btn--danger:hover:not(:disabled) {
-  border-color: var(--warn);
-  color: var(--warn);
+@media (hover: hover) {
+  .lib__btn--danger:hover:not(:disabled) {
+    border-color: var(--warn);
+    color: var(--warn);
+  }
 }
 .lib__crumbs {
   display: flex;
@@ -3256,9 +3312,11 @@ body {
   padding: 4px 6px;
   border-radius: 7px;
 }
-.crumb:hover {
-  background: var(--panel);
-  color: var(--text);
+@media (hover: hover) {
+  .crumb:hover {
+    background: var(--panel);
+    color: var(--text);
+  }
 }
 .crumb__sep {
   color: var(--text-faint);
@@ -3300,8 +3358,10 @@ body {
   text-align: left;
   font-size: 13.5px;
 }
-.lib__item:hover {
-  background: var(--panel);
+@media (hover: hover) {
+  .lib__item:hover {
+    background: var(--panel);
+  }
 }
 .lib__item--sel {
   background: rgba(var(--accent-rgb), 0.16);
@@ -3397,15 +3457,21 @@ body {
 .ctxmenu__item svg {
   color: var(--text-dim);
 }
-.ctxmenu__item:hover {
-  background: var(--panel-hover);
+@media (hover: hover) {
+  .ctxmenu__item:hover {
+    background: var(--panel-hover);
+  }
 }
-.ctxmenu__item--danger:hover {
-  background: rgba(255, 107, 107, 0.15);
-  color: var(--warn);
+@media (hover: hover) {
+  .ctxmenu__item--danger:hover {
+    background: rgba(255, 107, 107, 0.15);
+    color: var(--warn);
+  }
 }
-.ctxmenu__item--danger:hover svg {
-  color: var(--warn);
+@media (hover: hover) {
+  .ctxmenu__item--danger:hover svg {
+    color: var(--warn);
+  }
 }
 .ctxmenu__sep {
   height: 1px;
@@ -3535,9 +3601,11 @@ body {
     background 0.14s ease,
     border-color 0.14s ease;
 }
-.pldlg__item:hover:not(:disabled) {
-  border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.07);
+@media (hover: hover) {
+  .pldlg__item:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.07);
+  }
 }
 .pldlg__count {
   color: var(--text-faint);
@@ -3588,8 +3656,10 @@ body {
   color: var(--text-dim);
   cursor: pointer;
 }
-.dup__row:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .dup__row:hover {
+    color: var(--text);
+  }
 }
 /* Jedna kopie = řádek + (volitelně) rozbalený detail pod ním. */
 .dup__copy {
@@ -3609,9 +3679,11 @@ body {
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
-.dup__openbtn:hover {
-  color: var(--text);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .dup__openbtn:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
 }
 .dup__openbtn--on {
   color: var(--accent);
@@ -3860,10 +3932,12 @@ body {
   cursor: pointer;
   transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
 }
-.about__gh:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(148, 170, 220, 0.5);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .about__gh:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(148, 170, 220, 0.5);
+    transform: translateY(-1px);
+  }
 }
 /* GitHub logo přes masku (viz komentář v AboutModal.tsx) — barvu tak řídí CSS,
    ne obsah SVG. Originál měl natvrdo skoro černou #1B1F23 = na tmavém neviditelnou. */
@@ -4023,10 +4097,12 @@ body {
   cursor: pointer;
   transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
 }
-.about__social:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(148, 170, 220, 0.35);
-  color: var(--text);
+@media (hover: hover) {
+  .about__social:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(148, 170, 220, 0.35);
+    color: var(--text);
+  }
 }
 .about__socicon {
   width: 20px;
@@ -4059,8 +4135,10 @@ body {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.about__link:hover {
-  color: var(--text);
+@media (hover: hover) {
+  .about__link:hover {
+    color: var(--text);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4103,11 +4181,13 @@ body {
   min-width: 0;
   transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
 }
-.dup__startopt:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(148, 170, 220, 0.35);
-  color: var(--text);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .dup__startopt:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(148, 170, 220, 0.35);
+    color: var(--text);
+    transform: translateY(-1px);
+  }
 }
 .dup__startopt:disabled {
   opacity: 0.45;
@@ -4164,9 +4244,11 @@ body {
   cursor: pointer;
   transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
 }
-.dup__scopebtn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--text);
+@media (hover: hover) {
+  .dup__scopebtn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text);
+  }
 }
 /* Zúžený rozsah = akcent. Musí být na první pohled jasné, že se NEprohledává
    všechno — jinak by „nic nenalezeno" svádělo k mylnému závěru. */
@@ -4190,8 +4272,10 @@ body {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.dup__scopeclear:hover:not(:disabled) {
-  color: var(--text);
+@media (hover: hover) {
+  .dup__scopeclear:hover:not(:disabled) {
+    color: var(--text);
+  }
 }
 .dup__picker {
   margin: 8px 22px 0;
@@ -4224,9 +4308,11 @@ body {
   cursor: pointer;
   min-width: 0;
 }
-.dup__pickitem:hover {
-  background: rgba(255, 255, 255, 0.045);
-  color: var(--text);
+@media (hover: hover) {
+  .dup__pickitem:hover {
+    background: rgba(255, 255, 255, 0.045);
+    color: var(--text);
+  }
 }
 .dup__pickname {
   overflow: hidden;
@@ -4391,8 +4477,10 @@ body {
   cursor: pointer;
   border-bottom: 1px solid var(--border);
 }
-.plm__list:hover {
-  background: rgba(255, 255, 255, 0.04);
+@media (hover: hover) {
+  .plm__list:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
 }
 .plm__list--sel {
   background: rgba(var(--accent-rgb), 0.14);
@@ -4432,12 +4520,16 @@ body {
   color: var(--text-faint);
   cursor: pointer;
 }
-.plm__iconbtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
+@media (hover: hover) {
+  .plm__iconbtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+  }
 }
-.plm__iconbtn--danger:hover {
-  color: var(--warn);
+@media (hover: hover) {
+  .plm__iconbtn--danger:hover {
+    color: var(--warn);
+  }
 }
 .plm__songs {
   display: flex;
@@ -4456,8 +4548,10 @@ body {
   border-radius: var(--r-sm);
   cursor: pointer;
 }
-.plm__song:hover {
-  background: rgba(255, 255, 255, 0.04);
+@media (hover: hover) {
+  .plm__song:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
 }
 .plm__songtext {
   display: flex;
@@ -4700,9 +4794,11 @@ body {
   text-align: left;
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
 }
-.side-surprise:hover {
-  background: rgba(var(--accent-rgb), 0.1);
-  border-color: rgba(var(--accent-rgb), 0.35);
+@media (hover: hover) {
+  .side-surprise:hover {
+    background: rgba(var(--accent-rgb), 0.1);
+    border-color: rgba(var(--accent-rgb), 0.35);
+  }
 }
 .side-surprise:active {
   transform: translateY(1px);
@@ -4712,8 +4808,10 @@ body {
   flex-shrink: 0;
   transition: transform 0.25s ease;
 }
-.side-surprise:hover .side-surprise__dice {
-  transform: rotate(-18deg) scale(1.08);
+@media (hover: hover) {
+  .side-surprise:hover .side-surprise__dice {
+    transform: rotate(-18deg) scale(1.08);
+  }
 }
 .side-surprise__text {
   display: flex;
@@ -4773,9 +4871,11 @@ body {
   font-weight: 500;
   transition: color 0.14s, background 0.14s;
 }
-.side-item:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.035);
+@media (hover: hover) {
+  .side-item:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.035);
+  }
 }
 .side-item--on {
   color: #fff;
@@ -4915,30 +5015,6 @@ body {
   .tips__bulb {
     transition: none;
   }
-}
-.titlebar__library {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 16px;
-  border: none;
-  border-radius: 10px;
-  background: var(--accent-grad);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: 0;
-  cursor: pointer;
-  transition: filter 0.15s, transform 0.05s;
-}
-.titlebar__library:hover {
-  filter: brightness(1.1);
-  box-shadow: none;
-}
-.titlebar__library:active {
-  transform: translateY(1px);
 }
 .titlebar__btn {
   border-radius: 10px;
@@ -5439,10 +5515,6 @@ body {
   background: none;
   border: none;
 }
-.titlebar__library {
-  height: 40px;
-  font-size: 13.5px;
-}
 .titlebar__btn {
   width: 38px;
   height: 38px;
@@ -5763,9 +5835,11 @@ body {
   cursor: pointer;
   transition: color 0.14s ease, background 0.14s ease;
 }
-.side-version:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.06);
+@media (hover: hover) {
+  .side-version:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+  }
 }
 .side-update {
   display: block;
@@ -5780,10 +5854,12 @@ body {
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
-.side-update:hover:not(:disabled) {
-  color: var(--text);
-  background: rgba(var(--accent-rgb), 0.12);
-  border-color: rgba(var(--accent-rgb), 0.4);
+@media (hover: hover) {
+  .side-update:hover:not(:disabled) {
+    color: var(--text);
+    background: rgba(var(--accent-rgb), 0.12);
+    border-color: rgba(var(--accent-rgb), 0.4);
+  }
 }
 .side-update:disabled {
   opacity: 0.6;
@@ -5845,7 +5921,6 @@ body {
 /* ── Plochá tlačítka — žádné neony, gradienty, stíny ani 3D ── */
 
 /* Primární (My Library, Search, Download, hromadné stažení): solid modrá. */
-.titlebar__library,
 .searchbar__go,
 .dl-btn,
 .btn-primary,
@@ -5856,8 +5931,6 @@ body {
   transform: none !important;
   filter: none;
 }
-.titlebar__library::before,
-.titlebar__library::after,
 .searchbar__go::before,
 .searchbar__go::after,
 .dl-btn::before,
@@ -5868,15 +5941,15 @@ body {
 .batchbar__dl::after {
   display: none !important;
 }
-.titlebar__library:hover,
-.searchbar__go:hover,
-.dl-btn:hover,
-.btn-primary:hover,
-.batchbar__dl:hover {
-  background: #4d78f5;
-  filter: none;
+@media (hover: hover) {
+  .searchbar__go:hover,
+  .dl-btn:hover,
+  .btn-primary:hover,
+  .batchbar__dl:hover {
+    background: #4d78f5;
+    filter: none;
+  }
 }
-.titlebar__library:active,
 .searchbar__go:active,
 .dl-btn:active,
 .btn-primary:active,
@@ -5895,12 +5968,14 @@ body {
   box-shadow: none !important;
   transform: none !important;
 }
-.pillbtn:hover,
-.btn-secondary:hover,
-.titlebar__btn:hover,
-.pgbtn:hover:not(:disabled),
-.pgnum:hover {
-  background: rgba(255, 255, 255, 0.06);
+@media (hover: hover) {
+  .pillbtn:hover,
+  .btn-secondary:hover,
+  .titlebar__btn:hover,
+  .pgbtn:hover:not(:disabled),
+  .pgnum:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
 }
 .pgnum--active {
   background: var(--accent);
@@ -5926,9 +6001,11 @@ body {
   background: rgba(var(--accent-2-rgb), 0.5); /* tlumená modrá — ladí s akcentem */
   transition: background 0.14s, box-shadow 0.14s;
 }
-.side-item:hover::before {
-  background: var(--accent-2);
-  box-shadow: 0 0 6px rgba(var(--accent-2-rgb), 0.55);
+@media (hover: hover) {
+  .side-item:hover::before {
+    background: var(--accent-2);
+    box-shadow: 0 0 6px rgba(var(--accent-2-rgb), 0.55);
+  }
 }
 .side-item--on::before {
   display: none;
@@ -5939,9 +6016,11 @@ body {
   border: none;
   background: rgba(255, 255, 255, 0.04);
 }
-.side-update:hover:not(:disabled) {
-  border: none;
-  background: rgba(var(--accent-rgb), 0.14);
+@media (hover: hover) {
+  .side-update:hover:not(:disabled) {
+    border: none;
+    background: rgba(var(--accent-rgb), 0.14);
+  }
 }
 
 /* Obíhající úhel pro conic-gradient border (viz .side-update-card--live níže). */
@@ -6022,8 +6101,10 @@ body {
   cursor: pointer;
   transition: background 0.15s;
 }
-.side-update-card__btn:hover {
-  background: #4d78f5;
+@media (hover: hover) {
+  .side-update-card__btn:hover {
+    background: #4d78f5;
+  }
 }
 .side-update-card__close {
   position: absolute;
@@ -6041,9 +6122,11 @@ body {
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
 }
-.side-update-card__close:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.08);
+@media (hover: hover) {
+  .side-update-card__close:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 .side-update-progress {
   height: 6px;
@@ -6069,8 +6152,10 @@ body {
 .side-update-card--ready .side-update-card__btn {
   background: #22a883;
 }
-.side-update-card--ready .side-update-card__btn:hover {
-  background: #27bd92;
+@media (hover: hover) {
+  .side-update-card--ready .side-update-card__btn:hover {
+    background: #27bd92;
+  }
 }
 
 /* Obíhající okraj (jako u běžících launcherů) pro „živá" upozornění. */
@@ -6184,13 +6269,17 @@ body {
   border: none;
   background: rgba(255, 255, 255, 0.05);
 }
-.titlebar__btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+@media (hover: hover) {
+  .titlebar__btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
 }
-.titlebar__btn--close:hover {
-  background: #e23b5b;
-  color: #fff;
+@media (hover: hover) {
+  .titlebar__btn--close:hover {
+    background: #e23b5b;
+    color: #fff;
+  }
 }
 
 /* ── Stejný flat styl pro pager a dropdowny (MIN/MAX, sort) ──
@@ -6202,9 +6291,11 @@ body {
 .dd__btn {
   border: none;
 }
-.dd__btn:hover:not(:disabled) {
-  border: none;
-  background: var(--panel-hover);
+@media (hover: hover) {
+  .dd__btn:hover:not(:disabled) {
+    border: none;
+    background: var(--panel-hover);
+  }
 }
 
 /* Aktivní stránka si drží modrou i pod kurzorem (hover ji nesmí ztmavit). */
@@ -6224,7 +6315,6 @@ body {
 .pgnum:focus-visible,
 .dd__btn:focus-visible,
 .titlebar__btn:focus-visible,
-.titlebar__library:focus-visible,
 .dl-btn:focus-visible,
 .searchbar__go:focus-visible,
 .instbtn:focus-visible,
@@ -6408,7 +6498,6 @@ body {
 }
 
 /* Primární tlačítka → světlá pilulka s tmavým textem (typický „graphite" tah). */
-[data-theme='graphite'] .titlebar__library,
 [data-theme='graphite'] .searchbar__go,
 [data-theme='graphite'] .dl-btn,
 [data-theme='graphite'] .btn-primary,
@@ -6417,16 +6506,16 @@ body {
   background: linear-gradient(180deg, #f3f3f6 0%, #d4d4d8 100%);
   color: #131315;
 }
-[data-theme='graphite'] .titlebar__library:hover,
-[data-theme='graphite'] .searchbar__go:hover,
-[data-theme='graphite'] .dl-btn:hover,
-[data-theme='graphite'] .btn-primary:hover,
-[data-theme='graphite'] .batchbar__dl:hover,
-[data-theme='graphite'] .pgnum--active:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #dcdce0 100%);
-  color: #131315;
+@media (hover: hover) {
+  [data-theme='graphite'] .searchbar__go:hover,
+  [data-theme='graphite'] .dl-btn:hover,
+  [data-theme='graphite'] .btn-primary:hover,
+  [data-theme='graphite'] .batchbar__dl:hover,
+  [data-theme='graphite'] .pgnum--active:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #dcdce0 100%);
+    color: #131315;
+  }
 }
-[data-theme='graphite'] .titlebar__library:active,
 [data-theme='graphite'] .searchbar__go:active,
 [data-theme='graphite'] .dl-btn:active,
 [data-theme='graphite'] .batchbar__dl:active {
@@ -6467,9 +6556,11 @@ body {
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
-.theme-opt:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
+@media (hover: hover) {
+  .theme-opt:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+  }
 }
 .theme-opt--on {
   color: var(--text);
@@ -6498,10 +6589,12 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.13);
   color: var(--text-dim);
 }
-[data-theme='graphite'] .dl-btn--store:hover {
-  background: var(--panel-hover);
-  border-color: var(--accent);
-  color: var(--text);
+@media (hover: hover) {
+  [data-theme='graphite'] .dl-btn--store:hover {
+    background: var(--panel-hover);
+    border-color: var(--accent);
+    color: var(--text);
+  }
 }
 
 /* Popup plochy (dropdowny, refine, ⋮ menu, kontext. menu, lib dialog) měly navy. */
@@ -6525,8 +6618,10 @@ body {
 }
 
 /* Filter-chip „×" na hover má světlé pozadí (--accent-2) → tmavý křížek. */
-[data-theme='graphite'] .filterchip__x:hover {
-  color: #131315;
+@media (hover: hover) {
+  [data-theme='graphite'] .filterchip__x:hover {
+    color: #131315;
+  }
 }
 
 /* Tlačítko v update kartě → světlá pilulka (jako ostatní primární). „Ready"
@@ -6535,16 +6630,20 @@ body {
   background: linear-gradient(180deg, #f3f3f6 0%, #d4d4d8 100%);
   color: #131315;
 }
-[data-theme='graphite'] .side-update-card__btn:hover {
-  background: linear-gradient(180deg, #ffffff 0%, #dcdce0 100%);
-  color: #131315;
+@media (hover: hover) {
+  [data-theme='graphite'] .side-update-card__btn:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #dcdce0 100%);
+    color: #131315;
+  }
 }
 [data-theme='graphite'] .side-update-card--ready .side-update-card__btn {
   background: #22a883;
   color: #fff;
 }
-[data-theme='graphite'] .side-update-card--ready .side-update-card__btn:hover {
-  background: #27bd92;
+@media (hover: hover) {
+  [data-theme='graphite'] .side-update-card--ready .side-update-card__btn:hover {
+    background: #27bd92;
+  }
 }
 
 /* ============================================================
@@ -6567,20 +6666,24 @@ body {
     0 5px 12px rgba(0, 0, 0, 0.3) !important;
   border: 1px solid rgba(0, 0, 0, 0.4) !important;
 }
-[data-theme='graphite'] .titlebar__btn:hover,
-[data-theme='graphite'] .btn-secondary:hover,
-[data-theme='graphite'] .pgbtn:hover:not(:disabled),
-[data-theme='graphite'] .pgnum:hover:not(.pgnum--active),
-[data-theme='graphite'] .dd__btn:hover:not(:disabled),
-[data-theme='graphite'] .side-update:hover:not(:disabled),
-[data-theme='graphite'] .theme-opt:hover {
-  background: linear-gradient(180deg, #2e2f34 0%, #202126 100%) !important;
+@media (hover: hover) {
+  [data-theme='graphite'] .titlebar__btn:hover,
+  [data-theme='graphite'] .btn-secondary:hover,
+  [data-theme='graphite'] .pgbtn:hover:not(:disabled),
+  [data-theme='graphite'] .pgnum:hover:not(.pgnum--active),
+  [data-theme='graphite'] .dd__btn:hover:not(:disabled),
+  [data-theme='graphite'] .side-update:hover:not(:disabled),
+  [data-theme='graphite'] .theme-opt:hover {
+    background: linear-gradient(180deg, #2e2f34 0%, #202126 100%) !important;
+  }
 }
 /* Křížek: hover se zalije červeně (jako v běžných oknech). Musí být ZA grafitovým
    !important hoverem výše a taky s !important, aby ho přebil (stejná specificita). */
-[data-theme='graphite'] .titlebar__btn--close:hover {
-  background: #e23b5b !important;
-  color: #fff !important;
+@media (hover: hover) {
+  [data-theme='graphite'] .titlebar__btn--close:hover {
+    background: #e23b5b !important;
+    color: #fff !important;
+  }
 }
 /* Stisk = zatlačení dovnitř (engraved). */
 [data-theme='graphite'] .titlebar__btn:active,
@@ -6591,7 +6694,6 @@ body {
 }
 
 /* Světlé primární pilulky — vyvýšené s horním leskem. */
-[data-theme='graphite'] .titlebar__library,
 [data-theme='graphite'] .searchbar__go,
 [data-theme='graphite'] .dl-btn:not(.dl-btn--store),
 [data-theme='graphite'] .btn-primary,
@@ -6602,7 +6704,6 @@ body {
     0 1px 2px rgba(0, 0, 0, 0.5), 0 5px 14px rgba(0, 0, 0, 0.4) !important;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
 }
-[data-theme='graphite'] .titlebar__library:active,
 [data-theme='graphite'] .searchbar__go:active,
 [data-theme='graphite'] .dl-btn:active,
 [data-theme='graphite'] .batchbar__dl:active {
@@ -6630,17 +6731,19 @@ body {
     filter 0.15s,
     transform 0.05s;
 }
-[data-theme='graphite'] .song:hover .dl-btn:not(.dl-btn--store),
-[data-theme='graphite'] .dl-btn:not(.dl-btn--store):hover {
-  background: linear-gradient(180deg, #f3f3f6 0%, #d4d4d8 100%);
-  color: #131315;
-  border-color: transparent;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.5),
-    0 5px 14px rgba(0, 0, 0, 0.4) !important;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+@media (hover: hover) {
+  [data-theme='graphite'] .song:hover .dl-btn:not(.dl-btn--store),
+  [data-theme='graphite'] .dl-btn:not(.dl-btn--store):hover {
+    background: linear-gradient(180deg, #f3f3f6 0%, #d4d4d8 100%);
+    color: #131315;
+    border-color: transparent;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      inset 0 -2px 3px rgba(0, 0, 0, 0.12),
+      0 1px 2px rgba(0, 0, 0, 0.5),
+      0 5px 14px rgba(0, 0, 0, 0.4) !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
 }
 
 /* Vybraná položka v sidebaru + klouzavý indikátor — jemně vyvýšené. */
@@ -6659,12 +6762,14 @@ body {
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), inset 0 -2px 6px rgba(0, 0, 0, 0.5),
     inset 0 0 0 1px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.04);
 }
-[data-theme='graphite'] .side-surprise:hover {
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.14) 0%, rgba(var(--accent-rgb), 0.05) 100%),
-    rgba(0, 0, 0, 0.28);
-  border-color: rgba(var(--accent-rgb), 0.32);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08), inset 0 -2px 6px rgba(0, 0, 0, 0.45),
-    inset 0 0 0 1px rgba(var(--accent-rgb), 0.12), 0 1px 0 rgba(255, 255, 255, 0.05);
+@media (hover: hover) {
+  [data-theme='graphite'] .side-surprise:hover {
+    background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.14) 0%, rgba(var(--accent-rgb), 0.05) 100%),
+      rgba(0, 0, 0, 0.28);
+    border-color: rgba(var(--accent-rgb), 0.32);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08), inset 0 -2px 6px rgba(0, 0, 0, 0.45),
+      inset 0 0 0 1px rgba(var(--accent-rgb), 0.12), 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
 }
 [data-theme='graphite'] .side-surprise:active {
   transform: translateY(1px);
@@ -6713,10 +6818,12 @@ button.badge--owned {
   cursor: pointer;
   transition: border-color 0.14s, color 0.14s, background 0.14s;
 }
-button.badge--owned:hover {
-  border-color: var(--accent);
-  color: var(--text);
-  background: rgba(var(--accent-rgb), 0.1);
+@media (hover: hover) {
+  button.badge--owned:hover {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(var(--accent-rgb), 0.1);
+  }
 }
 .libpop {
   position: absolute;
@@ -6754,8 +6861,10 @@ button.badge--owned:hover {
   text-overflow: ellipsis;
   max-width: 100%;
 }
-.libpop__item:hover {
-  background: var(--panel-hover);
+@media (hover: hover) {
+  .libpop__item:hover {
+    background: var(--panel-hover);
+  }
 }
 
 /* ── Library Manager: banner „N kopií" (duplikáty z „In library") ── */
@@ -6789,9 +6898,11 @@ button.badge--owned:hover {
   cursor: pointer;
   transition: background 0.14s, color 0.14s, border-color 0.14s;
 }
-.lib__reveal-chip:hover {
-  background: var(--panel-hover);
-  color: var(--text);
+@media (hover: hover) {
+  .lib__reveal-chip:hover {
+    background: var(--panel-hover);
+    color: var(--text);
+  }
 }
 .lib__reveal-chip--on {
   background: rgba(var(--accent-rgb), 0.2);
@@ -6841,8 +6952,10 @@ button.badge--owned:hover {
   transition: transform 0.25s ease;
 }
 /* Hover: jemné naklonění + zvětšení, stejně jako kostka u „Surprise me". */
-.side-import:hover .side-import__logo {
-  transform: rotate(-18deg) scale(1.08);
+@media (hover: hover) {
+  .side-import:hover .side-import__logo {
+    transform: rotate(-18deg) scale(1.08);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .side-import__logo {
@@ -6888,8 +7001,10 @@ button.badge--owned:hover {
   color: inherit;
   transition: background 0.14s ease;
 }
-.disc__head:hover {
-  background: rgba(255, 255, 255, 0.035);
+@media (hover: hover) {
+  .disc__head:hover {
+    background: rgba(255, 255, 255, 0.035);
+  }
 }
 /* macOS: sekce je napevno otevřená → hlavička není klikací (žádný kurzor/hover). */
 .disc__head--static {
@@ -6994,10 +7109,12 @@ button.badge--owned:hover {
   cursor: pointer;
   transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
 }
-.tpl__tag:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(148, 170, 220, 0.5);
-  color: var(--text);
+@media (hover: hover) {
+  .tpl__tag:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(148, 170, 220, 0.5);
+    color: var(--text);
+  }
 }
 /* Náhled = výsledek TÉŽE funkce, kterou instaluje main → co je tu vidět, to vznikne. */
 .tpl__preview {
@@ -7151,8 +7268,10 @@ button.badge--owned:hover {
   cursor: pointer;
   white-space: nowrap;
 }
-.plimport__selall:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .plimport__selall:hover {
+    text-decoration: underline;
+  }
 }
 .plimport__progress {
   height: 4px;
@@ -7306,9 +7425,11 @@ button.badge--owned:hover {
   cursor: pointer;
   transition: background 0.14s, border-color 0.14s;
 }
-button.plrow__na:hover {
-  background: rgba(230, 170, 90, 0.22);
-  border-color: rgba(230, 170, 90, 0.75);
+@media (hover: hover) {
+  button.plrow__na:hover {
+    background: rgba(230, 170, 90, 0.22);
+    border-color: rgba(230, 170, 90, 0.75);
+  }
 }
 /* Nestažitelný řádek: disabled políčko (přerušované, tlumené) — jako v hlavních
    výsledcích. `.chk--disabled { pointer-events: none }` je definované globálně. */
@@ -7331,9 +7452,11 @@ button.plrow__na:hover {
   padding: 2px 8px;
   cursor: pointer;
 }
-.plrow__versions:hover {
-  color: var(--text);
-  border-color: rgba(var(--accent-rgb), 0.4);
+@media (hover: hover) {
+  .plrow__versions:hover {
+    color: var(--text);
+    border-color: rgba(var(--accent-rgb), 0.4);
+  }
 }
 
 /* Version picker (rozbalený pod řádkem) */
@@ -7360,8 +7483,10 @@ button.plrow__na:hover {
   border-radius: 6px;
   cursor: pointer;
 }
-.plver:hover {
-  background: rgba(255, 255, 255, 0.05);
+@media (hover: hover) {
+  .plver:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
 }
 .plver--on {
   color: var(--text);
@@ -7427,4 +7552,1653 @@ button.plrow__na:hover {
 /* Druhý oddělovač (SYSTEM | akce) — víc vzduchu kolem, ať se Surprise oddělí zřetelněji. */
 .side-sep--wide {
   margin: 4px 0;
+}
+
+/* ============================================================
+   MOBILE (Phase 1 — app shell). docs/mobile/plan.md.
+
+   Breakpoints (plán, jediná definice — všude používej TYTO hodnoty):
+     tablet: @media (max-width: 899.98px)  — sidebar → drawer, chrome pryč
+     phone:  @media (max-width: 600px)     — single column, sheets
+   (@custom-media není bez PostCSS pluginu podporované, proto literály +
+   tenhle komentář jako zdroj pravdy.)
+
+   Desktop (≥900px) se NESMÍ změnit: níže jsou jen (a) base pravidla
+   skrývající nové mobilní prvky na desktopu a (b) additivní @media bloky.
+   ============================================================ */
+
+/* Nové mobilní prvky na desktopu neexistují. */
+.titlebar__menu,
+.filterbar__mobiletoggle,
+.queue-pill,
+.queue-scrim,
+.nav-scrim {
+  display: none;
+}
+
+/* ── tablet (<900px): shell — jednosloupcový layout + drawer ── */
+@media (max-width: 899.98px) {
+  /* dvh místo vh: mobilní Safari/Chrome mění výšku viewportu s adresním
+     řádkem — 100vh by nechalo spodek shellu pod lištou prohlížeče. */
+  #root {
+    height: 100dvh;
+  }
+
+  /* Audit #1: workspace měl ~722px min-width v .app { overflow: hidden } →
+     půlka UI nedosažitelná. Jediný sloupec + zákaz horizontálního přetečení
+     v celém řetězci; sidebar jde mimo tok (fixed drawer). */
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .content {
+    min-width: 0;
+    /* clip (ne hidden): nevytváří scroll kontext → focus/scrollIntoView nemá
+       KAM odjet do strany; svisle nechává obsah (suggest dropdown) být. */
+    overflow-x: clip;
+  }
+
+  /* Sidebar → slide-in drawer přes obsah, plná výška, scrim za ním. */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: min(300px, 85vw);
+    z-index: 140;
+    transform: translateX(-102%);
+    visibility: hidden;
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s 0.28s;
+    border-right: 1px solid var(--border);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55);
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+  .sidebar--open {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s;
+  }
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 130;
+    background: rgba(4, 8, 18, 0.6);
+    backdrop-filter: blur(2px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar {
+      transition: none;
+    }
+  }
+
+  /* Title bar: wordmark + My Library + Settings + hamburger. Okenní chrome
+     (maximize/quit) a TipsTicker pryč; cíle ≥44px. */
+  .titlebar__btn--window,
+  .tips {
+    display: none;
+  }
+  .titlebar__menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .titlebar__menu-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 17px;
+  }
+  .titlebar__menu-lines i {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+  .titlebar {
+    min-height: 60px;
+    padding: 8px 12px 4px;
+    gap: 8px;
+  }
+  /* Hamburger vlevo, brand opticky uprostřed. Titlebar je flex (redesign v2),
+     takže: akce (jen hamburger, 44px) dostanou order -1, brand se vystředí
+     auto-marginy a ::after je prázdná 44px protiváha vpravo. */
+  .titlebar::after {
+    /* Základní .titlebar::after je display:none/absolute (desktop dekor) —
+       tady je z něj statická 44px protiváha hamburgeru. */
+    content: '';
+    display: block;
+    position: static;
+    width: 44px;
+    height: 1px;
+    flex: none;
+    background: none;
+  }
+  .titlebar__actions {
+    order: -1;
+    margin-left: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .titlebar__left {
+    margin-inline: auto;
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+  }
+  .titlebar__btn {
+    width: 44px;
+    height: 44px;
+  }
+  .brand-text {
+    font-size: 24px;
+    white-space: nowrap;
+  }
+
+  /* ── Hero/filtry: defaultně sbaleno do 44px přepínače (audit #2: results
+     0px na 375 I 768 — hero sežral celý viewport). Rozbalení = svislé
+     skupiny pod sebou, plná šířka. ── */
+  .filterbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin: 6px 12px 0;
+    padding: 10px 12px;
+  }
+  .filterbar__mobiletoggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 6px;
+    border: none;
+    background: none;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-align: left;
+  }
+  .filterbar__mobilecount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11.5px;
+  }
+  .filterbar__mobilecaret {
+    margin-left: auto;
+    color: var(--text-faint);
+  }
+  .filterbar--mobile-collapsed .fgroup,
+  .filterbar--mobile-collapsed .dropzone {
+    display: none;
+  }
+  .filterbar .fgroup + .fgroup {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  .filterbar .dropzone {
+    margin-left: 0;
+    align-self: stretch;
+    width: auto;
+  }
+  .instbtns {
+    justify-content: space-between;
+    row-gap: 14px;
+  }
+
+  /* Info pruh + search: užší okraje a kompaktnější vertikála — každý px
+     výšky tady jde z výšky seznamu výsledků (audit #2). */
+  .rec-hint {
+    margin: 8px 12px 0;
+    padding: 7px 11px;
+    font-size: 11.5px;
+  }
+  .content .searchbar {
+    padding: 8px 12px;
+  }
+  .searchbar__input-wrap {
+    min-width: 0;
+  }
+  .content .searchbar__row--input {
+    padding: 8px;
+  }
+  .content .searchbar__input {
+    min-width: 0;
+    height: 44px;
+  }
+  .content .searchbar__go {
+    height: 44px;
+  }
+
+  /* Resultsbar + tabulka + pager: obsah se zalamuje/scrolluje UVNITŘ, nikdy
+     neroztahuje shell. (Fáze 1 tu měla na .results--table provizorní
+     overflow-x: auto pro 838px desktopové řádky — Fáze 2 řádky přestavěla na
+     karty, které se vejdou, takže provizorium je odstraněné.) */
+  .resultsbar {
+    flex-wrap: wrap;
+    margin: 2px 12px;
+    padding: 2px 6px;
+    row-gap: 4px;
+  }
+  .resultsbar__right {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+  .tablewrap {
+    margin: 0 12px 8px;
+  }
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  .pgbtn,
+  .pgnum {
+    min-width: 44px;
+    height: 44px;
+  }
+  .pager__pages {
+    flex-wrap: wrap;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  /* ── Download queue → bottom sheet: sbalená pilulka (počet + souhrnný
+     průběh) vpravo dole; tap ji rozbalí na sheet přes obsah. ── */
+  .queue-pill {
+    position: fixed;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 90;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: var(--box, #0f1a31);
+    color: var(--text);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  }
+  .queue-pill--hidden {
+    display: none;
+  }
+  .queue-pill--error {
+    border-color: rgba(255, 107, 107, 0.55);
+  }
+  .queue-pill__bar {
+    width: 56px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+  }
+  .queue-pill__fill {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 0.25s ease;
+  }
+  .queue-pill--error .queue-pill__fill {
+    background: #ff6b6b;
+  }
+  .queue-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 92;
+    background: rgba(4, 8, 18, 0.55);
+  }
+  /* Panel fronty v toku layoutu neexistuje (nahrazuje ho pilulka)… */
+  .queue-wrap {
+    display: none;
+  }
+  /* …a jako sheet je fixovaný dole, nad scrimem, pod modaly (z 100). */
+  .queue-wrap--sheet {
+    display: grid;
+    grid-template-rows: 1fr;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 95;
+  }
+  .queue-wrap--sheet .queue-inner {
+    opacity: 1;
+  }
+  .queue-wrap--sheet .queue {
+    max-height: min(70dvh, 620px);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-top: 1px solid var(--border-strong, var(--border));
+    background: #0c1530;
+    box-shadow: 0 -12px 44px rgba(0, 0, 0, 0.55);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .queue-wrap--sheet .queue__toggle,
+  .queue-wrap--sheet .queue__clear {
+    min-height: 44px;
+  }
+  .queue-wrap--sheet .queue__list {
+    max-height: min(48dvh, 480px);
+  }
+}
+
+/* ── phone (≤600px): jednosloupcové dorovnání shellu ── */
+@media (max-width: 600px) {
+  /* Search řádek: input přes celou šířku, Filters + Search pod ním. */
+  .content .searchbar__row--input {
+    flex-wrap: wrap;
+  }
+  .searchbar__input-wrap {
+    flex: 1 1 100%;
+  }
+  .content .searchbar__go {
+    flex: 1;
+  }
+  .searchbar__filters {
+    min-height: 44px;
+  }
+  .content .searchbar__go {
+    min-height: 44px;
+  }
+  /* Wordmark kompaktněji, ať se s akcemi vejde do 375px (EQ značka pryč —
+     text „Chart Manager." je značka sám o sobě). */
+  .brand-mark {
+    display: none;
+  }
+  .brand-text {
+    font-size: 19px;
+  }
+  .titlebar__brandbtn {
+    padding-left: 0;
+  }
+  .titlebar {
+    padding: 6px 8px 2px;
+    gap: 6px;
+  }
+  .titlebar__actions {
+    gap: 6px;
+  }
+  /* Suggest dropdown nesmí přetéct viewport do stran. */
+  .suggest {
+    max-width: calc(100vw - 24px);
+  }
+}
+
+/* ============================================================
+   MOBILE (Phase 2 — vyhledávání a výsledky). docs/mobile/plan.md.
+
+   Breakpointy = tytéž literály jako Phase 1 (jediný zdroj pravdy je hlavička
+   sekce Phase 1 výše): tablet <900px, phone ≤600px. Vše additivní; desktop
+   (≥900px) se NESMÍ změnit.
+
+   Pozn. k Phase 1: hero panel (.filterbar) je na mobilu nově sbalený TRVALE —
+   přepínač otevírá filter-sheet místo inline rozbalení. Rozbalovací pravidla
+   Phase 1 (.filterbar .fgroup + .fgroup, .filterbar .dropzone…) tím osiřela,
+   ale nechávám je být: jsou neškodná a sekce Phase 1 se nereorganizuje.
+   ============================================================ */
+
+/* Nové mobilní prvky (Phase 2) na desktopu neexistují. */
+.resultsbar__select,
+.selectbar,
+.sheet,
+.sheet-scrim {
+  display: none;
+}
+
+/* ── tablet (<900px): karty výsledků, filter-sheet, výběrový režim ── */
+@media (max-width: 899.98px) {
+  /* ── Sdílený vzor bottom-sheetu (`.sheet`) ─────────────────────────────
+     Scrim + panel přisátý dole, zaoblený vršek, dvh strop, safe-area.
+     Fáze 4 má pro modaly použít TENHLE vzor (queue sheet z Fáze 1 má svou
+     starší per-komponentovou kopii — kandidát na sjednocení ve Fázi 4/5). */
+  .sheet-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 96;
+    background: rgba(4, 8, 18, 0.55);
+  }
+  .sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 97;
+    display: flex;
+    flex-direction: column;
+    max-height: min(85dvh, 720px);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-top: 1px solid var(--border-strong, var(--border));
+    background: #0c1530;
+    box-shadow: 0 -12px 44px rgba(0, 0, 0, 0.55);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .sheet__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .sheet__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: auto;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .sheet__close {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .sheet__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px 16px;
+  }
+  .sheet__foot {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  /* ── Filter-sheet (FilterSheet.tsx): všechny filtry na jednom místě ──
+     Nahrazuje na mobilu desktopovou roletu FilterPanel (audit: panel 204px
+     obsahu ve 135px sloupci, spodek pod foldem) i inline rozbalení hero
+     panelu. Sort žije tady (audit: sort dropdown se otevíral mimo viewport). */
+  .filterpanel {
+    display: none;
+  }
+  .filtersheet__group + .filtersheet__group,
+  .filtersheet__panel {
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+    padding-top: 14px;
+  }
+  .filtersheet__clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 13px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .filtersheet__done {
+    width: 100%;
+    min-height: 48px;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+  /* Sort: dropdown přes celou šířku + směrové tlačítko vedle, cíle ≥44px. */
+  .filtersheet .sortctl {
+    display: flex;
+  }
+  .filtersheet .sortctl > .dd {
+    flex: 1;
+  }
+  .filtersheet .dd--sort .dd__btn {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .filtersheet .dd__btn,
+  .filtersheet .filterfield__input {
+    min-height: 44px;
+  }
+  /* Položky rozbalených menu v sheetu taky na dotykový cíl (audit: 31px).
+     Phase 6: totéž pro sort dropdown NAD výsledky — žije mimo sheet a při
+     původní opravě vypadl (položky měl pořád 31px). */
+  .filtersheet .dd__item,
+  .dd--sort .dd__item {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  /* Menší kruhy nástrojů, ať se všech 5 vejde do jedné řady i na 375px. */
+  .filtersheet .instbtn__circle {
+    width: 56px;
+    height: 56px;
+  }
+  .filtersheet .sortctl__dir {
+    width: 44px;
+  }
+  /* Exact-difficulty tečky: 16px audit označil za mrňavé — v sheetu 32px. */
+  .filtersheet .ddot {
+    width: 32px;
+    height: 32px;
+  }
+  .filtersheet .diffdots {
+    gap: 9px;
+  }
+  .filtersheet__diffrow {
+    flex-wrap: wrap;
+    row-gap: 14px;
+  }
+
+  /* ── SongRow → karta (audit: řádek 838px min-width, Download na x≈883 —
+     rozbité na 375 I 768, proto tablet breakpoint, ne phone) ──────────────
+     art | titul/interpret | ⋮ nahoře, tečky nástrojů uprostřed, akce dole. */
+  .song,
+  .results--table .song {
+    grid-template-columns: 54px minmax(0, 1fr) 44px;
+    grid-template-areas:
+      'art main menu'
+      'diffs diffs diffs'
+      'action action action';
+    gap: 10px 12px;
+    padding: 12px;
+  }
+  .song__check,
+  .sk--check {
+    display: none;
+  }
+  .song__art,
+  .sk--art {
+    grid-area: art;
+    width: 54px;
+    height: 54px;
+  }
+  .song__main,
+  .sk-main {
+    grid-area: main;
+  }
+  .song__diffs,
+  .sk-diffs {
+    grid-area: diffs;
+    min-width: 0;
+  }
+  .song__action,
+  .sk--btn {
+    grid-area: action;
+  }
+  .song .rowmenu,
+  .sk--dots {
+    grid-area: menu;
+    justify-self: end;
+  }
+  .rowmenu__btn {
+    width: 44px;
+    height: 44px;
+  }
+  /* Badge řádek se zalamuje místo přetékání; charter kratší. */
+  .song__meta {
+    flex-wrap: wrap;
+    row-gap: 5px;
+  }
+  .song__charter {
+    max-width: 150px;
+  }
+  /* Tečky nástrojů: kompaktnější, ať se všech 5 sloupců vejde na 375px. */
+  .song__diffs .instruments {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .song__diffs .instrument {
+    gap: 4px;
+  }
+  .song__diffs .dots {
+    gap: 2px;
+  }
+  .song__diffs .dot {
+    width: 7px;
+    height: 7px;
+  }
+  /* Akce: Download přes šířku karty, cíl ≥44px; velikost souboru vedle. */
+  .song__action {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .song__action .dl-btn {
+    width: auto;
+    flex: 1;
+    min-height: 44px;
+  }
+  .song__action .jobchip {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+  }
+  .song__size {
+    flex-shrink: 0;
+  }
+  .sk--btn {
+    width: 100%;
+    height: 44px;
+  }
+
+  /* ── Výběrový režim (touch nemá hover checkboxy ani Ctrl/Shift-klik):
+     checkbox sloupec vlevo, akce/⋮ pryč, tap řádku = přepnout. ── */
+  .results--selecting .song {
+    grid-template-columns: 32px 54px minmax(0, 1fr);
+    grid-template-areas:
+      'check art main'
+      'check diffs diffs';
+  }
+  .results--selecting .song__check {
+    display: flex;
+    grid-area: check;
+    align-self: stretch;
+  }
+  .results--selecting .song__check .chk__box {
+    opacity: 1;
+    width: 24px;
+    height: 24px;
+  }
+  .results--selecting .song__action,
+  .results--selecting .rowmenu,
+  .results--selecting .sk--btn,
+  .results--selecting .sk--dots {
+    display: none;
+  }
+
+  /* Resultsbar: desktopové All + inline batch lištu nahrazuje Select režim. */
+  .chk--selectall,
+  .batchbar {
+    display: none;
+  }
+  .resultsbar__select {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-dim);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .resultsbar__select--on {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.14);
+    color: var(--text);
+  }
+
+  /* Připnutá lišta výběru dole (nad queue pilulkou, pod modaly z 100). */
+  .selectbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 91;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: #0c1530;
+    border-top: 1px solid var(--border-strong, var(--border));
+    box-shadow: 0 -12px 44px rgba(0, 0, 0, 0.55);
+  }
+  .selectbar__all {
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+  .selectbar__all .chk__box {
+    width: 24px;
+    height: 24px;
+  }
+  .selectbar__count {
+    flex: 1;
+    min-width: 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .selectbar__note {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+  }
+  .selectbar__dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent-grad);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .selectbar__dl:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .selectbar__done {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  /* Lišta překrývá spodek obsahu → pilulka fronty nad ni, obsah dostane
+     spodní rezervu, ať poslední karta/pager nejsou schované pod lištou. */
+  .app--selecting .queue-pill {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+  .app--selecting .content {
+    padding-bottom: calc(66px + env(safe-area-inset-bottom));
+  }
+
+  /* ── Našeptávač: plná šířka viewportu (kotva = input, který začíná ~20px
+     od kraje) + strop výšky, ať spodní návrhy nekončí pod foldem (audit). ── */
+  .suggest {
+    width: calc(100vw - 40px);
+    max-width: none;
+  }
+  .suggest__list {
+    max-height: min(52dvh, 430px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .suggest__item {
+    min-height: 44px;
+  }
+  .suggest__all {
+    min-height: 44px;
+  }
+
+  /* Pager: ikona „nahlásit chybu" na 44px (čísla stránek řešila Phase 1). */
+  .pager__bug {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ============================================================
+   MOBILE (Phase 3 — Library manager). docs/mobile/plan.md.
+
+   Breakpointy = tytéž literály jako Phase 1/2 (zdroj pravdy je hlavička
+   sekce Phase 1): tablet <900px, phone ≤600px. Vše additivní; desktop
+   (≥900px) se NESMÍ změnit.
+
+   Co tu je: ⋮ kebab na řádcích (touch-cesta k akcím pravého kliku — obě
+   prezentace renderují JEDEN seznam `menuItems` v LibraryManager.tsx),
+   výběrový režim s checkboxy + lištou hromadných akcí, dotykové cíle
+   toolbaru/drobečků, oprava přetékajícího song detailu a vždy viditelné
+   přehrávací tlačítko v detailu (audit §4).
+   ============================================================ */
+
+/* Nové mobilní prvky (Phase 3) na desktopu neexistují. */
+.lib__kebab,
+.lib__check,
+.lib__selectbar,
+.lib__selecttoggle {
+  display: none;
+}
+
+/* ── tablet (<900px): knihovna na dotyk ── */
+@media (max-width: 899.98px) {
+  /* Rada „Right-click for actions" je na dotyku lež — místo ní tlačítko Select. */
+  .lib__hint {
+    display: none;
+  }
+  .lib__selecttoggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-dim);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* Řádky: dotykový cíl ≥44px; ⋮ vpravo (44×44). Svislý padding menší —
+     výšku už drží kebab, jinak by řádek nabobtnal na ~64px. */
+  .lib__item {
+    min-height: 44px;
+    padding: 5px 6px 5px 12px;
+  }
+  .lib__kebab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 10px;
+    background: none;
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+
+  /* ⋮ sheet: položky sdílí třídu .ctxmenu__item — tady jen dotykové rozměry. */
+  .libsheet__body {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 10px;
+  }
+  .libsheet .ctxmenu__item {
+    min-height: 48px;
+    font-size: 14px;
+    gap: 12px;
+    border-radius: 10px;
+  }
+  .libsheet .ctxmenu__sep {
+    margin: 6px 8px;
+  }
+  .libsheet__title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+  }
+
+  /* ── Výběrový režim: checkboxy místo kebabu, tap řádku = přepnout. ── */
+  .lib--selecting .lib__kebab {
+    display: none;
+  }
+  .lib--selecting .lib__check {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .lib__checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    border: 1.5px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+  }
+  .lib__item--sel .lib__checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Lišta hromadných akcí (nahrazuje patičku) — stejná sada jako desktopové
+     kontextové menu nad výběrem: playlist / copy / cut / delete. */
+  .lib__selectbar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.02);
+    flex-shrink: 0;
+  }
+  .lib__sbrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .lib__sball {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong, var(--border));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-dim);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .lib__sbcount {
+    flex: 1;
+    min-width: 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .lib__sbdone {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-dim);
+    cursor: pointer;
+  }
+  .lib__sbactions {
+    display: flex;
+    gap: 8px;
+  }
+  .lib__sbbtn {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 4px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .lib__sbbtn svg {
+    color: var(--text-dim);
+  }
+  .lib__sbbtn:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .lib__sbbtn--danger {
+    color: var(--warn);
+    border-color: rgba(255, 107, 107, 0.4);
+  }
+  .lib__sbbtn--danger svg {
+    color: var(--warn);
+  }
+
+  /* ── Toolbar + drobečky: dotykové cíle (audit: 34px tlačítka, 27px crumby). ── */
+  .lib__btn,
+  .lib__sortsel,
+  .lib__sortdir {
+    min-height: 44px;
+  }
+  .lib__btn--icon {
+    min-width: 44px;
+    justify-content: center;
+  }
+  .lib__sortdir {
+    width: 44px;
+  }
+  .crumb {
+    min-height: 44px;
+  }
+  /* Jednotlivé segmenty cesty: smí se smrsknout s ellipsis, ať poslední drobek
+     neuteče za okraj (prostřední segmenty už schovává „…" v LibraryManager.tsx).
+     Delší segment se smrskne víc — flex-shrink dělí prostor podle šířky. */
+  .crumb__wrap {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .crumb__wrap .crumb {
+    flex-shrink: 1;
+    display: inline-block;
+    min-width: 44px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 36px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  /* Samotné „…" se nikdy nesmršťuje (jinak z něj zbude tečka). */
+  .crumb__wrap .crumb--ellipsis {
+    flex-shrink: 0;
+    min-width: 0;
+  }
+
+  /* ── Song detail: audit — 483px obsahu ve 305px kartě (tečky nástrojů
+     přetékaly, Edit uřízlý). Řádek se zalamuje, tečky wrapují, Edit přes
+     celou šířku, přehrávání vždy viditelné (hover na dotyku neexistuje). ── */
+  .songdetail {
+    flex-wrap: wrap;
+  }
+  .songdetail__meta {
+    /* Vedle 84px obalu, ale při úzkém sloupci smí zalomit POD něj. */
+    flex: 1 1 160px;
+  }
+  .songdetail__edit {
+    flex: 1 1 100%;
+    min-height: 44px;
+  }
+  .songdetail__diffs .instruments {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .songdetail__artwrap .song__preview {
+    opacity: 1;
+  }
+
+  /* ── Dialogy (rename / delete / metadata): dotykové cíle. Layout samotný
+     audit prošel („no breakage"), tak se nechává být. ── */
+  .lib__dialog input,
+  .lib__dialog-foot .btn-secondary,
+  .lib__dialog-foot .btn-primary {
+    min-height: 44px;
+  }
+}
+
+/* ============================================================
+   IA (Phase 3.5) — restrukturalizace navigace. docs/mobile/plan.md
+   („Amendment 2026-08-02"). Pravidlo „desktop se nesmí změnit" je
+   VYŘAZENO — tahle sekce mění strukturu na VŠECH šířkách:
+
+   1. My Library = plnohodnotná stránka (.libpage) v obsahové ploše,
+      žádný modal. Search pohled zůstává namontovaný pod ní
+      (.view--off = visibility:hidden + absolute), takže výsledky,
+      filtry i scroll pozice přežijí.
+   2. Sidebar = navigace: na desktopu kompaktní nav rail (ikony +
+      popisky), na mobilu dál drawer z Fáze 1.
+   3. Database/System přepínače žijí ve filtrech (.srcswitch v
+      FilterPanel/FilterSheet), ne v sidebaru.
+   4. Mobilní hlavička: titlebar = brand + hamburger; hero panel
+      (.filterbar) na mobilu neexistuje (duplikát Filters tlačítka);
+      Filters + Search jsou ikonová 44px tlačítka v řadě s inputem.
+
+   Breakpointy = tytéž literály jako Fáze 1–3: tablet <900px, phone ≤600px.
+   ============================================================ */
+
+/* ── Pohledy obsahu: search zůstává namontovaný pod knihovnou ── */
+.content {
+  position: relative; /* kotva pro .view--off a .libpage sub-dialogy */
+}
+.view--search {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* Skrytý search pohled: visibility (ne display:none), ať scroll pozice
+   seznamu výsledků přežije; absolute ho vyjme z toku, aby netlačil layout
+   knihovní stránky. z-index -1 = nikdy nechytá klik ani :hover. */
+.view--search.view--off {
+  visibility: hidden;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ── Knihovna jako stránka ─────────────────────────────────── */
+.libpage {
+  position: relative; /* .lib__dialog-overlay (rename/delete) je absolute */
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 6px 20px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.012);
+  overflow: hidden;
+}
+.libpage__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px 0;
+}
+.libpage__head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.libpage__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 12px 7px 8px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+@media (hover: hover) {
+  .libpage__back:hover {
+    border-color: var(--border-strong);
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* ── Sidebar → navigace (společný základ: drawer i rail) ───── */
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.side-navitem {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  color: var(--text-dim);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.14s, background 0.14s;
+}
+@media (hover: hover) {
+  .side-navitem:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.035);
+  }
+}
+.side-navitem--on {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.55), rgba(var(--accent-rgb), 0.22));
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.side-navitem__icon {
+  flex-shrink: 0;
+}
+
+/* ── Database/System ve filtrech (FilterPanel i FilterSheet) ── */
+.srcswitch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.srcswitch__group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  max-width: 100%;
+}
+/* Úzké šířky: segmentový přepínač smí scrollovat do strany (klouzavá pilulka
+   se měří přes offsetLeft, wrap by ji rozbil). */
+.srcswitch .seg {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* ── Search tlačítko: text na desktopu, ikona na mobilu ────── */
+.searchbar__go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.searchbar__go-icon {
+  /* !important: Icon.tsx dává svg inline display:block — jinak nejde schovat. */
+  display: none !important;
+}
+
+/* ── Desktop (≥900px): kompaktní nav rail ──────────────────── */
+@media (min-width: 900px) {
+  .workspace {
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+  .sidebar {
+    padding: 14px 10px;
+    gap: 16px;
+  }
+  /* Nav položky: ikona nad popiskem, na střed. */
+  .side-navitem {
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 4px;
+    text-align: center;
+  }
+  .side-navitem__label {
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+  }
+  .side-navitem--on {
+    box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.4);
+  }
+  /* Globální akce: stejný svislý tvar, podtitulky se nevejdou. */
+  .side-surprise {
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 4px;
+    text-align: center;
+  }
+  .side-surprise__text {
+    align-items: center;
+  }
+  .side-surprise__title {
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+  .side-surprise__sub {
+    display: none;
+  }
+  .side-import__logo {
+    margin: 0;
+  }
+  /* Update patička: v úzkém railu kompaktněji. */
+  .side-footer {
+    padding-top: 10px;
+  }
+  .side-version {
+    font-size: 10.5px;
+    align-self: center;
+    text-align: center;
+  }
+  .side-update {
+    padding: 8px 6px;
+    font-size: 10.5px;
+  }
+  .side-update__result {
+    font-size: 10px;
+    text-align: center;
+  }
+  .side-update-card {
+    padding: 10px 8px;
+  }
+  .side-update-card__title {
+    font-size: 11px;
+  }
+  .side-update-card__desc {
+    font-size: 10px;
+  }
+}
+
+/* ── Mobil (<900px): hlavička + jednořádkový search ────────── */
+@media (max-width: 899.98px) {
+  /* Hero panel je duplikát filter-sheetu → na mobilu neexistuje. */
+  .filterbar {
+    display: none;
+  }
+  /* Search řádek: input + ikonové Filters + ikonové Search v JEDNÉ řadě
+     (přepisuje wrap pravidla Fáze 1 ≤600px — tahle sekce je v souboru níž). */
+  .content .searchbar__row--input {
+    flex-wrap: nowrap;
+  }
+  .searchbar__input-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .searchbar__filters {
+    position: relative;
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .searchbar__filters-label {
+    display: none;
+  }
+  .searchbar__filters-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+  }
+  .content .searchbar__go {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+  .searchbar__go-label {
+    display: none;
+  }
+  .searchbar__go-icon {
+    display: block !important;
+  }
+  /* Knihovní stránka těsněji k okrajům (jako .tablewrap na mobilu). */
+  .libpage {
+    margin: 6px 12px 8px;
+  }
+  .libpage__head {
+    padding: 12px 12px 0;
+  }
+}
+
+/* ============================================================
+   MOBILE (Phase 4 — modaly jako sheety). docs/mobile/plan.md.
+
+   Pod ≤600px (phone) se KAŽDÝ `.modal` mění na sheet ukotvený dole:
+   - výchozí = bottom sheet (výška podle obsahu, strop 85dvh, zaoblený
+     vršek) — krátké modaly: What's new, playlist import, target folder,
+     marketplace/confirm, local drop;
+   - obsahově vysoké modaly = full-screen (100dvh): Settings, Duplicates,
+     Playlists, About — mají scrollovací tělo delší než viewport, bottom
+     sheet by jen přidal mrtvý proužek nahoře.
+
+   Vzor záměrně ZRCADLÍ sdílené `.sheet` třídy Fáze 2 (metriky, safe-area,
+   momentum scroll); nepoužívá je přímo, protože modaly už mají jednotnou
+   kostru .modal__head/__body/__foot a `.sheet` základ žije v <900px bloku
+   (modaly zůstávají vycentrované až do 600px). Hlavička je sticky (flex,
+   ne scroll), zavírací křížek 44×44, tělo scrolluje s momentum.
+
+   ≥600px se tady nemění NIC.
+   ============================================================ */
+@media (max-width: 599.98px) {
+  .modal-overlay {
+    /* Sheet leží dole na hraně viewportu — zaoblení overlaye (desktopové
+       okno) by full-width sheet uřízlo. */
+    border-radius: 0;
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: 0;
+  }
+  .modal {
+    width: 100%;
+    max-width: none;
+    max-height: min(85dvh, 100dvh - 48px);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    /* Scroll přebírá __body; overflow:auto na boxu by odscrolloval hlavičku. */
+    overflow: hidden;
+    border: none;
+    border-top: 1px solid var(--border-strong);
+    border-radius: 16px 16px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: sheetIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes sheetIn {
+    from {
+      opacity: 0.4;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .modal__head {
+    flex-shrink: 0;
+    padding: 13px 16px;
+  }
+  .modal__close {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .modal__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px;
+  }
+  .modal__foot {
+    flex-shrink: 0;
+  }
+  /* Akční tlačítka patičky na výšku prstu. */
+  .modal__foot button {
+    min-height: 44px;
+  }
+
+  /* ── Full-screen varianty (obsah vyšší než viewport) ── */
+  .modal--settings,
+  .modal--dup,
+  .modal--plm,
+  .modal--about {
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    border-top: none;
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* ── Settings: jeden sloupec (audit: 2×135px sloupce lámaly labely) ── */
+  .modal--settings {
+    width: 100%;
+  }
+  .settings-cols {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Duplicates: porovnání kopií pod sebou ──
+     Detail kopie (obal + metadata) se skládá svisle a bez 30px odsazení —
+     na 375px by řádek art+meta nutil vodorovný scroll. Rozbalovací (i) a
+     checkbox řádky na 44px cíle. */
+  .dup__detail {
+    flex-direction: column;
+    margin-left: 12px;
+  }
+  .dup__openbtn {
+    width: 44px;
+    height: 44px;
+  }
+  /* Řada obtížností nástrojů smí zalomit — stejný fix jako .songdetail__diffs
+     ve Fázi 3 (audit: dots row hnal detail do vodorovného scrollu). */
+  .dup__detailmeta .instruments {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .dup__row {
+    min-height: 44px;
+  }
+  /* Charter jméno se na úzkém řádku vzdává (je i v detailu kopie). */
+  .dup__charter {
+    display: none;
+  }
+  /* Mezi-pruhy (rozsah/picker/chyba) nesmí flex sežrat na nulu. */
+  .dup__scope,
+  .dup__picker,
+  .dup__notice,
+  .modal--dup > .lib__error {
+    flex-shrink: 0;
+  }
+  /* Patička (Rescan · N selected · Move · Delete) se na 375px nevejde do
+     jedné řady — Rescan utíkal na x=−95. Zalom ji. */
+  .dup__foot {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 8px;
+  }
+  .dup__startopts {
+    /* Karty voleb pod sebe — vedle sebe měly 139px a lámaly text. */
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Playlists: panely pod sebou místo 270px|1fr (audit: pravý panel
+     byl 40px sliver). Seznam playlistů dostane horní třetinu, písně zbytek. ── */
+  .plm__body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(120px, 34%) minmax(0, 1fr);
+  }
+  .plm__list {
+    min-height: 44px;
+  }
+  .plm__iconbtn {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* ── Add-to-playlist dialog (lib__dialog — zůstává vycentrovaný, viz
+     Fáze 3): jen dotykové cíle řádků existujících playlistů. ── */
+  .pldlg__item {
+    min-height: 44px;
+  }
+}
+
+/* ============================================================
+   MOBILE (Phase 5 — dotykové doladění). docs/mobile/plan.md.
+
+   Dvě věci žijí MIMO tuhle sekci, protože musely být cílenými úpravami
+   existujících pravidel (plán je výslovně povoluje):
+
+   1. Sticky-hover stráž: ~102 viditelně „lepivých" :hover pravidel (podsvit
+      řádků, glow/transform tlačítek — vč. grafitových variant) je na místě
+      zabaleno do `@media (hover: hover)`. Na dotykovém zařízení po tapu
+      nezůstane nic svítit; pro myš (hover: hover) se nemění NIC.
+      Nezabalené zůstaly: reveal pravidla náhledů (řeší se níže), stavy co
+      hover jen UDRŽUJÍ (.pgnum--active:hover, .side-item--on:hover,
+      .song--selected:hover), brand easter-egg, drag-and-drop dropzone
+      (jen myš) a negace v prefers-reduced-motion.
+   2. `.suggest__item--hover` (zvýraznění klávesnicí) je oddělené od
+      `.suggest__item:hover`, aby stráž nesebrala klávesovou navigaci.
+
+   Zbytek Fáze 5 je additivní tady. Breakpointy = literály Fáze 1.
+   ============================================================ */
+
+/* ── Audio náhled: na dotyku/mobilu je play VŽDY viditelné ──
+   Audit #2 hover-inventáře: `.song:hover .song__preview` (výsledky) a
+   `.dup__detailartwrap:hover .song__preview` (detail duplicit) byly
+   poslední dva hover-only reveal ovladače. Stejný vzor jako song detail
+   knihovny ve Fázi 3: overlay prostě svítí pořád. Šířkové rameno kryje
+   úzká okna, (hover: none) rameno dotykové tablety ≥900px. */
+@media (max-width: 899.98px), (hover: none) {
+  .song .song__preview,
+  .songdetail__artwrap .song__preview,
+  .dup__detailartwrap .song__preview {
+    opacity: 1;
+  }
+}
+
+/* ── Dotyková odezva: :active náhrada za odstraněný hover ──
+   Jen pod (hover: none), ať se myší chování nemění. Krátké bliknutí při
+   tapu — stejné plochy, jaké dávál hover. */
+@media (hover: none) {
+  .song:active {
+    background: var(--row-hover);
+  }
+  .suggest__item:active,
+  .dd__item:active,
+  .ctxmenu__item:active,
+  .lib__item:active,
+  .folder-item:active,
+  .dup__pickitem:active,
+  .plm__song:active,
+  .pldlg__item:active,
+  .side-navitem:active,
+  .side-item:active,
+  .crumb:active {
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .ctxmenu__item--danger:active {
+    background: rgba(255, 107, 107, 0.12);
+  }
+  .dup__row:active {
+    color: var(--text);
+  }
+  .pgbtn:active:not(:disabled),
+  .pgnum:active,
+  .btn-secondary:active,
+  .modal__close:active,
+  .sheet__close:active,
+  .rowmenu__btn:active,
+  .lib__btn:active:not(:disabled),
+  .lib__sortsel:active,
+  .lib__sortdir:active,
+  .dup__openbtn:active,
+  .plm__iconbtn:active,
+  .searchbar__filters:active,
+  .queue__clear:active,
+  .dd__btn:active:not(:disabled) {
+    background: var(--panel-hover);
+  }
+  .instbtn:active .instbtn__circle {
+    transform: scale(0.95);
+  }
+  /* Dlouhý stisk na obalu alba (play overlay) nesmí na iOS vytáhnout
+     systémové menu „Uložit obrázek" — ovladač je tlačítko, ne obrázek. */
+  .song__art img,
+  .songdetail__art,
+  .dup__detailart {
+    -webkit-touch-callout: none;
+  }
+}
+
+/* ── FilterSheet: segmentový přepínač System bez viditelného scrollbaru ──
+   `.srcswitch .seg` má overflow-x: auto (Fáze 3.5 — klouzavá pilulka se
+   měří přes offsetLeft, wrap by ji rozbil). Na 375px scrollbar opticky
+   rušil pod CH/PS/RB/All — schovat, scrollovatelnost zůstává. */
+.srcswitch .seg {
+  scrollbar-width: none;
+}
+.srcswitch .seg::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Duplicity: checkbox kopie na dotykový rozměr (poznámka Fáze 4) ──
+   Základní .chk__box je 19px; řádek `.dup__row` je <label> s min-height
+   44px (Fáze 4), takže tap-plocha je celý řádek — box jen zvětšit, ať je
+   stav čitelný palcem. */
+@media (max-width: 600px) {
+  .dup__row .chk__box {
+    width: 24px;
+    height: 24px;
+  }
 }

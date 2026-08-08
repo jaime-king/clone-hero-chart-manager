@@ -13,9 +13,40 @@ const ACCEPTED_EXT = /\.(zip|rar|7z|sng|rb3con|con)$/i
 
 const LEVELS = Array.from({ length: MAX_DIFFICULTY + 1 }, (_, i) => i) // 0..6
 
-export function FilterBar(): JSX.Element {
+/** Kruhová tlačítka nástrojů — sdílená mezi hero panelem (desktop) a mobilním
+ *  filter-sheetem (FilterSheet). Stav žije ve store, takže obě místa jsou vždy
+ *  synchronní. */
+export function InstrumentButtons(): JSX.Element {
   const filters = useStore((s) => s.instrumentFilters)
   const toggle = useStore((s) => s.toggleInstrumentFilter)
+  return (
+    <div className="instbtns">
+      {INSTRUMENTS.map((inst) => {
+        const active = filters.includes(inst.id)
+        return (
+          <button
+            key={inst.id}
+            className={`instbtn ${active ? 'instbtn--active' : ''}`}
+            onClick={() => toggle(inst.id)}
+            style={
+              {
+                '--inst-color': inst.color
+              } as React.CSSProperties
+            }
+          >
+            <span className="instbtn__circle">
+              <Icon name={inst.icon} size={28} color={inst.color} />
+            </span>
+            <span className="instbtn__label">{inst.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+export function FilterBar(): JSX.Element {
+  const filters = useStore((s) => s.instrumentFilters)
   const diffMin = useStore((s) => s.diffMin)
   const diffMax = useStore((s) => s.diffMax)
   const setDiffRange = useStore((s) => s.setDiffRange)
@@ -26,6 +57,10 @@ export function FilterBar(): JSX.Element {
   const openLocalDrop = useStore((s) => s.openLocalDrop)
   const openLocalBatch = useStore((s) => s.openLocalBatch)
   const [dragOver, setDragOver] = useState(false)
+  // IA (Phase 3.5): na mobilu (<900px) je celý hero panel CSS-schovaný —
+  // tytéž ovládací prvky žijí ve FilterSheet, který otevírá ikonové tlačítko
+  // Filters v search baru. Dřívější „Filters & instruments" přepínač tady byl
+  // duplikát toho tlačítka a je odstraněný.
 
   const handleDrop = (e: React.DragEvent<HTMLElement>): void => {
     e.preventDefault()
@@ -61,28 +96,7 @@ export function FilterBar(): JSX.Element {
     <div className="filterbar">
       <div className="fgroup fgroup--instruments">
         <div className="fgroup__label">Instruments</div>
-        <div className="instbtns">
-          {INSTRUMENTS.map((inst) => {
-            const active = filters.includes(inst.id)
-            return (
-              <button
-                key={inst.id}
-                className={`instbtn ${active ? 'instbtn--active' : ''}`}
-                onClick={() => toggle(inst.id)}
-                style={
-                  {
-                    '--inst-color': inst.color
-                  } as React.CSSProperties
-                }
-              >
-                <span className="instbtn__circle">
-                  <Icon name={inst.icon} size={28} color={inst.color} />
-                </span>
-                <span className="instbtn__label">{inst.label}</span>
-              </button>
-            )
-          })}
-        </div>
+        <InstrumentButtons />
       </div>
 
       <div className="fgroup fgroup--difficulty">
