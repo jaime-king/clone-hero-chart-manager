@@ -103,19 +103,9 @@ interface AppState {
   // Multi-select (hromadné stažení) — klíče vybraných písní + čekající dávka.
   selectedKeys: string[]
   pendingBatch: SongResult[] | null
-  // Hromadný lokální drop (víc souborů / složka) — čeká na výběr cílové složky.
-  pendingLocalBatch: string[] | null
 
   // Klíč aktuálně otevřeného ⋮ menu (jen jedno najednou).
   openRowMenu: string | null
-
-  // Drop zone — lokální soubor čekající na potvrzení (artist/title/subfolder).
-  pendingLocal: {
-    path: string
-    fileName: string
-    suggestedArtist: string
-    suggestedTitle: string
-  } | null
 
   // ── „Deep scan" ──────────────────────────────────────────────────────
   // Server neumí filtrovat podle nástroje/obtížnosti. Při zapnutém filtru se
@@ -207,84 +197,15 @@ interface AppState {
   openBatchDownload: (songs: SongResult[]) => Promise<void>
   confirmBatchDownload: (subfolder: string) => Promise<void>
   cancelBatchDownload: () => void
-  // Hromadný lokální drop
-  openLocalBatch: (paths: string[]) => Promise<void>
-  confirmLocalBatch: (subfolder: string) => Promise<void>
-  cancelLocalBatch: () => void
   openMarketplace: (song: SongResult) => void
   closeMarketplace: () => void
   setOpenRowMenu: (key: string | null) => void
-  openLocalDrop: (path: string, fileName: string) => Promise<void>
-  cancelLocalDrop: () => void
-  confirmLocalDrop: (
-    artist: string,
-    title: string,
-    subfolder: string
-  ) => Promise<void>
   applyJobUpdate: (job: DownloadJob) => void
   clearFinishedJobs: () => Promise<void>
   cancelJob: (id: string) => Promise<void>
   cancelAllJobs: () => Promise<void>
   loadConfig: () => Promise<void>
   saveConfig: (patch: Partial<AppConfig>) => Promise<void>
-}
-
-/** Známé suffixy a tagy v názvech souborů z kolovacích chartingových komunit. */
-const NAME_TAG = /[_\s.-]?(?:PS|CH|RB|RB1|RB2|RB3|RB4|PS3|PS4|XBOX|Wii|Chart|v\d+|final|fixed|update|updated)$/i
-
-/** "LostInTheEcho_PS.rar" → { artist: '', title: 'Lost In The Echo' } */
-function parseFileName(fileName: string): { artist: string; title: string } {
-  // Strip extension.
-  let base = fileName.replace(/\.[^.]+$/, '')
-  // Strip známé tagy (může jich být víc za sebou: "_PS_v2").
-  let prev = ''
-  while (prev !== base) {
-    prev = base
-    base = base.replace(NAME_TAG, '')
-  }
-  // Pokud je tam " - ", split na artist+title; jinak title = vše, artist = ''.
-  const dashIdx = base.indexOf(' - ')
-  let artist = ''
-  let title = base
-  if (dashIdx > 0 && dashIdx < base.length - 3) {
-    artist = base.slice(0, dashIdx)
-    title = base.slice(dashIdx + 3)
-  }
-  return { artist: humanize(artist), title: humanize(title) }
-}
-
-/** Normalizace pro fuzzy porovnání: lowercase, jen písmena a číslice. */
-function norm(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]/g, '')
-}
-
-/**
- * Posoudí, jestli "Artist Title" z lookupu odpovídá tomu, co jsme parsovali
- * z názvu souboru. Stačí, aby složený `artistTitle` byl prefix našeho
- * `parsedTitle` (nebo naopak) — pak to považujeme za stejnou skladbu.
- */
-function looksLikeSameSong(parsedTitle: string, artist: string, title: string): boolean {
-  const a = norm(parsedTitle)
-  const b = norm(`${artist} ${title}`)
-  if (!a || !b) return false
-  return a === b || a.startsWith(b) || b.startsWith(a)
-}
-
-/** "LinkinPark_lost_in_the.echo" → "Linkin Park lost in the echo" → kapitalizace. */
-function humanize(s: string): string {
-  if (!s) return ''
-  return (
-    s
-      // CamelCase → "Camel Case" (boundary lowercase → UPPERCASE).
-      .replace(/([a-z\d])([A-Z])/g, '$1 $2')
-      // ALLCAPS → "ALL CAPS" boundary
-      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-      // _ a . jako separator slov
-      .replace(/[_.]+/g, ' ')
-      // víc mezer → jedna
-      .replace(/\s+/g, ' ')
-      .trim()
-  )
 }
 
 /** Debounce pro znovunačtení „In library" indexu po dávce instalací. */
@@ -687,9 +608,7 @@ export const useStore = create<AppState>((set, get) => {
   lastSubfolder: '',
   selectedKeys: [],
   pendingBatch: null,
-  pendingLocalBatch: null,
   openRowMenu: null,
-  pendingLocal: null,
   deep: false,
   deepSongs: [],
   deepScannedPages: 0,
@@ -1258,118 +1177,9 @@ export const useStore = create<AppState>((set, get) => {
   },
   cancelBatchDownload: () => set({ pendingBatch: null }),
 
-  // ---- Hromadný lokální drop ----
-  openLocalBatch: async (paths) => {
-    if (paths.length === 0) return
-    set({ pendingLocalBatch: paths, foldersLoading: true })
-    await loadFolders()
-  },
-  confirmLocalBatch: async (subfolder) => {
-    const paths = get().pendingLocalBatch
-    if (!paths) return
-    set({ pendingLocalBatch: null, lastSubfolder: subfolder }) // guard proti dvojímu confirmu
-    try {
-      const ids = await window.api.enqueueLocalBatch(paths, subfolder || undefined)
-      set((s) => {
-        const enqueuedKeys = { ...s.enqueuedKeys }
-        ids.forEach((id, i) => {
-          enqueuedKeys[`localbatch:${id}:${i}`] = id
-        })
-        return { enqueuedKeys }
-      })
-    } catch (e) {
-      set({ error: errMsg(e) })
-    }
-  },
-  cancelLocalBatch: () => set({ pendingLocalBatch: null }),
-
   openMarketplace: (song) => set({ marketplacePrompt: song }),
   closeMarketplace: () => set({ marketplacePrompt: null }),
   setOpenRowMenu: (key) => set({ openRowMenu: key }),
-
-  openLocalDrop: async (path, fileName) => {
-    // 1) Rychlá heuristika z názvu souboru (instantní prefill).
-    let { artist, title } = parseFileName(fileName)
-
-    // 2) Pokud je to .sng, můžeme přečíst přesná metadata z hlavičky (rychlé).
-    try {
-      const meta = await window.api.peekFileMeta(path)
-      if (meta) {
-        artist = meta.artist || artist
-        title = meta.title || title
-      }
-    } catch {
-      /* ignorovat — heuristika postačí */
-    }
-
-    // 3) Když nemáme artist ale máme aspoň 2 slova v title, zkusíme lookup
-    // v databázi — nejlepší top match obvykle správně rozdělí artist+title.
-    if (!artist && title.split(/\s+/).length >= 2) {
-      try {
-        const res = await window.api.search(title, 1, 3, 'ch', 'both')
-        const top = res.songs[0]
-        if (top && looksLikeSameSong(title, top.artist, top.title)) {
-          artist = top.artist
-          title = top.title
-        }
-      } catch {
-        /* nevadí — heuristika ostane */
-      }
-    }
-
-    set({
-      pendingLocal: {
-        path,
-        fileName,
-        suggestedArtist: artist,
-        suggestedTitle: title
-      },
-      foldersLoading: true
-    })
-    await loadFolders()
-  },
-  cancelLocalDrop: () => set({ pendingLocal: null }),
-  confirmLocalDrop: async (artist, title, subfolder) => {
-    const pending = get().pendingLocal
-    if (!pending) return
-    // Sestavíme minimální SongResult pro install/pojmenování.
-    const localSong: SongResult = {
-      key: `local:${pending.path}`,
-      fileId: null,
-      songId: null,
-      title: title.trim() || pending.suggestedTitle || 'Unknown title',
-      artist: artist.trim() || 'Unknown artist',
-      album: '',
-      year: null,
-      genre: '',
-      lengthSeconds: null,
-      albumArtUrl: null,
-      difficulties: {},
-      expertOnly: null,
-      charter: null,
-      source: 'Local file',
-      gameFormat: null,
-      gameFormats: [],
-      needsConversion: false,
-      official: false,
-      downloadUrl: null,
-      downloadPageUrl: null,
-      externalUrl: null,
-      sizeBytes: null,
-      downloads: null
-    }
-    set({ pendingLocal: null, lastSubfolder: subfolder }) // guard proti dvojímu confirmu
-    try {
-      const jobId = await window.api.enqueueLocalFile(
-        pending.path,
-        localSong,
-        subfolder || undefined
-      )
-      set((s) => ({ enqueuedKeys: { ...s.enqueuedKeys, [localSong.key]: jobId } }))
-    } catch (e) {
-      set({ error: errMsg(e) })
-    }
-  },
 
   applyJobUpdate: (job) => {
     set((s) => ({ jobs: { ...s.jobs, [job.id]: job } }))

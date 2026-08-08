@@ -111,9 +111,6 @@ function CopyDetail({ rel }: { rel: string }): JSX.Element {
         {line1 ? <div className="dup__detailsub">{line1}</div> : null}
         {line2 ? <div className="dup__detailsub">{line2}</div> : null}
         {info ? <InstrumentDifficulty difficulties={info.difficulties} /> : null}
-        <button className="linkbtn dup__reveal" onClick={() => window.api.libReveal(rel)}>
-          <Icon name="external" size={12} /> Show in Explorer
-        </button>
       </div>
     </div>
   )

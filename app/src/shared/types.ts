@@ -316,24 +316,6 @@ export interface UpdateInfo {
   url: string
 }
 
-export interface UpdateAvailable {
-  version: string
-  /** true = instalační verze umí self-update; false = portable → jen ruční odkaz. */
-  canAutoUpdate: boolean
-  /** URL na release (jen u ručního fallbacku). */
-  url?: string
-}
-
-/** Výsledek ruční kontroly aktualizací (tlačítko „Check for updates"). */
-export interface UpdateCheckResult {
-  /** available = je novější verze, uptodate = máš poslední, error = nešlo zkontrolovat. */
-  status: 'available' | 'uptodate' | 'error'
-  /** Verze — u `available` ta nová, u `uptodate` aktuální. */
-  version?: string
-  canAutoUpdate?: boolean
-  url?: string
-}
-
 export interface ReleaseNotes {
   version: string
   name: string
@@ -344,7 +326,7 @@ export interface ReleaseNotes {
   date?: string
 }
 
-/** API vystavené do renderer procesu přes contextBridge (window.api). */
+/** API renderer procesu (window.api) — implementuje web-api.ts přes fetch/SSE. */
 export interface RendererApi {
   /** OS, na kterém běžíme — renderer podle toho ladí UI (mac vs Windows). */
   platform: NodeJS.Platform
@@ -363,14 +345,6 @@ export interface RendererApi {
   /** Načte skladby z odkazu na playlist (v1: veřejný Spotify přes embed). */
   resolvePlaylist(url: string): Promise<PlaylistResolveResult>
   enqueueDownload(song: SongResult, targetSubfolder?: string): Promise<string>
-  /** Spustí pipeline pro lokální soubor (drag-and-drop z disku). */
-  enqueueLocalFile(
-    localPath: string,
-    song: SongResult,
-    targetSubfolder?: string
-  ): Promise<string>
-  /** Hromadně zařadí dropnuté soubory/složky (metadata z názvů). */
-  enqueueLocalBatch(paths: string[], targetSubfolder?: string): Promise<string[]>
   /** Vrátí názvy přímých podsložek v knihovně Songs. */
   listSongFolders(): Promise<string[]>
   /** Normalizované klíče (artist|title) písní už v knihovně — pro „In library" nápovědu. */
@@ -388,8 +362,6 @@ export interface RendererApi {
   libMoveOut(relItems: string[], destAbsDir: string): Promise<void>
   libMove(src: string, destDir: string): Promise<void>
   libCopy(src: string, destDir: string): Promise<void>
-  libOpen(rel: string): void
-  libReveal(relItem: string): void
   /** Přečte metadata (song.ini) písně. */
   libReadMeta(relItem: string): Promise<SongMeta>
   /** Detailní info (obtížnosti, charter, délka…) pro dávku písní. */
@@ -423,37 +395,11 @@ export interface RendererApi {
   /** True if the configured Songs folder exists. */
   songsDirExists(): Promise<boolean>
   chooseDirectory(defaultPath?: string): Promise<string | null>
-  /** Otevře nativní file picker pro chart/archiv. */
-  chooseSongFile(): Promise<{ path: string; name: string } | null>
-  /** Bezpečně získá absolutní cestu z drag-and-drop File. */
-  getDroppedFilePath(file: File): string | null
-  /** Přečte artist+title z lokálního souboru (rychlé pro .sng). */
-  peekFileMeta(path: string): Promise<{ artist: string; title: string } | null>
   /** Rozbalí shortlink (bit.ly aj.) na finální URL. */
   resolveUrl(url: string): Promise<string>
-  /** Přepne maximalizaci hlavního okna. */
-  toggleMaximize(): void
-  /** Aktuální stav maximalizace (počáteční ikona tlačítka). */
-  isMaximized(): Promise<boolean>
-  /** Odběr změn stavu maximalizace (přepnutí ikony). Vrací unsubscribe. */
-  onMaximizeChange(cb: (max: boolean) => void): () => void
-  quitApp(): void
   openExternal(url: string): void
-  // ---- Auto-update ----
-  /** Spustí stažení aktualizace (jen instalační verze). */
-  downloadUpdate(): Promise<{ ok: true } | { ok: false; error: string }>
-  /** Nainstaluje staženou aktualizaci a restartuje appku. */
-  installUpdate(): Promise<void>
-  /** Přišla nová verze (auto nebo ruční fallback). */
-  onUpdateAvailable(cb: (info: UpdateAvailable) => void): () => void
-  /** Průběh stahování aktualizace (procenta). */
-  onUpdateProgress(cb: (p: { percent: number }) => void): () => void
-  /** Aktualizace stažená a připravená k instalaci. */
-  onUpdateDownloaded(cb: (info: { version: string }) => void): () => void
   /** Aktuální verze aplikace. */
   appVersion(): Promise<string>
-  /** Ruční kontrola aktualizací (bez restartu). U instalační verze vyvolá i update banner. */
-  checkForUpdates(): Promise<UpdateCheckResult>
   /** Živě přepne škálu UI (náhled z Nastavení; trvale se uloží přes config). */
   setUiScale(scale: number): Promise<void>
   /** Poznámky k vydání dané (nebo aktuální) verze z GitHubu. */

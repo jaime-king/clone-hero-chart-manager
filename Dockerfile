@@ -12,9 +12,6 @@
 FROM node:26 AS build
 WORKDIR /repo
 
-# Electron is a dependency of app/ but its binary is useless here — skip the
-# ~100 MB download its postinstall performs.
-ENV ELECTRON_SKIP_BINARY_DOWNLOAD=1
 # npm 11 gates dependency install scripts behind approval. app/package.json
 # carries the allowScripts block, but a version bump or a non-TTY prompt must
 # never hang/fail the image build, so approve globally for this build stage
@@ -23,9 +20,9 @@ ENV npm_config_dangerously_allow_all_scripts=true
 
 COPY . .
 
-# Renderer SPA. build:web, NOT build — both write app/out and the web build
-# must win (it moves index.web.html into place as index.html).
-RUN cd app && npm ci && npm run build:web
+# Renderer SPA (vite.web.config.ts → app/out/renderer; the fork is web-only,
+# `build` is the only build).
+RUN cd app && npm ci && npm run build
 
 # Server. npm ci's postinstall runs scripts/sync-core.mjs (mirrors
 # app/src/main/core + shared into server/src/gen); build = tsc → dist/.

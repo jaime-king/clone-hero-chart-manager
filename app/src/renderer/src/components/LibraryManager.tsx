@@ -575,9 +575,6 @@ export function LibraryManager(): JSX.Element | null {
               <Icon name="caret" size={12} style={{ transform: sortDir === 'asc' ? 'rotate(180deg)' : 'none' }} />
             </button>
           </div>
-          <button className="lib__btn lib__btn--icon" onClick={() => window.api.libOpen(cwd)} title="Open in Explorer">
-            <Icon name="external" size={15} />
-          </button>
           <button className="lib__btn lib__btn--icon" onClick={() => void load(cwd)} title="Refresh">
             <Icon name="refresh" size={15} />
           </button>
